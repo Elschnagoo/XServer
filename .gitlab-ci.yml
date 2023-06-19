@@ -1,0 +1,54 @@
+stages:
+  - prebuild
+  - test
+  - build
+  - deploy
+
+build:project:
+  stage: prebuild
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/node:18
+  tags:
+    - docker
+  script:
+    - cd ./backend
+    - npm install
+    - npm run buildprep
+    - cd ..
+    - bash ./installFrontend.sh
+  artifacts:
+    paths:
+      - backend/dist
+      - backend/public
+      - backend/package-lock.json
+      - backend/node_modules
+    expire_in: 1 days
+
+
+build:docker:
+  stage: build
+  before_script:
+    - echo ${CI_REGISTRY_PASSWORD} | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
+  after_script:
+    - docker logout $CI_REGISTRY
+  tags:
+    - shell
+  only:
+    - tags
+  except:
+    - branches
+  script:
+    - |
+      if [[ -z "$CI_COMMIT_TAG" ]]; then
+        export CI_APPLICATION_REPOSITORY=${CI_APPLICATION_REPOSITORY:-$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG}
+        export CI_APPLICATION_TAG=${CI_APPLICATION_TAG:-$CI_COMMIT_SHA}
+      else
+        export CI_APPLICATION_REPOSITORY=${CI_APPLICATION_REPOSITORY:-$CI_REGISTRY_IMAGE}
+        export CI_APPLICATION_TAG=${CI_APPLICATION_TAG:-$CI_COMMIT_TAG}
+      fi
+    - cd ./backend
+    - docker build -t $CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG -t $CI_APPLICATION_REPOSITORY:latest  .
+    - docker push  $CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG
+    - docker push  $CI_APPLICATION_REPOSITORY:latest
+  needs:
+    - build:project
+

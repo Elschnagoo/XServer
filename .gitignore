@@ -1,0 +1,6 @@
+/data/db/
+/backend/tests/a.json
+/.env
+/demo/
+.idea
+*.iml

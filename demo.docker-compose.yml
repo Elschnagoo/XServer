@@ -1,0 +1,27 @@
+version: "3"
+# ONLY USE THIS FOR DEMO PURPOSES
+services:
+  dev-db:
+    image: postgres:14
+    volumes:
+    - ./demo/db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=DB_PASSWORD
+      - POSTGRES_USER=DB_USER
+  dev-app:
+    links:
+      - dev-db
+    image: elschnagoo/xserver:latest
+    environment:
+      - POSTGRES_PASSWORD=DB_PASSWORD
+      - POSTGRES_USER=DB_USER
+      - DBPATH=dev-db
+      - DBPORT=5432
+      - SERVER_PASSWORD=x_server_demo
+    volumes:
+      - ./demo/data:/app/data # contains config and media data
+      - ./demo/video:/video # place for video files
+    # mount media folder
+    ports:
+      - "8080:9257"
+    restart: on-failure
