@@ -1,5 +1,4 @@
 import { SPathUtil, SwaggerConfig } from '@grandlinex/swagger-mate';
-import MovieLib from './modules/WatchModule/database/entities/MovieLib';
 import LibFile from './modules/WatchModule/database/entities/LibFile';
 import Label from './modules/WatchModule/database/entities/Label';
 import DownloadQ from './modules/WatchModule/database/queue/DownloadQ';
@@ -76,7 +75,6 @@ const SwaggerConf: SwaggerConfig = {
     },
     schemas: {
       ...SPathUtil.schemaEntryGen(
-        new MovieLib(),
         new LibFile(),
         new LibPath(),
         new Label(),

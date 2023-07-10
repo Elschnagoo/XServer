@@ -7,11 +7,19 @@ import {
   XResponse,
 } from '@grandlinex/kernel';
 
-import { SPath, SPathUtil } from '@grandlinex/swagger-mate';
+import { SComponent, SPath, SPathUtil } from '@grandlinex/swagger-mate';
 import { query } from 'express';
 import { WatchDB } from '../../database';
 import MovieLib from '../../database/entities/MovieLib';
 import { isUUID } from '../../utils/Validation';
+
+const extendedSchema: any = SPathUtil.schemaEntryGen(new MovieLib()).MovieLib;
+extendedSchema.properties = {
+  ...extendedSchema.properties,
+  duration: {
+    type: 'number',
+  },
+};
 
 @SPath({
   '/movie': {
@@ -47,6 +55,11 @@ import { isUUID } from '../../utils/Validation';
         '500'
       ),
     },
+  },
+})
+@SComponent({
+  schemas: {
+    MovieLib: extendedSchema,
   },
 })
 export default class MovieAction extends BaseApiAction<IKernel, WatchDB> {

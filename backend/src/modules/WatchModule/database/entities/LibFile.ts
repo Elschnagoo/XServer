@@ -30,6 +30,12 @@ export default class LibFile extends CoreEntity {
   file_meta: ProbeInfo | null;
 
   @Column({
+    dataType: 'int',
+    canBeNull: true,
+  })
+  duration: number | null;
+
+  @Column({
     dataType: 'boolean',
   })
   synced: boolean;
@@ -41,5 +47,6 @@ export default class LibFile extends CoreEntity {
     this.file_meta = props?.file_meta ?? null;
     this.file_path = props?.file_path || '';
     this.synced = props?.synced ?? false;
+    this.duration = props?.duration ?? null;
   }
 }

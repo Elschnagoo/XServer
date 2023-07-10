@@ -116,7 +116,7 @@ const MovieComp = forwardRef<
   }));
   const authHelper = useAuthHelper();
   const [meta] = useQData<{
-    duration: string;
+    duration: number;
     size: string;
     res: number;
     container: string;
@@ -134,7 +134,7 @@ const MovieComp = forwardRef<
       SupportedWebVideoCodec.includes(vid.codec_name) &&
       SupportedWebVideoContainer.includes(inspection.format.format_name);
     return {
-      duration: inspection.format.duration,
+      duration: mov.duration || 0,
       size: `${(Number(inspection.format.size) / 1024 / 1024).toFixed(2)} MB`,
       res: vid.height || 0,
       web,

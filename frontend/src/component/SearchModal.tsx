@@ -20,6 +20,8 @@ export enum SearchOrder {
   DATE_DSC = 'date_dsc',
   RATING_ASC = 'rating_asc',
   RATING_DSC = 'rating_dsc',
+  DURATION_ASC = 'duration_asc',
+  DURATION_DSC = 'duration_dsc',
   NAME_ASC = 'name_asc',
   NAME_DSC = 'name_dsc',
   SHUFFLE = 'shuffle',
@@ -141,6 +143,14 @@ export default function SearchModal(props: { close: () => void }) {
                   {
                     key: SearchOrder.RATING_ASC,
                     name: 'Rating (Ascending)',
+                  },
+                  {
+                    key: SearchOrder.DURATION_DSC,
+                    name: 'Duration (Descending)',
+                  },
+                  {
+                    key: SearchOrder.DURATION_ASC,
+                    name: 'Duration (Ascending)',
                   },
                   {
                     key: SearchOrder.NAME_ASC,

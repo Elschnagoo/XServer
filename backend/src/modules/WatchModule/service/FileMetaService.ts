@@ -33,6 +33,7 @@ export default class FileMetaService extends BaseLoopService<
           await db.file.updateObject(el.e_id, {
             synced: true,
             file_meta: meta,
+            duration: parseInt(meta?.format.duration.split('.')[0] || '0', 10),
           });
         } catch (e) {
           this.error(`Could not get meta [Exception] for ${el.file_path}`);

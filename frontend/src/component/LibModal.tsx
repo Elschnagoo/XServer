@@ -65,12 +65,12 @@ export default function LibModal(props: { close: () => void }) {
               {
                 key: 'url',
                 type: InputOptionType.TEXT,
-                label: 'URL',
+                label: 'Folder Path',
               },
               {
                 key: 'check',
                 type: InputOptionType.CHECKBOX,
-                label: 'Download',
+                label: 'Mark as Download Folder',
               },
             ],
           ]}

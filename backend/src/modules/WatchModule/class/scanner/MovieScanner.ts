@@ -33,6 +33,7 @@ export default class MovieScanner extends BaseScanner {
                 file_path: fPath,
                 lib: lib.e_id,
                 synced: false,
+                duration: null,
               })
             )
           ).e_id;

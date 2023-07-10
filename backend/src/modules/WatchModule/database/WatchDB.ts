@@ -17,6 +17,7 @@ import Label from './entities/Label';
 import LabelMap from './map/LabelMap';
 import Patch002 from './patch/Patch002';
 import DownloadQ from './queue/DownloadQ';
+import Patch003 from './patch/Patch003';
 
 export default class WatchDB extends PGCon {
   types: CoreEntityWrapper<LibType>;
@@ -40,7 +41,7 @@ export default class WatchDB extends PGCon {
   labelMap: CoreEntityWrapper<LabelMap>;
 
   constructor(mod: IBaseKernelModule<any, any, any, any, any>) {
-    super(mod, '2');
+    super(mod, '3');
     this.types = this.registerEntity(new LibType());
     this.states = this.registerEntity(new StateTypeQ());
     this.lib = this.registerEntity(new Library());
@@ -53,7 +54,11 @@ export default class WatchDB extends PGCon {
     this.download = this.registerEntity(new DownloadQ());
     this.label = this.registerEntity(new Label());
     this.labelMap = this.registerEntity(new LabelMap());
-    this.setUpdateChain(new Patch001(this), new Patch002(this));
+    this.setUpdateChain(
+      new Patch001(this),
+      new Patch002(this),
+      new Patch003(this)
+    );
   }
 
   async searchQuery(rating?: number, label?: string[]): Promise<MovieLib[]> {
@@ -83,9 +88,11 @@ export default class WatchDB extends PGCon {
 
     const query: RawQuery = {
       exec: `
-          SELECT *
-          FROM ${this.schemaName}.movie_lib
+          SELECT lib.*,file.duration
+          FROM ${this.schemaName}.movie_lib as lib,
+               ${this.schemaName}.lib_file as file
           WHERE disabled = false
+          AND   lib.lib_file = file.e_id
           ${filter.join('\n')}
           ORDER BY created DESC;
         `,

@@ -84,6 +84,12 @@ export default function usePreload() {
               b.movie_name.localeCompare(a.movie_name)
             );
             break;
+          case SearchOrder.DURATION_ASC:
+            data = data.sort((a, b) => (a.duration || 0) - (b.duration || 0));
+            break;
+          case SearchOrder.DURATION_DSC:
+            data = data.sort((a, b) => (b.duration || 0) - (a.duration || 0));
+            break;
           case SearchOrder.SHUFFLE:
             data = data.sort((a, b) => 0.5 - Math.random());
             break;
