@@ -61,7 +61,7 @@ export default function SearchModal(props: { close: () => void }) {
           defaultState={search || defaultSearch}
           submit={{
             buttonText: 'Suchen',
-            onSubmit: async (form, setError, clear) => {
+            onSubmit: async ({ form, setError, clear }) => {
               dispatch(setMax(14));
               dispatch(setSearch(form));
               loadMovie(form);

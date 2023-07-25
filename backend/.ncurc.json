@@ -1,7 +1,6 @@
 {
   "upgrade": true,
   "reject": [
-    "@types/node",
-    "axios"
+    "@types/node"
   ]
 }

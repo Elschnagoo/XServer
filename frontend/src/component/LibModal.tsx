@@ -36,7 +36,7 @@ export default function LibModal(props: { close: () => void }) {
           submit={{
             buttonText: 'Add folder',
             loading: true,
-            onSubmit: async (form, setError, clear) => {
+            onSubmit: async ({ form, setError, clear }) => {
               if (!form.url || form.url === '') {
                 setError({
                   field: [
@@ -93,7 +93,7 @@ export default function LibModal(props: { close: () => void }) {
                                 toast.success('New Scan Job created ');
                               } else {
                                 toast.error(
-                                  `Scan Job creation failed: ${r.code}`
+                                  `Scan Job creation failed: ${r.code}`,
                                 );
                               }
                             });
@@ -113,7 +113,7 @@ export default function LibModal(props: { close: () => void }) {
                     {
                       autoClose: false,
                       icon: <IORocketOutline />,
-                    }
+                    },
                   );
                 }}
               >

@@ -79,7 +79,7 @@ const LoginWeb: React.FC<any> = function () {
           ]}
           submit={{
             loading: true,
-            onSubmit: async (form, setError, clear) => {
+            onSubmit: async ({ form, setError, clear }) => {
               setError(null);
               if (!(await context.connect('admin', form.password))) {
                 setError({ global: ['ERROR-CON'] });

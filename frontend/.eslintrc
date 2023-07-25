@@ -32,6 +32,7 @@
   "rules": {
     "no-plusplus": "warn",
     "no-param-reassign": "warn",
+    "@typescript-eslint/no-explicit-any": "warn",
     "react/jsx-props-no-spreading": "warn",
     "no-restricted-syntax": "warn",
     "class-methods-use-this": "warn",

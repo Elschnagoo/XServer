@@ -73,7 +73,7 @@ export default function TitleComp(props: {
             },
           ],
         ]}
-        onChange={(form) => {
+        onChange={({ form }) => {
           setName(form.name);
         }}
       />

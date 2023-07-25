@@ -40,7 +40,7 @@ export default function LabelModal(props: { close: () => void }) {
           }}
           submit={{
             buttonText: 'Create',
-            onSubmit: async (form, setError, clear) => {
+            onSubmit: async ({ form, setError, clear }) => {
               const label_name = form.it?.text;
               if (!label_name || label_name === '') {
                 setError({

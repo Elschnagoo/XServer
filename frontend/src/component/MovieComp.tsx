@@ -9,6 +9,7 @@ import React, {
 } from 'react';
 import { Label, MovieLib } from '@elschnagoo/xserver-con/dist/ApiTypes';
 import {
+  DropDownIconMenu,
   Grid,
   HNavigator,
   IconButton,
@@ -17,7 +18,6 @@ import {
   IOEyeOffOutline,
   IOFlash,
   IOFlashOff,
-  IOOpenOutline,
   IOPlay,
   IOPricetag,
   IOSparkles,
@@ -43,6 +43,7 @@ import TitleComp from '@/component/TitleComp';
 import { useAppDispatch } from '@/store';
 import { updateMovie } from '@/store/MovieStore';
 import ImgCarousel from '@/component/ImgCarousel';
+import CheckBox from '@/component/CheckBox';
 
 const SupportedWebVideoCodec = ['h264', 'vp8', 'vp9'];
 
@@ -63,9 +64,13 @@ const MovieComp = forwardRef<
     label: Label[];
     reload: () => void;
     editMode?: boolean;
+    multi?: {
+      updateMulti: (id: string) => void;
+      list: string[];
+    };
   }
 >((prop, ref) => {
-  const { mov, label, editMode, reload } = prop;
+  const { mov, label, editMode, reload, multi } = prop;
   const dispatch = useAppDispatch();
   const playerRef = createRef<MediaPlayerRefType>();
   const [localLib, setLocalLib] = useState<MovieLib>(mov);
@@ -74,14 +79,18 @@ const MovieComp = forwardRef<
   const [editLabel, setEditLabel] = useState<boolean>(editMode || false);
   const [editStar, setEditStar] = useState<boolean>(editMode || false);
 
+  const has = useMemo(
+    () => !!multi?.list.includes(mov.e_id),
+    [mov.e_id, multi],
+  );
   const updateL = useCallback(
     (lib: MovieLib) => {
       setLocalLib(lib);
       dispatch(updateMovie(lib));
     },
-    [dispatch]
+    [dispatch],
   );
-  const update = useCallback(() => {
+  /* const update = useCallback(() => {
     context.getMovie(localLib.e_id).then((res) => {
       if (res.success && res.data) {
         updateL(res.data);
@@ -89,7 +98,7 @@ const MovieComp = forwardRef<
         toast.error('Fehler beim Aktualisieren der Daten');
       }
     });
-  }, [context, localLib.e_id, updateL]);
+  }, [context, localLib.e_id, updateL]); */
 
   useImperativeHandle(ref, () => ({
     updateLib(lib: MovieLib) {
@@ -263,66 +272,91 @@ const MovieComp = forwardRef<
             </IconButton>
           ) : null}
 
-          <IconButton
-            /*            toolTip={{
-                          text: 'Video in neuem Tab öffnen',
-                          position: 'left',
-                        }} */
-            onClick={() => {
-              toast.dark(
-                <Grid flex flexC gap={12}>
-                  <span>Delete Medium [{mov.movie_name}] from File system</span>
-                  <Grid flex flexR gap={12} hCenter>
-                    <IconButton
-                      onClick={() => {
-                        context.deleteMovie(mov.e_id).then((r) => {
-                          if (r.success) {
-                            toast.success('Element deleted');
-                          } else {
-                            toast.error('Error deleting element');
-                          }
-                          reload();
-                        });
-                      }}
-                    >
-                      <IOCheckmark />
-                    </IconButton>
-                    <IconButton
-                      onClick={() => {
-                        toast.dismiss();
-                      }}
-                    >
-                      <IOClose />
-                    </IconButton>
-                  </Grid>
-                </Grid>,
-                {
-                  autoClose: false,
-                  icon: <IOTrash />,
-                }
-              );
+          {multi && (
+            <Tooltip
+              className="hide-on-mobile"
+              position="left"
+              text={
+                multi.list.length >= 4 && !has ? '' : 'Select for multi play'
+              }
+            >
+              <CheckBox
+                disabled={multi.list.length >= 4 && !has}
+                checked={has}
+                value={has}
+                onChange={() => multi.updateMulti(mov.e_id)}
+              />
+            </Tooltip>
+          )}
+
+          <DropDownIconMenu
+            menu={[
+              {
+                key: 'open',
+                icon: 'IOOpenOutline',
+                label: 'Open Video in new tab',
+              },
+              {
+                key: 'delete',
+                icon: 'IOTrash',
+                label: 'Delete Video',
+              },
+            ]}
+            left
+            onChange={(key) => {
+              switch (key) {
+                case 'open':
+                  context.openExternalConfig({
+                    url: authHelper(
+                      `/movie/stream/${mov.e_id}?profile=raw`,
+                      true,
+                      true,
+                    ),
+                    external: true,
+                  });
+
+                  break;
+                case 'delete':
+                  toast.dark(
+                    <Grid flex flexC gap={12}>
+                      <span>
+                        Delete Medium [{mov.movie_name}] from File system
+                      </span>
+                      <Grid flex flexR gap={12} hCenter>
+                        <IconButton
+                          onClick={() => {
+                            context.deleteMovie(mov.e_id).then((r) => {
+                              if (r.success) {
+                                toast.success('Element deleted');
+                              } else {
+                                toast.error('Error deleting element');
+                              }
+                              reload();
+                            });
+                          }}
+                        >
+                          <IOCheckmark />
+                        </IconButton>
+                        <IconButton
+                          onClick={() => {
+                            toast.dismiss();
+                          }}
+                        >
+                          <IOClose />
+                        </IconButton>
+                      </Grid>
+                    </Grid>,
+                    {
+                      autoClose: false,
+                      icon: <IOTrash />,
+                    },
+                  );
+                  break;
+                default:
+                  break;
+              }
             }}
-          >
-            <IOTrash />
-          </IconButton>
-          <IconButton
-            /*            toolTip={{
-                          text: 'Video in neuem Tab öffnen',
-                          position: 'left',
-                        }} */
-            onClick={() => {
-              context.openExternalConfig({
-                url: authHelper(
-                  `/movie/stream/${mov.e_id}?profile=raw`,
-                  true,
-                  true
-                ),
-                external: true,
-              });
-            }}
-          >
-            <IOOpenOutline />
-          </IconButton>
+          />
         </Grid>
       </Grid>
       <Grid
@@ -350,6 +384,7 @@ const MovieComp = forwardRef<
 
 MovieComp.defaultProps = {
   editMode: undefined,
+  multi: undefined,
 };
 
 export default MovieComp;

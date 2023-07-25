@@ -4,14 +4,12 @@ import {
   getDocumentMeta,
   Grid,
   IconButton,
-  IOCheckmark,
-  IOClose,
   IOCloseCircleOutline,
   IODownload,
   IODownloadOutline,
+  IOGridOutline,
   IOLogOut,
   IOPricetag,
-  IORocketOutline,
   IOScanCircleOutline,
   IOSearch,
   IOServer,
@@ -19,7 +17,6 @@ import {
   LDots,
 } from '@grandlinex/react-components';
 import { MovieLib } from '@elschnagoo/xserver-con/dist/ApiTypes';
-import { toast } from 'react-toastify';
 import { useGlobalContext } from '@/context/GlobalContext';
 import MovieComp from '@/component/MovieComp';
 import downloadFullPlaylist from '@/utils/PlaylistGen';
@@ -39,6 +36,7 @@ import LabelModal from '@/component/LabelModal';
 import EditModal from '@/component/EditModal';
 import DownloadModal from '@/component/DownloadModal';
 import LibModal from '@/component/LibModal';
+import MultiView from '@/component/MultiView';
 
 export default function Main() {
   const context = useGlobalContext();
@@ -51,6 +49,8 @@ export default function Main() {
   const [dModal, setDModal] = useState<boolean>(false);
   const [double, setDouble] = useState<boolean>(false);
   const [editMode, setEditMode] = useState<boolean>(false);
+  const [multi, setMulti] = useState<string[]>([]);
+  const [multiOpen, setMultiOpen] = useState<boolean>(false);
   const max = useAppSelector(selectMax);
   const search = useAppSelector(selectSearch);
   const data = useAppSelector(selectMovie);
@@ -77,6 +77,28 @@ export default function Main() {
   }, [search, data, max]);
   return (
     <>
+      {multiOpen ? (
+        <MultiView
+          close={() => {
+            try {
+              const doc = document as any;
+              setMultiOpen(false);
+              if (doc.exitFullscreen) {
+                doc.exitFullscreen();
+              } else if (doc.msExitFullscreen) {
+                doc.msExitFullscreen();
+              } else if (doc.mozCancelFullScreen) {
+                doc.mozCancelFullScreen();
+              } else if (doc.webkitCancelFullScreen) {
+                doc.webkitCancelFullScreen();
+              }
+            } catch (e) {
+              console.warn(e);
+            }
+          }}
+          list={multi}
+        />
+      ) : null}
       {sModal ? <SearchModal close={() => setSModal(false)} /> : null}
       {lModal ? <LabelModal close={() => setLModal(false)} /> : null}
       {dModal ? <DownloadModal close={() => setDModal(false)} /> : null}
@@ -94,10 +116,38 @@ export default function Main() {
             <span>
               ({max}/{data?.length || 0})
             </span>
+            {multi.length > 0 ? (
+              <IconButton
+                className="hide-on-mobile"
+                toolTip={{
+                  text: 'Start Multi View',
+                  position: 'left',
+                }}
+                onClick={() => {
+                  try {
+                    const docElm = document.documentElement as any;
+                    if (docElm.requestFullscreen) {
+                      docElm.requestFullscreen();
+                    } else if (docElm.msRequestFullscreen) {
+                      docElm.msRequestFullscreen();
+                    } else if (docElm.mozRequestFullScreen) {
+                      docElm.mozRequestFullScreen();
+                    } else if (docElm.webkitRequestFullScreen) {
+                      docElm.webkitRequestFullScreen();
+                    }
+                  } catch (e) {
+                    console.warn(e);
+                  }
+                  setMultiOpen(true);
+                }}
+              >
+                <IOGridOutline />
+              </IconButton>
+            ) : null}
             {search ? (
               <IconButton
                 toolTip={{
-                  text: 'Suche zurücksetzen',
+                  text: 'Reset Search',
                   position: 'left',
                 }}
                 onClick={() => {
@@ -255,6 +305,16 @@ export default function Main() {
                   label={label}
                   reload={() => {
                     loadMovie(search);
+                  }}
+                  multi={{
+                    list: multi,
+                    updateMulti: (id) => {
+                      if (multi.includes(id)) {
+                        setMulti(multi.filter((dx) => dx !== id));
+                      } else {
+                        setMulti([...multi, id]);
+                      }
+                    },
                   }}
                 />
               ))}
