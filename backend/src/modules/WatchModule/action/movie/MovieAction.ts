@@ -8,7 +8,6 @@ import {
 } from '@grandlinex/kernel';
 
 import { SComponent, SPath, SPathUtil } from '@grandlinex/swagger-mate';
-import { query } from 'express';
 import { WatchDB } from '../../database';
 import MovieLib from '../../database/entities/MovieLib';
 import { isUUID } from '../../utils/Validation';
@@ -38,9 +37,18 @@ extendedSchema.properties = {
           },
         },
         {
-          name: 'rating',
+          name: 'min',
           in: 'query',
-          description: 'Rating',
+          description: 'Rating Min',
+          required: false,
+          schema: {
+            type: 'string',
+          },
+        },
+        {
+          name: 'max',
+          in: 'query',
+          description: 'Rating Max',
           required: false,
           schema: {
             type: 'string',
@@ -52,7 +60,7 @@ extendedSchema.properties = {
         new MovieLib(),
         true,
         '400',
-        '500'
+        '500',
       ),
     },
   },
@@ -72,17 +80,22 @@ export default class MovieAction extends BaseApiAction<IKernel, WatchDB> {
     req: XRequest,
     res: XResponse,
     next: () => void,
-    data: JwtToken | null
+    data: JwtToken | null,
   ): Promise<void> {
     if (data) {
-      const { rating, label } = req.query;
+      const { min, max, label } = req.query;
 
-      let rat: number | undefined;
+      let mi: number | undefined;
+      let ma: number | undefined;
       try {
-        rat =
-          typeof rating === 'string'
-            ? parseInt(rating as string, 10)
-            : undefined;
+        mi = typeof min === 'string' ? parseInt(min as string, 10) : undefined;
+      } catch (e) {
+        this.error(e);
+        res.sendStatus(400);
+        return;
+      }
+      try {
+        ma = typeof max === 'string' ? parseInt(max as string, 10) : undefined;
       } catch (e) {
         this.error(e);
         res.sendStatus(400);
@@ -114,7 +127,7 @@ export default class MovieAction extends BaseApiAction<IKernel, WatchDB> {
       }
 
       const db = this.getModule().getDb();
-      const dat = await db.searchQuery(rat, lab);
+      const dat = await db.searchQuery(mi, ma, lab);
 
       res.status(200).send(dat);
       return;

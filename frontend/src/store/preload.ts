@@ -27,8 +27,11 @@ export default function usePreload() {
       });
   }, []);
   const loadMovie = useCallback((search?: any) => {
-    const r: string | undefined = Number.isInteger(search?.rating)
-      ? `${search?.rating}`
+    const min: string | undefined = Number.isInteger(search?.min)
+      ? `${search?.min}`
+      : undefined;
+    const max: string | undefined = Number.isInteger(search?.max)
+      ? `${search?.max}`
       : undefined;
     const l: string | undefined =
       search?.label && search.label.length > 0
@@ -36,7 +39,7 @@ export default function usePreload() {
         : undefined;
 
     context
-      .getMovies(l, r)
+      .getMovies(l, min, max)
       .then((res) => {
         let data = res.data || [];
 
@@ -76,12 +79,12 @@ export default function usePreload() {
             break;
           case SearchOrder.NAME_ASC:
             data = data.sort((a, b) =>
-              a.movie_name.localeCompare(b.movie_name)
+              a.movie_name.localeCompare(b.movie_name),
             );
             break;
           case SearchOrder.NAME_DSC:
             data = data.sort((a, b) =>
-              b.movie_name.localeCompare(a.movie_name)
+              b.movie_name.localeCompare(a.movie_name),
             );
             break;
           case SearchOrder.DURATION_ASC:
@@ -96,7 +99,7 @@ export default function usePreload() {
           case SearchOrder.DATE_ASC:
             data = data.sort(
               (a, b) =>
-                new Date(a.created).getTime() - new Date(b.created).getTime()
+                new Date(a.created).getTime() - new Date(b.created).getTime(),
             );
             break;
           case SearchOrder.DATE_DSC:

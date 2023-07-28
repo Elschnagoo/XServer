@@ -61,7 +61,7 @@ export default function SearchModal(props: { close: () => void }) {
           defaultState={search || defaultSearch}
           submit={{
             buttonText: 'Suchen',
-            onSubmit: async ({ form, setError, clear }) => {
+            onSubmit: async ({ form }) => {
               dispatch(setMax(14));
               dispatch(setSearch(form));
               loadMovie(form);
@@ -79,9 +79,18 @@ export default function SearchModal(props: { close: () => void }) {
             ],
             [
               {
-                key: 'rating',
+                key: 'min',
                 type: InputOptionType.NUMBER,
-                label: 'Rating',
+                label: 'Rating Min',
+                restriction: {
+                  min: 0,
+                  max: 5,
+                },
+              },
+              {
+                key: 'max',
+                type: InputOptionType.NUMBER,
+                label: 'Rating Max',
                 restriction: {
                   min: 0,
                   max: 5,

@@ -74,7 +74,7 @@ export default function Main() {
         dispatch(setMax(data.length));
       }
     }
-  }, [search, data, max]);
+  }, [search, data, max, dispatch]);
   return (
     <>
       {multiOpen ? (

@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:22.04 as baseimage
 
 
 ENV DEBIAN_FRONTEND noninteractive
@@ -11,22 +11,6 @@ RUN apt-get update && apt-get upgrade -y && \
 
 
 ARG S6_OVERLAY_VERSION=3.1.4.1
-
-
-CMD mkdir /app
-
-COPY ./dist /app/dist
-COPY ./res /app/res
-COPY ./public /app/public
-COPY ./node_modules /app/node_modules
-COPY ./package-lock.json /app/
-COPY ./package.json /app/
-COPY ./tsconfig.json /app/
-COPY ./docker/run.sh /app/run.sh
-RUN chmod +x /app/run.sh
-
-WORKDIR /app
-
 
 ENV DBPATH=db
 ENV DBPORT=5432
@@ -44,5 +28,22 @@ ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLA
 RUN tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz
 ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-x86_64.tar.xz /tmp
 RUN tar -C / -Jxpf /tmp/s6-overlay-x86_64.tar.xz
+CMD mkdir /app
+
+WORKDIR /app
+COPY ./docker/run.sh /app/run.sh
+RUN chmod +x /app/run.sh
 
 ENTRYPOINT ["/init"]
+
+FROM elschnagoo/base:latest  as app
+
+COPY ./dist /app/dist
+COPY ./res /app/res
+COPY ./public /app/public
+COPY ./node_modules /app/node_modules
+COPY ./package-lock.json /app/
+COPY ./package.json /app/
+COPY ./tsconfig.json /app/
+
+

@@ -57,26 +57,35 @@ export default class WatchDB extends PGCon {
     this.setUpdateChain(
       new Patch001(this),
       new Patch002(this),
-      new Patch003(this)
+      new Patch003(this),
     );
   }
 
-  async searchQuery(rating?: number, label?: string[]): Promise<MovieLib[]> {
+  async searchQuery(
+    min?: number,
+    max?: number,
+    label?: string[],
+  ): Promise<MovieLib[]> {
     const param: any[] = [];
     let paramCounter = 1;
     const filter = [];
-    if (rating !== undefined) {
-      if (rating === 0) {
+    if (min !== undefined) {
+      filter.push(`AND rating >= $${paramCounter}`);
+      param.push(min);
+      paramCounter += 1;
+    }
+    if (max !== undefined) {
+      if (max === 0) {
         filter.push(`AND rating is null`);
       } else {
-        filter.push(`AND rating = $${paramCounter}`);
-        param.push(rating);
+        filter.push(`AND rating <= $${paramCounter}`);
+        param.push(max);
         paramCounter += 1;
       }
     }
     if (label) {
       const idd = label.map((cur) => `'${cur}'`).join(',');
-      filter.push(`AND e_id in (SELECT mov_lib
+      filter.push(`AND lib.e_id in (SELECT mov_lib
                                 FROM (SELECT count(1) as count, mov_lib
                                       FROM watch.label_map
                                       WHERE label in (${idd})
@@ -115,7 +124,7 @@ export default class WatchDB extends PGCon {
       }
     }
     await this.lib.createObject(
-      new Library({ lib_name: 'default_lib', lib_type: LibTypeEnum.MOVIE })
+      new Library({ lib_name: 'default_lib', lib_type: LibTypeEnum.MOVIE }),
     );
   }
 

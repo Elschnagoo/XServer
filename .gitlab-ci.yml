@@ -46,7 +46,7 @@ build:docker:
         export CI_APPLICATION_TAG=${CI_APPLICATION_TAG:-$CI_COMMIT_TAG}
       fi
     - cd ./backend
-    - docker build -t $CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG -t $CI_APPLICATION_REPOSITORY:latest  .
+    - docker build --target app -t $CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG -t $CI_APPLICATION_REPOSITORY:latest  .
     - docker push  $CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG
     - docker push  $CI_APPLICATION_REPOSITORY:latest
   needs:
