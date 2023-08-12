@@ -6,6 +6,7 @@ import { MovieEnv } from '@/lib';
 const initialAppEnv: MovieEnv = {
   search: null,
   label: null,
+  exclude: null,
   movie: null,
   max: 14,
 };

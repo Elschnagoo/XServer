@@ -7,6 +7,7 @@ import {
   IOChevronForward,
   IOClose,
   IOInformationCircle,
+  IOPricetag,
   KeyBind,
   Tooltip,
   useKeyListener,
@@ -20,9 +21,10 @@ import { useGlobalContext } from '@/context/GlobalContext';
 
 export default function EditModal(props: {
   close: () => void;
+  openLabel: () => void;
   parentPos?: number;
 }) {
-  const { close, parentPos } = props;
+  const { close, parentPos, openLabel } = props;
   const search = useAppSelector(selectSearch);
   const context = useGlobalContext();
   const { loadMovie } = usePreload();
@@ -277,6 +279,15 @@ export default function EditModal(props: {
           <Tooltip className="h-fix" text={tText} position="bottom">
             <IOInformationCircle size={24} />
           </Tooltip>
+          <IconButton
+            toolTip={{
+              text: 'Edit Labels',
+              position: 'left',
+            }}
+            onClick={() => openLabel()}
+          >
+            <IOPricetag />
+          </IconButton>
           <CheckBox
             className="h-fix"
             checked={forcePlay}

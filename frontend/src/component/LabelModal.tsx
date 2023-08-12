@@ -1,14 +1,18 @@
-import React from 'react';
+import React, { createRef, useRef, useState } from 'react';
 import {
   Badge,
   Form,
   Grid,
   IconButton,
   InputOptionType,
+  IOClipboard,
   IOClose,
   Table,
+  uuid,
 } from '@grandlinex/react-components';
 import { toast } from 'react-toastify';
+import { BaseRowEvent } from '@grandlinex/react-components/dist/components/table/TableHook';
+import { Label } from '@elschnagoo/xserver-con';
 import { useAppSelector } from '@/store';
 import { selectLabel } from '@/store/MovieStore';
 import usePreload from '@/store/preload';
@@ -17,13 +21,20 @@ import { useGlobalContext } from '@/context/GlobalContext';
 export default function LabelModal(props: { close: () => void }) {
   const { close } = props;
   const { loadLabel } = usePreload();
+  const ref = useRef(createRef<HTMLDivElement>());
   const context = useGlobalContext();
   const label = useAppSelector(selectLabel);
+  const [fState, setFState] = useState<Record<string, any>>({
+    color: 'blue',
+    it: { text: '', icon: null },
+    label_order: '',
+  });
+  const [formId, setFormId] = useState(uuid());
   if (!label) {
     return null;
   }
   return (
-    <Grid flex className="s-modal" center>
+    <Grid divRef={ref.current} flex className="s-modal" center>
       <Grid className="form-wrapper" flex flexC gap={12}>
         <Grid flex flexR gap={4} flexSpaceB>
           <h1>Label creation</h1>
@@ -32,12 +43,9 @@ export default function LabelModal(props: { close: () => void }) {
           </IconButton>
         </Grid>
         <Form
+          key={formId}
           className="glx-w-full-4"
-          defaultState={{
-            color: 'blue',
-            it: { text: '', icon: null },
-            label_order: '',
-          }}
+          defaultState={fState}
           submit={{
             buttonText: 'Create',
             onSubmit: async ({ form, setError, clear }) => {
@@ -129,6 +137,24 @@ export default function LabelModal(props: { close: () => void }) {
         />
         <Table
           rowData={label}
+          rowAction={[
+            (row: BaseRowEvent<Label>) => ({
+              name: 'Copy',
+              icon: <IOClipboard />,
+              onClick: () => {
+                setFState({
+                  color: row.data.color,
+                  it: {
+                    text: row.data.label_name,
+                    icon: row.data.icon || null,
+                  },
+                  label_order: row.data.label_order,
+                });
+                setFormId(uuid());
+                ref.current.current?.scroll({ top: 0, behavior: 'smooth' });
+              },
+            }),
+          ]}
           columnDefs={[
             {
               field: 'label_name',

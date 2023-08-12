@@ -20,6 +20,7 @@ export type AppEnv = {
 export type MovieEnv = {
   search: Record<string, any> | null;
   label: Label[] | null;
+  exclude: Label[] | null;
   movie: MovieLib[] | null;
   max: number;
 };

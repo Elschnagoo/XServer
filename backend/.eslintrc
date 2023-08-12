@@ -30,6 +30,7 @@
   },
   "rules": {
     "no-plusplus": "warn",
+    "@typescript-eslint/no-explicit-any": "warn",
     "no-restricted-syntax": "warn",
     "@typescript-eslint/naming-convention": "warn",
     "no-underscore-dangle": "warn",

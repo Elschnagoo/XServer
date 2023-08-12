@@ -37,9 +37,13 @@ export default function usePreload() {
       search?.label && search.label.length > 0
         ? search.label.join(';')
         : undefined;
+    const e: string | undefined =
+      search?.exclude && search.exclude.length > 0
+        ? search.exclude.join(';')
+        : undefined;
 
     context
-      .getMovies(l, min, max)
+      .getMovies(l, e, min, max)
       .then((res) => {
         let data = res.data || [];
 

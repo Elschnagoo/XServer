@@ -37,6 +37,15 @@ extendedSchema.properties = {
           },
         },
         {
+          name: 'exclude',
+          in: 'query',
+          description: 'Label',
+          required: false,
+          schema: {
+            type: 'string',
+          },
+        },
+        {
           name: 'min',
           in: 'query',
           description: 'Rating Min',
@@ -83,7 +92,7 @@ export default class MovieAction extends BaseApiAction<IKernel, WatchDB> {
     data: JwtToken | null,
   ): Promise<void> {
     if (data) {
-      const { min, max, label } = req.query;
+      const { min, max, label, exclude } = req.query;
 
       let mi: number | undefined;
       let ma: number | undefined;
@@ -101,38 +110,45 @@ export default class MovieAction extends BaseApiAction<IKernel, WatchDB> {
         res.sendStatus(400);
         return;
       }
-      let lab: string[] | undefined;
-      try {
-        if (label) {
-          if (typeof label !== 'string') {
-            res.sendStatus(400);
-            return;
-          }
-          lab = label.split(';');
-          let valid = true;
-          lab.forEach((cur) => {
-            if (!isUUID(cur)) {
-              valid = false;
-            }
-          });
-          if (!valid) {
-            res.sendStatus(400);
-            return;
-          }
-        }
-      } catch (e) {
-        this.error(e);
+      const lab = this.convertLabel(label);
+      const exc = this.convertLabel(exclude);
+      if (lab === null || exc === null) {
         res.sendStatus(400);
         return;
       }
 
       const db = this.getModule().getDb();
-      const dat = await db.searchQuery(mi, ma, lab);
+      const dat = await db.searchQuery(mi, ma, lab, exc);
 
       res.status(200).send(dat);
       return;
     }
 
     res.sendStatus(403);
+  }
+
+  convertLabel(label?: unknown): string[] | undefined | null {
+    let lab: string[] | undefined;
+    try {
+      if (label) {
+        if (typeof label !== 'string') {
+          return null;
+        }
+        lab = label.split(';');
+        let valid = true;
+        lab.forEach((cur) => {
+          if (!isUUID(cur)) {
+            valid = false;
+          }
+        });
+        if (!valid) {
+          return null;
+        }
+      }
+    } catch (e) {
+      this.error(e);
+      return null;
+    }
+    return lab;
   }
 }

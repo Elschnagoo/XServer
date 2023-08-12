@@ -35,6 +35,7 @@ const defaultSearch = {
   titel: '',
   rating: '',
   label: [],
+  exclude: [],
   order: SearchOrder.DATE_DSC,
   sync: Sync.ALL,
 };
@@ -101,7 +102,20 @@ export default function SearchModal(props: { close: () => void }) {
               {
                 key: 'label',
                 type: InputOptionType.TAG_SELECTOR,
-                label: 'Label',
+                label: 'Have Label',
+                items: label.map((l) => ({
+                  key: l.e_id,
+                  name: l.label_name,
+                  icon: l.icon as any,
+                  other: l.color,
+                })),
+              },
+            ],
+            [
+              {
+                key: 'exclude',
+                type: InputOptionType.TAG_SELECTOR,
+                label: 'Exclude Label',
                 items: label.map((l) => ({
                   key: l.e_id,
                   name: l.label_name,

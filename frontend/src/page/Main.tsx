@@ -103,7 +103,11 @@ export default function Main() {
       {lModal ? <LabelModal close={() => setLModal(false)} /> : null}
       {dModal ? <DownloadModal close={() => setDModal(false)} /> : null}
       {editMode !== -1 ? (
-        <EditModal close={() => setEditMode(-1)} parentPos={editMode} />
+        <EditModal
+          close={() => setEditMode(-1)}
+          parentPos={editMode}
+          openLabel={() => setLModal(true)}
+        />
       ) : null}
       {libModal ? <LibModal close={() => setLibModal(false)} /> : null}
       <Grid flex className="main" flexC vCenter>

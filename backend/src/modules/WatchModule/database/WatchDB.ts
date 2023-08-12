@@ -65,6 +65,7 @@ export default class WatchDB extends PGCon {
     min?: number,
     max?: number,
     label?: string[],
+    exc?: string[],
   ): Promise<MovieLib[]> {
     const param: any[] = [];
     let paramCounter = 1;
@@ -86,13 +87,22 @@ export default class WatchDB extends PGCon {
     if (label) {
       const idd = label.map((cur) => `'${cur}'`).join(',');
       filter.push(`AND lib.e_id in (SELECT mov_lib
-                                FROM (SELECT count(1) as count, mov_lib
-                                      FROM watch.label_map
-                                      WHERE label in (${idd})
-                                      GROUP BY mov_lib) as cml
-                                      WHERE count = $${paramCounter})`);
+                                    FROM (SELECT count(1) as count, mov_lib
+                                          FROM watch.label_map
+                                          WHERE label in (${idd})
+                                          GROUP BY mov_lib) as cml
+                                    WHERE count = $${paramCounter})`);
       param.push(label.length);
       paramCounter += 1;
+    }
+    if (exc) {
+      const idd = exc.map((cur) => `'${cur}'`).join(',');
+      filter.push(`AND lib.e_id not in (SELECT mov_lib
+                                        FROM (SELECT count(1) as count, mov_lib
+                                              FROM watch.label_map
+                                              WHERE label in (${idd})
+                                              GROUP BY mov_lib) as cml
+                                        WHERE count >0)`);
     }
 
     const query: RawQuery = {
@@ -108,6 +118,7 @@ export default class WatchDB extends PGCon {
       param,
     };
 
+    this.log(query);
     const [res] = await this.execScripts([query]);
     return res?.rows || [];
   }
