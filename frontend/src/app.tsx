@@ -1,6 +1,11 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import './app.scss';
 
+import {
+  UIContext,
+  UIContextData,
+  usePathQueryMap,
+} from '@grandlinex/react-components';
 import {
   selectIsInitG,
   selectLogin,
@@ -14,9 +19,17 @@ import Main from '@/page/Main';
 
 const App: React.FC = function () {
   const dispatch = useAppDispatch();
-
+  const query = usePathQueryMap();
   const init = useAppSelector(selectIsInitG);
   const login = useAppSelector(selectLogin);
+
+  const data = useMemo(
+    () =>
+      new UIContextData({
+        tooltipDisabled: query.has('m'),
+      }),
+    [query],
+  );
 
   useCookie();
 
@@ -27,9 +40,10 @@ const App: React.FC = function () {
     };
   }
 
-  if (!init || !login) {
-    return <LoginWeb />;
-  }
-  return <Main />;
+  return (
+    <UIContext.Provider value={data}>
+      {!init || !login ? <LoginWeb /> : <Main />}
+    </UIContext.Provider>
+  );
 };
 export default App;

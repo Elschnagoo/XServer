@@ -34,7 +34,7 @@ export default function DownloadModal(props: { close: () => void }) {
           submit={{
             buttonText: 'Download element',
             loading: true,
-            onSubmit: async ({form, setError, clear}) => {
+            onSubmit: async ({ form, setError, clear }) => {
               if (!form.url || form.url === '') {
                 setError({
                   field: [

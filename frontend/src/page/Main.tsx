@@ -48,7 +48,7 @@ export default function Main() {
   const [libModal, setLibModal] = useState<boolean>(false);
   const [dModal, setDModal] = useState<boolean>(false);
   const [double, setDouble] = useState<boolean>(false);
-  const [editMode, setEditMode] = useState<boolean>(false);
+  const [editMode, setEditMode] = useState<number>(-1);
   const [multi, setMulti] = useState<string[]>([]);
   const [multiOpen, setMultiOpen] = useState<boolean>(false);
   const max = useAppSelector(selectMax);
@@ -102,7 +102,9 @@ export default function Main() {
       {sModal ? <SearchModal close={() => setSModal(false)} /> : null}
       {lModal ? <LabelModal close={() => setLModal(false)} /> : null}
       {dModal ? <DownloadModal close={() => setDModal(false)} /> : null}
-      {editMode ? <EditModal close={() => setEditMode(false)} /> : null}
+      {editMode !== -1 ? (
+        <EditModal close={() => setEditMode(-1)} parentPos={editMode} />
+      ) : null}
       {libModal ? <LibModal close={() => setLibModal(false)} /> : null}
       <Grid flex className="main" flexC vCenter>
         <Grid className="header" flex flexR vCenter flexSpaceB>
@@ -200,7 +202,7 @@ export default function Main() {
                 position: 'left',
               }}
               onClick={() => {
-                setEditMode(!editMode);
+                setEditMode(0);
               }}
               disabled={cur.length === 0}
             >
@@ -274,7 +276,7 @@ export default function Main() {
           gap={24}
           vCenter
         >
-          {!data || !label || editMode ? (
+          {!data || !label || editMode >= 0 ? (
             <Grid className="item" flex flexC hCenter vCenter>
               <div style={{ width: '62px' }}>
                 <LDots />
@@ -298,13 +300,16 @@ export default function Main() {
                 }
               }}
             >
-              {cur.map((e) => (
+              {cur.map((e, index) => (
                 <MovieComp
                   key={e.e_id}
                   mov={e}
                   label={label}
                   reload={() => {
                     loadMovie(search);
+                  }}
+                  setEditMode={() => {
+                    setEditMode(index);
                   }}
                   multi={{
                     list: multi,

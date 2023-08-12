@@ -23,7 +23,7 @@ export default function LabelComp(props: {
 
   const [movLabel, , reload] = useQData(async () => {
     return (await contex.getMoviesLabel(id)).data?.sort(
-      (a, b) => a.label.label_order - b.label.label_order
+      (a, b) => a.label.label_order - b.label.label_order,
     );
   });
   if (movLabel) {

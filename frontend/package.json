@@ -1,10 +1,10 @@
 {
   "name": "frontend",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "private": true,
   "dependencies": {
     "@elschnagoo/xserver-con": "file:../backend/gen",
-    "@grandlinex/react-components": "0.2.3",
+    "@grandlinex/react-components": "0.3.3",
     "@reduxjs/toolkit": "1.9.5",
     "axios": "1.4.0",
     "moment": "2.29.4",

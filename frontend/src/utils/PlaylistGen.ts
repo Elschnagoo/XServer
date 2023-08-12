@@ -28,7 +28,7 @@ function downloadPlaylist(title: string, text: string) {
 export default function downloadFullPlaylist(
   title: string,
   files: MovieLib[],
-  auth: ReturnType<typeof useAuthHelper>
+  auth: ReturnType<typeof useAuthHelper>,
 ) {
   const lines = ['#EXTM3U', `#PLAYLIST:${title}`];
   files.forEach((s) => {

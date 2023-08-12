@@ -9,10 +9,12 @@ import React, {
 } from 'react';
 import { Label, MovieLib } from '@elschnagoo/xserver-con/dist/ApiTypes';
 import {
+  CheckBox,
   DropDownIconMenu,
   Grid,
   HNavigator,
   IconButton,
+  INames,
   IOCheckmark,
   IOClose,
   IOEyeOffOutline,
@@ -24,6 +26,8 @@ import {
   IOStar,
   IOTrash,
   IOTvOutline,
+  PlayerUpdateEvent,
+  Progress,
   Tooltip,
   useQData,
 } from '@grandlinex/react-components';
@@ -43,7 +47,6 @@ import TitleComp from '@/component/TitleComp';
 import { useAppDispatch } from '@/store';
 import { updateMovie } from '@/store/MovieStore';
 import ImgCarousel from '@/component/ImgCarousel';
-import CheckBox from '@/component/CheckBox';
 
 const SupportedWebVideoCodec = ['h264', 'vp8', 'vp9'];
 
@@ -64,20 +67,36 @@ const MovieComp = forwardRef<
     label: Label[];
     reload: () => void;
     editMode?: boolean;
+    forcePlay?: boolean;
+    doubleTime?: boolean;
+    showProgress?: boolean;
+    setEditMode?: () => void;
     multi?: {
       updateMulti: (id: string) => void;
       list: string[];
     };
   }
 >((prop, ref) => {
-  const { mov, label, editMode, reload, multi } = prop;
+  const {
+    mov,
+    label,
+    editMode,
+    reload,
+    multi,
+    forcePlay,
+    doubleTime,
+    showProgress,
+    setEditMode,
+  } = prop;
   const dispatch = useAppDispatch();
   const playerRef = createRef<MediaPlayerRefType>();
   const [localLib, setLocalLib] = useState<MovieLib>(mov);
   const context = useGlobalContext();
-  const [play, setPlay] = useState<boolean>(false);
+  const [play, setPlay] = useState<boolean>(!!forcePlay);
   const [editLabel, setEditLabel] = useState<boolean>(editMode || false);
   const [editStar, setEditStar] = useState<boolean>(editMode || false);
+  const [playerStatus, setPlayerstatus] =
+    useState<PlayerUpdateEvent<any> | null>(null);
 
   const has = useMemo(
     () => !!multi?.list.includes(mov.e_id),
@@ -166,7 +185,21 @@ const MovieComp = forwardRef<
       <TitleComp mov={localLib} update={updateL} />
       {play ? (
         <Grid flex flexC hCenter vCenter>
-          <MediaPlayer ref={playerRef} autoplay={editMode} src={stream} />
+          <MediaPlayer
+            ref={playerRef}
+            autoplay={editMode}
+            src={stream}
+            onProgress={(e) => {
+              if (showProgress) {
+                setPlayerstatus(e);
+              }
+            }}
+            onPlay={() => {
+              if (playerRef.current && doubleTime) {
+                playerRef.current.setPlayBackRate(2.0);
+              }
+            }}
+          />
         </Grid>
       ) : (
         <div className="carosell-container">
@@ -185,8 +218,16 @@ const MovieComp = forwardRef<
       )}
 
       <Grid flex flexR flexSpaceB className="glx-p-8 glx-flex-wrap" hCenter>
-        <Grid flex vCenter>
-          {moment(mov.created).format('DD.MM.YY - HH:mm')}
+        <Grid flex vCenter gap={12} grow={1} className="glx-mr-12">
+          <div>{moment(mov.created).format('DD.MM.YY - HH:mm')}</div>
+          {playerStatus ? (
+            <Grid grow={1}>
+              <Progress
+                cur={playerStatus.currentTime}
+                max={playerStatus.duration}
+              />
+            </Grid>
+          ) : null}
         </Grid>
         <Grid flex flexR gap={8} hCenter vCenter>
           {localLib.rating !== null ? (
@@ -274,13 +315,14 @@ const MovieComp = forwardRef<
 
           {multi && (
             <Tooltip
-              className="hide-on-mobile"
+              className="hide-on-mobile h-fix"
               position="left"
               text={
                 multi.list.length >= 4 && !has ? '' : 'Select for multi play'
               }
             >
               <CheckBox
+                className="h-fix"
                 disabled={multi.list.length >= 4 && !has}
                 checked={has}
                 value={has}
@@ -296,6 +338,15 @@ const MovieComp = forwardRef<
                 icon: 'IOOpenOutline',
                 label: 'Open Video in new tab',
               },
+              ...(setEditMode
+                ? [
+                    {
+                      key: 'edit',
+                      icon: 'IOServer' as INames,
+                      label: 'Edit Mode',
+                    },
+                  ]
+                : []),
               {
                 key: 'delete',
                 icon: 'IOTrash',
@@ -352,6 +403,9 @@ const MovieComp = forwardRef<
                     },
                   );
                   break;
+                case 'edit':
+                  setEditMode?.();
+                  break;
                 default:
                   break;
               }
@@ -384,6 +438,10 @@ const MovieComp = forwardRef<
 
 MovieComp.defaultProps = {
   editMode: undefined,
+  forcePlay: undefined,
+  doubleTime: undefined,
+  showProgress: undefined,
+  setEditMode: undefined,
   multi: undefined,
 };
 

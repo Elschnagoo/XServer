@@ -21,7 +21,7 @@ export const movState = createSlice({
     updateMovie: (state, action: PayloadAction<MovieLib>) => {
       if (state.movie) {
         const index = state.movie.findIndex(
-          (m) => m.e_id === action.payload.e_id
+          (m) => m.e_id === action.payload.e_id,
         );
         if (index !== -1) {
           state.movie[index] = action.payload;

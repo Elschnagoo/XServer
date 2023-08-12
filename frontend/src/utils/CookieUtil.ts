@@ -7,7 +7,7 @@ function cookieString(
   cname: string,
   cvalue: string,
   expire: Date,
-  domain?: string
+  domain?: string,
 ) {
   const expires = `expires=${expire.toUTCString()}`;
   return `${cname}=${cvalue};${expires};SameSite=Lax;${

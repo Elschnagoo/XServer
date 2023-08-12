@@ -5,7 +5,7 @@ export default function ImgCarousel({ data }: { data: [string, string][] }) {
   const [running, setRunning] = useState(false);
   const cur = useMemo<[string, string] | undefined>(
     () => data[index],
-    [data, index]
+    [data, index],
   );
   useEffect(() => {
     const timer = setInterval(() => {

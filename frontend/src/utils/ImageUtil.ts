@@ -12,12 +12,12 @@ function useImgThumbHelper() {
       } else if (item.watch?.movie) {
         img = auth(
           `/s/watch-service/movie/img/${item.watch.movie}?type=poster`,
-          true
+          true,
         );
       } else if (item.watch?.show) {
         img = auth(
           `/s/watch-service/show/img/${item.watch.show}?type=poster`,
-          true
+          true,
         );
       }
     }

@@ -29,5 +29,5 @@ root.render(
         <App />
       </Provider>
     </GlobalContext.Provider>
-  </Root>
+  </Root>,
 );
