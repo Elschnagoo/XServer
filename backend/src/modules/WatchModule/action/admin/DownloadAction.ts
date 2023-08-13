@@ -25,6 +25,18 @@ import YTDLMod from '../../../YTDL/YTDLMod';
           url: {
             type: 'string',
           },
+          label: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                e_id: {
+                  type: 'string',
+                },
+              },
+              required: ['e_id'],
+            },
+          },
         },
         required: ['url'],
       }),
@@ -42,11 +54,17 @@ export default class DownloadAction extends BaseApiAction<IKernel, WatchDB> {
     req: XRequest,
     res: XResponse,
     next: () => void,
-    data: JwtToken | null
+    data: JwtToken | null,
   ): Promise<void> {
     const { body } = req;
-    const { url } = body;
-    if (!url) {
+    const { url, label } = body;
+    if (
+      !url ||
+      (!!label &&
+        (!Array.isArray(label) ||
+          (Array.isArray(label) &&
+            !!label?.find((ex: any) => typeof ex?.e_id !== 'string'))))
+    ) {
       res.sendStatus(400);
       return;
     }
@@ -78,7 +96,8 @@ export default class DownloadAction extends BaseApiAction<IKernel, WatchDB> {
         error: null,
         lib_path: lPath.e_id,
         state: StateTypeQEnum.PENDING,
-      })
+        label: label?.map((e: any) => e.e_id) || null,
+      }),
     );
 
     res.sendStatus(201);

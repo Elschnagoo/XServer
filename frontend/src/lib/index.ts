@@ -17,10 +17,24 @@ export type AppEnv = {
   endpoint: string;
 };
 
+export enum MODAL {
+  'MULTI_VIEW',
+  'SEARCH',
+  'LABEL',
+  'DOWNLOAD',
+  'BULK_LABEL',
+  'BULK_RATING',
+  'LIB',
+}
+
 export type MovieEnv = {
   search: Record<string, any> | null;
   label: Label[] | null;
   exclude: Label[] | null;
   movie: MovieLib[] | null;
   max: number;
+  multi: string[];
+  modal: MODAL | null;
+  editMode: number;
+  revision: number;
 };

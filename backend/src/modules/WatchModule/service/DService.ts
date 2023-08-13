@@ -23,7 +23,7 @@ export default class DService extends BaseLoopService<IKernel, WatchDB> {
   async downloadFile(
     dw: DownloadQ,
     downloader: Downloader,
-    scanner: MovieScanner
+    scanner: MovieScanner,
   ): Promise<boolean> {
     const db = this.getModule().getDb();
     const libPath = (await db.path.getObjById(dw.lib_path))!;
@@ -38,7 +38,13 @@ export default class DService extends BaseLoopService<IKernel, WatchDB> {
             nPath = path.join(libPath.lib_path, `${Date.now()}-${f.fileName}`);
           }
           await fs.promises.cp(f.fullPath, nPath);
-          await scanner.fileAdd(lib, libPath, nPath, f.fileName);
+          await scanner.fileAdd(
+            lib,
+            libPath,
+            nPath,
+            f.fileName,
+            dw.label || undefined,
+          );
         }
         this.log(`Download: ${dw.download_path} complete`);
       }

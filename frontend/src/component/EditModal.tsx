@@ -1,4 +1,10 @@
-import React, { createRef, useCallback, useMemo, useState } from 'react';
+import React, {
+  createRef,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   CheckBox,
   Grid,
@@ -13,22 +19,27 @@ import {
   useKeyListener,
 } from '@grandlinex/react-components';
 import { toast } from 'react-toastify';
-import { useAppSelector } from '@/store';
-import { selectLabel, selectMovie, selectSearch } from '@/store/MovieStore';
+import { useAppDispatch, useAppSelector } from '@/store';
+import {
+  selectEditMode,
+  selectLabel,
+  selectMovie,
+  selectSearch,
+  setEditMode,
+  setModal,
+} from '@/store/MovieStore';
 import usePreload from '@/store/preload';
 import MovieComp, { MovieComRefType } from '@/component/MovieComp';
 import { useGlobalContext } from '@/context/GlobalContext';
+import { MODAL } from '@/lib';
 
-export default function EditModal(props: {
-  close: () => void;
-  openLabel: () => void;
-  parentPos?: number;
-}) {
-  const { close, parentPos, openLabel } = props;
+export default function EditModal() {
+  const dispatch = useAppDispatch();
+  const parentPos = useAppSelector(selectEditMode);
   const search = useAppSelector(selectSearch);
   const context = useGlobalContext();
   const { loadMovie } = usePreload();
-  const ref = createRef<MovieComRefType>();
+  const ref = useRef(createRef<MovieComRefType>());
   const label = useAppSelector(selectLabel);
   const data = useAppSelector(selectMovie);
   const [forcePlay, setForcePlay] = useState<boolean>(false);
@@ -44,12 +55,12 @@ export default function EditModal(props: {
           if (!res.success || !res.data) {
             toast.error(`Fehler`);
           } else {
-            ref.current?.updateLib(res.data);
+            ref.current.current?.updateLib(res.data);
           }
         });
       }
     },
-    [cur],
+    [context, cur, ref],
   );
   const keyListerner = useMemo<(KeyBind & { description?: string })[]>(
     () => [
@@ -87,7 +98,7 @@ export default function EditModal(props: {
         description: 'Close editor',
         action: () => {
           loadMovie(search || undefined);
-          close();
+          dispatch(setEditMode(-1));
         },
       },
       {
@@ -98,7 +109,7 @@ export default function EditModal(props: {
         description: 'Toggle star',
         action: () => {
           if (cur) {
-            ref.current?.toggleStar();
+            ref.current.current?.toggleStar();
           }
         },
       },
@@ -110,7 +121,7 @@ export default function EditModal(props: {
         description: 'Toggle Player',
         action: () => {
           if (cur) {
-            ref.current?.togglePlay();
+            ref.current.current?.togglePlay();
           }
         },
       },
@@ -122,7 +133,7 @@ export default function EditModal(props: {
         description: 'Seek forward',
         action: () => {
           if (cur) {
-            ref.current?.seekForward();
+            ref.current.current?.seekForward();
           }
         },
       },
@@ -134,7 +145,7 @@ export default function EditModal(props: {
         description: 'Seek back',
         action: () => {
           if (cur) {
-            ref.current?.seekBack();
+            ref.current.current?.seekBack();
           }
         },
       },
@@ -253,7 +264,7 @@ export default function EditModal(props: {
         },
       },
     ],
-    [close, cur, data, loadMovie, pos, ref, search, setStar],
+    [cur, data, dispatch, loadMovie, pos, search, setStar],
   );
 
   const tText = useMemo(
@@ -284,7 +295,9 @@ export default function EditModal(props: {
               text: 'Edit Labels',
               position: 'left',
             }}
-            onClick={() => openLabel()}
+            onClick={() => {
+              dispatch(setModal(MODAL.LABEL));
+            }}
           >
             <IOPricetag />
           </IconButton>
@@ -331,7 +344,7 @@ export default function EditModal(props: {
           <IconButton
             onClick={() => {
               loadMovie(search || undefined);
-              close();
+              dispatch(setEditMode(-1));
             }}
           >
             <IOClose />
@@ -352,7 +365,7 @@ export default function EditModal(props: {
           </Grid>
           <Grid flex className="edit-main">
             <MovieComp
-              ref={ref}
+              ref={ref.current}
               key={`edit_${cur.e_id}`}
               mov={cur}
               forcePlay={forcePlay}

@@ -14,136 +14,128 @@ import {
 } from '@grandlinex/react-components';
 import { toast } from 'react-toastify';
 import { useGlobalContext } from '@/context/GlobalContext';
+import BaseModal from '@/component/BaseModal';
 
-export default function LibModal(props: { close: () => void }) {
-  const { close } = props;
+export default function LibModal() {
   const context = useGlobalContext();
   const [data, , reload] = useQData(async () => {
     return (await context.getLibPath()).data;
   });
 
   return (
-    <Grid flex className="s-modal" center>
-      <Grid className="form-wrapper" flex flexC gap={12}>
-        <Grid flex flexR gap={4} flexSpaceB>
-          <h1>Manage Library</h1>
-          <IconButton onClick={close}>
-            <IOClose />
-          </IconButton>
-        </Grid>
-        <Form
-          className="glx-w-full-4"
-          submit={{
-            buttonText: 'Add folder',
-            loading: true,
-            onSubmit: async ({ form, setError, clear }) => {
-              if (!form.url || form.url === '') {
-                setError({
-                  field: [
-                    {
-                      key: 'url',
-                      message: 'Bitte gib eine URL ein',
-                    },
-                  ],
-                });
-              }
-              const l = await context.addLibPath({
-                path: form.url,
-                download: form.check || false,
+    <BaseModal title="Library Path">
+      <Form
+        className="glx-w-full-4"
+        submit={{
+          buttonText: 'Add folder',
+          loading: true,
+          onSubmit: async ({ form, setError, clear }) => {
+            if (!form.url || form.url === '') {
+              setError({
+                field: [
+                  {
+                    key: 'url',
+                    message: 'Bitte gib eine URL ein',
+                  },
+                ],
               });
-              if (l.success) {
-                toast.success('New folder added');
-                reload();
-                clear();
-              } else {
-                toast.error('Error adding folder');
-              }
+            }
+            const l = await context.addLibPath({
+              path: form.url,
+              download: form.check || false,
+            });
+            if (l.success) {
+              toast.success('New folder added');
+              reload();
+              clear();
+            } else {
+              toast.error('Error adding folder');
+            }
+          },
+        }}
+        options={[
+          [
+            {
+              key: 'url',
+              type: InputOptionType.TEXT,
+              label: 'Folder Path',
             },
-          }}
-          options={[
-            [
-              {
-                key: 'url',
-                type: InputOptionType.TEXT,
-                label: 'Folder Path',
-              },
-              {
-                key: 'check',
-                type: InputOptionType.CHECKBOX,
-                label: 'Mark as Download Folder',
-              },
-            ],
-          ]}
-        />
+            {
+              key: 'check',
+              type: InputOptionType.CHECKBOX,
+              label: 'Mark as Download Folder',
+            },
+          ],
+        ]}
+      />
 
-        {data ? (
-          <>
-            <Grid flex hCenter fullWidth>
-              <Button onClick={() => reload()}>Refresh list</Button>
-              <Button
-                onClick={() => {
-                  toast.dark(
-                    <Grid flex flexC gap={12}>
-                      <span>Add new Scan</span>
-                      <Grid flex flexR gap={12} hCenter>
-                        <IconButton
-                          onClick={() => {
-                            context.addScanJob().then((r) => {
-                              if (r.success) {
-                                toast.success('New Scan Job created ');
-                              } else {
-                                toast.error(
-                                  `Scan Job creation failed: ${r.code}`,
-                                );
-                              }
-                            });
-                          }}
-                        >
-                          <IOCheckmark />
-                        </IconButton>
-                        <IconButton
-                          onClick={() => {
-                            toast.dismiss();
-                          }}
-                        >
-                          <IOClose />
-                        </IconButton>
-                      </Grid>
-                    </Grid>,
-                    {
-                      autoClose: false,
-                      icon: <IORocketOutline />,
-                    },
-                  );
-                }}
-              >
-                Scan Library
-              </Button>
-            </Grid>
-            <Table
-              rowData={data}
-              columnDefs={[
-                {
-                  field: 'lib',
-                  headerName: 'Lib',
-                },
-                {
-                  field: 'lib_path',
-                  headerName: 'Lib path',
-                },
-                {
-                  field: 'download',
-                  headerName: 'Download folder',
-                },
-              ]}
-            />
-          </>
-        ) : (
-          <Grid flex flexR hCenter>
-            <LPulse />
+      {data ? (
+        <>
+          <Grid flex hCenter fullWidth>
+            <Button onClick={() => reload()}>Refresh list</Button>
+            <Button
+              onClick={() => {
+                toast.dark(
+                  <Grid flex flexC gap={12}>
+                    <span>Add new Scan</span>
+                    <Grid flex flexR gap={12} hCenter>
+                      <IconButton
+                        onClick={() => {
+                          context.addScanJob().then((r) => {
+                            if (r.success) {
+                              toast.success('New Scan Job created ');
+                            } else {
+                              toast.error(
+                                `Scan Job creation failed: ${r.code}`,
+                              );
+                            }
+                          });
+                        }}
+                      >
+                        <IOCheckmark />
+                      </IconButton>
+                      <IconButton
+                        onClick={() => {
+                          toast.dismiss();
+                        }}
+                      >
+                        <IOClose />
+                      </IconButton>
+                    </Grid>
+                  </Grid>,
+                  {
+                    autoClose: false,
+                    icon: <IORocketOutline />,
+                  },
+                );
+              }}
+            >
+              Scan Library
+            </Button>
           </Grid>
-        )}
-      </Grid>
-    </Grid>
+          <Table
+            rowData={data}
+            columnDefs={[
+              {
+                field: 'lib',
+                headerName: 'Lib',
+              },
+              {
+                field: 'lib_path',
+                headerName: 'Lib path',
+              },
+              {
+                field: 'download',
+                headerName: 'Download folder',
+              },
+            ]}
+          />
+        </>
+      ) : (
+        <Grid flex flexR hCenter>
+          <LPulse />
+        </Grid>
+      )}
+    </BaseModal>
   );
 }

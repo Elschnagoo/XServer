@@ -2,16 +2,13 @@ import React, { useMemo } from 'react';
 import { cnx, Grid, IconButton, IOClose } from '@grandlinex/react-components';
 import { MediaPlayer } from '@grandlinex/react-components/dist/components/mediaPlayer/MediaPlayer';
 import useAuthHelper from '@/utils/AuthUtil';
+import { selectMulti, setModal } from '@/store/MovieStore';
+import { useAppDispatch, useAppSelector } from '@/store';
 
-export default function MultiView({
-  list,
-  close,
-}: {
-  list: string[];
-  close: () => void;
-}) {
+export default function MultiView() {
   const authHelper = useAuthHelper();
-
+  const dispatch = useAppDispatch();
+  const list = useAppSelector(selectMulti);
   const pList = useMemo(() => {
     return list.map((v) => [
       v,
@@ -22,7 +19,7 @@ export default function MultiView({
   return (
     <>
       <Grid flex flexR className="multi-view glx-flex-wrap">
-        {pList.map(([id, steam, poster]) => (
+        {pList.slice(0, 4).map(([id, steam, poster]) => (
           <div
             id={`${id}_steam`}
             className={cnx(
@@ -36,7 +33,25 @@ export default function MultiView({
         ))}
       </Grid>
       <div className="multi-close">
-        <IconButton onClick={close}>
+        <IconButton
+          onClick={() => {
+            try {
+              const doc = document as any;
+              dispatch(setModal(null));
+              if (doc.exitFullscreen) {
+                doc.exitFullscreen();
+              } else if (doc.msExitFullscreen) {
+                doc.msExitFullscreen();
+              } else if (doc.mozCancelFullScreen) {
+                doc.mozCancelFullScreen();
+              } else if (doc.webkitCancelFullScreen) {
+                doc.webkitCancelFullScreen();
+              }
+            } catch (e) {
+              console.warn(e);
+            }
+          }}
+        >
           <IOClose />
         </IconButton>
       </div>

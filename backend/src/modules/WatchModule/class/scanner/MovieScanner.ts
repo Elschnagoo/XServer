@@ -6,6 +6,7 @@ import LibPath from '../../database/entities/LibPath';
 import LibFile from '../../database/entities/LibFile';
 import MovieLib from '../../database/entities/MovieLib';
 import MediaUtil from '../../utils/MediaUtil';
+import LabelMap from '../../database/map/LabelMap';
 
 export function niceName(name: string) {
   let tName = Path.parse(name).name;
@@ -20,7 +21,8 @@ export default class MovieScanner extends BaseScanner {
     lib: Library,
     path: LibPath,
     fPath: string,
-    name: string
+    name: string,
+    labelList?: string[],
   ): Promise<void> {
     try {
       if (!(await this.db.file.findObj({ file_path: fPath }))) {
@@ -34,10 +36,10 @@ export default class MovieScanner extends BaseScanner {
                 lib: lib.e_id,
                 synced: false,
                 duration: null,
-              })
+              }),
             )
           ).e_id;
-          await this.db.movieLib.createObject(
+          const mId = await this.db.movieLib.createObject(
             new MovieLib({
               created: new Date(),
               lib: lib.e_id,
@@ -47,8 +49,23 @@ export default class MovieScanner extends BaseScanner {
               disabled: false,
               rating: null,
               lib_file: fId,
-            })
+            }),
           );
+          if (labelList) {
+            for (const label of labelList) {
+              try {
+                await this.db.labelMap.createObject(
+                  new LabelMap({
+                    label,
+                    mov_lib: mId.e_id,
+                  }),
+                );
+              } catch (e) {
+                this.chanel.error(`Can't add label ${label}`);
+                this.chanel.error(e);
+              }
+            }
+          }
         }
       }
     } catch (e) {

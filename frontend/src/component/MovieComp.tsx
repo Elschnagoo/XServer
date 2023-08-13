@@ -45,7 +45,7 @@ import LabelComp from '@/component/LabelComp';
 import StarComp from '@/component/StarComp';
 import TitleComp from '@/component/TitleComp';
 import { useAppDispatch } from '@/store';
-import { updateMovie } from '@/store/MovieStore';
+import { setEditMode, updateMovie } from '@/store/MovieStore';
 import ImgCarousel from '@/component/ImgCarousel';
 
 const SupportedWebVideoCodec = ['h264', 'vp8', 'vp9'];
@@ -70,7 +70,7 @@ const MovieComp = forwardRef<
     forcePlay?: boolean;
     doubleTime?: boolean;
     showProgress?: boolean;
-    setEditMode?: () => void;
+    index?: number;
     multi?: {
       updateMulti: (id: string) => void;
       list: string[];
@@ -86,7 +86,7 @@ const MovieComp = forwardRef<
     forcePlay,
     doubleTime,
     showProgress,
-    setEditMode,
+    index,
   } = prop;
   const dispatch = useAppDispatch();
   const playerRef = createRef<MediaPlayerRefType>();
@@ -317,13 +317,10 @@ const MovieComp = forwardRef<
             <Tooltip
               className="hide-on-mobile h-fix"
               position="left"
-              text={
-                multi.list.length >= 4 && !has ? '' : 'Select for multi play'
-              }
+              text="Select for bulk action."
             >
               <CheckBox
                 className="h-fix"
-                disabled={multi.list.length >= 4 && !has}
                 checked={has}
                 value={has}
                 onChange={() => multi.updateMulti(mov.e_id)}
@@ -338,7 +335,7 @@ const MovieComp = forwardRef<
                 icon: 'IOOpenOutline',
                 label: 'Open Video in new tab',
               },
-              ...(setEditMode
+              ...(index !== undefined
                 ? [
                     {
                       key: 'edit',
@@ -404,7 +401,10 @@ const MovieComp = forwardRef<
                   );
                   break;
                 case 'edit':
-                  setEditMode?.();
+                  if (index !== undefined) {
+                    dispatch(setEditMode(index));
+                  }
+
                   break;
                 default:
                   break;
@@ -420,10 +420,12 @@ const MovieComp = forwardRef<
         flex={editMode}
       >
         <StarComp
-          mov={localLib}
-          edit={editStar}
-          update={updateL}
-          close={() => setEditStar(false)}
+          option={{
+            mov: localLib,
+            edit: editStar,
+            close: () => setEditStar(false),
+            update: updateL,
+          }}
         />
         <LabelComp
           label={label}
@@ -441,7 +443,7 @@ MovieComp.defaultProps = {
   forcePlay: undefined,
   doubleTime: undefined,
   showProgress: undefined,
-  setEditMode: undefined,
+  index: undefined,
   multi: undefined,
 };
 

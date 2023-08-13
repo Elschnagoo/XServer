@@ -1,19 +1,15 @@
 import React from 'react';
-import {
-  Form,
-  Grid,
-  IconButton,
-  InputOptionType,
-  IOClose,
-} from '@grandlinex/react-components';
+import { Form, InputOptionType } from '@grandlinex/react-components';
 import { useAppDispatch, useAppSelector } from '@/store';
 import {
   selectLabel,
   selectSearch,
   setMax,
+  setModal,
   setSearch,
 } from '@/store/MovieStore';
 import usePreload from '@/store/preload';
+import BaseModal from '@/component/BaseModal';
 
 export enum SearchOrder {
   DATE_ASC = 'date_asc',
@@ -39,8 +35,7 @@ const defaultSearch = {
   order: SearchOrder.DATE_DSC,
   sync: Sync.ALL,
 };
-export default function SearchModal(props: { close: () => void }) {
-  const { close } = props;
+export default function SearchModal() {
   const { loadMovie } = usePreload();
   const search = useAppSelector(selectSearch);
   const dispatch = useAppDispatch();
@@ -49,150 +44,142 @@ export default function SearchModal(props: { close: () => void }) {
     return null;
   }
   return (
-    <Grid flex className="s-modal" center>
-      <Grid className="form-wrapper" flex flexC gap={4}>
-        <Grid flex flexR gap={4} flexSpaceB>
-          <h1>Suche</h1>
-          <IconButton onClick={close}>
-            <IOClose />
-          </IconButton>
-        </Grid>
-        <Form
-          className="glx-w-full-4"
-          defaultState={search || defaultSearch}
-          submit={{
-            buttonText: 'Suchen',
-            onSubmit: async ({ form }) => {
-              dispatch(setMax(14));
-              dispatch(setSearch(form));
-              loadMovie(form);
-              close();
+    <BaseModal title="Search">
+      <Form
+        className="glx-w-full-4"
+        defaultState={search || defaultSearch}
+        submit={{
+          buttonText: 'Suchen',
+          onSubmit: async ({ form }) => {
+            dispatch(setMax(14));
+            dispatch(setSearch(form));
+            loadMovie(form);
+            dispatch(setModal(null));
+          },
+        }}
+        options={[
+          [
+            {
+              key: 'titel',
+              type: InputOptionType.TEXT,
+              label: 'Titel',
+              autoFocus: true,
             },
-          }}
-          options={[
-            [
-              {
-                key: 'titel',
-                type: InputOptionType.TEXT,
-                label: 'Titel',
-                autoFocus: true,
+          ],
+          [
+            {
+              key: 'min',
+              type: InputOptionType.NUMBER,
+              label: 'Rating Min',
+              restriction: {
+                min: 0,
+                max: 5,
               },
-            ],
-            [
-              {
-                key: 'min',
-                type: InputOptionType.NUMBER,
-                label: 'Rating Min',
-                restriction: {
-                  min: 0,
-                  max: 5,
+            },
+            {
+              key: 'max',
+              type: InputOptionType.NUMBER,
+              label: 'Rating Max',
+              restriction: {
+                min: 0,
+                max: 5,
+              },
+            },
+          ],
+          [
+            {
+              key: 'label',
+              type: InputOptionType.TAG_SELECTOR,
+              label: 'Have Label',
+              items: label.map((l) => ({
+                key: l.e_id,
+                name: l.label_name,
+                icon: l.icon as any,
+                other: l.color,
+              })),
+            },
+          ],
+          [
+            {
+              key: 'exclude',
+              type: InputOptionType.TAG_SELECTOR,
+              label: 'Exclude Label',
+              items: label.map((l) => ({
+                key: l.e_id,
+                name: l.label_name,
+                icon: l.icon as any,
+                other: l.color,
+              })),
+            },
+          ],
+          [
+            {
+              key: 'syc',
+              type: InputOptionType.DROPDOWN,
+              label: 'State',
+              items: [
+                {
+                  key: Sync.ALL,
+                  name: 'All (default)',
                 },
-              },
-              {
-                key: 'max',
-                type: InputOptionType.NUMBER,
-                label: 'Rating Max',
-                restriction: {
-                  min: 0,
-                  max: 5,
+                {
+                  key: Sync.DONE,
+                  name: 'Synced',
                 },
-              },
-            ],
-            [
-              {
-                key: 'label',
-                type: InputOptionType.TAG_SELECTOR,
-                label: 'Have Label',
-                items: label.map((l) => ({
-                  key: l.e_id,
-                  name: l.label_name,
-                  icon: l.icon as any,
-                  other: l.color,
-                })),
-              },
-            ],
-            [
-              {
-                key: 'exclude',
-                type: InputOptionType.TAG_SELECTOR,
-                label: 'Exclude Label',
-                items: label.map((l) => ({
-                  key: l.e_id,
-                  name: l.label_name,
-                  icon: l.icon as any,
-                  other: l.color,
-                })),
-              },
-            ],
-            [
-              {
-                key: 'syc',
-                type: InputOptionType.DROPDOWN,
-                label: 'State',
-                items: [
-                  {
-                    key: Sync.ALL,
-                    name: 'All (default)',
-                  },
-                  {
-                    key: Sync.DONE,
-                    name: 'Synced',
-                  },
-                  {
-                    key: Sync.PENDING,
-                    name: 'Sync Pending',
-                  },
-                ],
-              },
-            ],
-            [
-              {
-                key: 'order',
-                type: InputOptionType.DROPDOWN,
-                label: 'Order',
-                items: [
-                  {
-                    key: SearchOrder.DATE_DSC,
-                    name: 'Date (Descending ,default)',
-                  },
-                  {
-                    key: SearchOrder.DATE_ASC,
-                    name: 'Date (Ascending)',
-                  },
-                  {
-                    key: SearchOrder.RATING_DSC,
-                    name: 'Rating (Descending)',
-                  },
-                  {
-                    key: SearchOrder.RATING_ASC,
-                    name: 'Rating (Ascending)',
-                  },
-                  {
-                    key: SearchOrder.DURATION_DSC,
-                    name: 'Duration (Descending)',
-                  },
-                  {
-                    key: SearchOrder.DURATION_ASC,
-                    name: 'Duration (Ascending)',
-                  },
-                  {
-                    key: SearchOrder.NAME_ASC,
-                    name: 'Name (A-Z)',
-                  },
-                  {
-                    key: SearchOrder.NAME_DSC,
-                    name: 'Name (Z-A)',
-                  },
-                  {
-                    key: SearchOrder.SHUFFLE,
-                    name: 'Random',
-                  },
-                ],
-              },
-            ],
-          ]}
-        />
-      </Grid>
-    </Grid>
+                {
+                  key: Sync.PENDING,
+                  name: 'Sync Pending',
+                },
+              ],
+            },
+          ],
+          [
+            {
+              key: 'order',
+              type: InputOptionType.DROPDOWN,
+              label: 'Order',
+              items: [
+                {
+                  key: SearchOrder.DATE_DSC,
+                  name: 'Date (Descending ,default)',
+                },
+                {
+                  key: SearchOrder.DATE_ASC,
+                  name: 'Date (Ascending)',
+                },
+                {
+                  key: SearchOrder.RATING_DSC,
+                  name: 'Rating (Descending)',
+                },
+                {
+                  key: SearchOrder.RATING_ASC,
+                  name: 'Rating (Ascending)',
+                },
+                {
+                  key: SearchOrder.DURATION_DSC,
+                  name: 'Duration (Descending)',
+                },
+                {
+                  key: SearchOrder.DURATION_ASC,
+                  name: 'Duration (Ascending)',
+                },
+                {
+                  key: SearchOrder.NAME_ASC,
+                  name: 'Name (A-Z)',
+                },
+                {
+                  key: SearchOrder.NAME_DSC,
+                  name: 'Name (Z-A)',
+                },
+                {
+                  key: SearchOrder.SHUFFLE,
+                  name: 'Random',
+                },
+              ],
+            },
+          ],
+        ]}
+      />
+    </BaseModal>
   );
 }

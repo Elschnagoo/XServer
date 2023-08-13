@@ -4,6 +4,8 @@ import {
   getDocumentMeta,
   Grid,
   IconButton,
+  IOCheckmarkDone,
+  IOCloseCircle,
   IOCloseCircleOutline,
   IODownload,
   IODownloadOutline,
@@ -13,6 +15,7 @@ import {
   IOScanCircleOutline,
   IOSearch,
   IOServer,
+  IOSparkles,
   IOSync,
   LDots,
 } from '@grandlinex/react-components';
@@ -24,37 +27,39 @@ import useAuthHelper from '@/utils/AuthUtil';
 import usePreload from '@/store/preload';
 import { useAppDispatch, useAppSelector } from '@/store';
 import {
+  addMulti,
+  removeMulti,
+  resetMulti,
+  selectEditMode,
   selectLabel,
   selectMax,
   selectMovie,
+  selectMulti,
+  selectRevision,
   selectSearch,
+  setEditMode,
   setMax,
+  setModal,
+  setMulti,
   setSearch,
 } from '@/store/MovieStore';
-import SearchModal from '@/component/SearchModal';
-import LabelModal from '@/component/LabelModal';
 import EditModal from '@/component/EditModal';
-import DownloadModal from '@/component/DownloadModal';
-import LibModal from '@/component/LibModal';
-import MultiView from '@/component/MultiView';
+import { MODAL } from '@/lib';
+import ModalSwitch from '@/component/ModalSwitch';
 
 export default function Main() {
-  const context = useGlobalContext();
   const dispatch = useAppDispatch();
-  const auth = useAuthHelper();
-  const { loadLabel, loadMovie } = usePreload();
-  const [sModal, setSModal] = useState<boolean>(false);
-  const [lModal, setLModal] = useState<boolean>(false);
-  const [libModal, setLibModal] = useState<boolean>(false);
-  const [dModal, setDModal] = useState<boolean>(false);
-  const [double, setDouble] = useState<boolean>(false);
-  const [editMode, setEditMode] = useState<number>(-1);
-  const [multi, setMulti] = useState<string[]>([]);
-  const [multiOpen, setMultiOpen] = useState<boolean>(false);
+  const editMode = useAppSelector(selectEditMode);
+  const multi = useAppSelector(selectMulti);
   const max = useAppSelector(selectMax);
   const search = useAppSelector(selectSearch);
   const data = useAppSelector(selectMovie);
   const label = useAppSelector(selectLabel);
+  const revision = useAppSelector(selectRevision);
+  const [double, setDouble] = useState<boolean>(false);
+  const context = useGlobalContext();
+  const auth = useAuthHelper();
+  const { loadLabel, loadMovie } = usePreload();
   const cur = useMemo<MovieLib[]>(() => {
     if (!data) {
       return [];
@@ -77,39 +82,8 @@ export default function Main() {
   }, [search, data, max, dispatch]);
   return (
     <>
-      {multiOpen ? (
-        <MultiView
-          close={() => {
-            try {
-              const doc = document as any;
-              setMultiOpen(false);
-              if (doc.exitFullscreen) {
-                doc.exitFullscreen();
-              } else if (doc.msExitFullscreen) {
-                doc.msExitFullscreen();
-              } else if (doc.mozCancelFullScreen) {
-                doc.mozCancelFullScreen();
-              } else if (doc.webkitCancelFullScreen) {
-                doc.webkitCancelFullScreen();
-              }
-            } catch (e) {
-              console.warn(e);
-            }
-          }}
-          list={multi}
-        />
-      ) : null}
-      {sModal ? <SearchModal close={() => setSModal(false)} /> : null}
-      {lModal ? <LabelModal close={() => setLModal(false)} /> : null}
-      {dModal ? <DownloadModal close={() => setDModal(false)} /> : null}
-      {editMode !== -1 ? (
-        <EditModal
-          close={() => setEditMode(-1)}
-          parentPos={editMode}
-          openLabel={() => setLModal(true)}
-        />
-      ) : null}
-      {libModal ? <LibModal close={() => setLibModal(false)} /> : null}
+      {editMode !== -1 ? <EditModal /> : null}
+      <ModalSwitch />
       <Grid flex className="main" flexC vCenter>
         <Grid className="header" flex flexR vCenter flexSpaceB>
           <Grid flex vCenter className="glx-pl-4">
@@ -119,37 +93,72 @@ export default function Main() {
             </span>
           </Grid>
           <Grid flex flexR gap={4} vCenter>
+            {multi.length > 0 ? (
+              <>
+                <span>({multi.length} selected)</span>
+                <IconButton
+                  toolTip={{
+                    text: 'Reset Selection',
+                    position: 'left',
+                  }}
+                  onClick={() => {
+                    dispatch(resetMulti());
+                  }}
+                >
+                  <IOCloseCircle />
+                </IconButton>
+                <IconButton
+                  className="hide-on-mobile"
+                  toolTip={{
+                    text: 'Start Multi View',
+                    position: 'left',
+                  }}
+                  onClick={() => {
+                    try {
+                      const docElm = document.documentElement as any;
+                      if (docElm.requestFullscreen) {
+                        docElm.requestFullscreen();
+                      } else if (docElm.msRequestFullscreen) {
+                        docElm.msRequestFullscreen();
+                      } else if (docElm.mozRequestFullScreen) {
+                        docElm.mozRequestFullScreen();
+                      } else if (docElm.webkitRequestFullScreen) {
+                        docElm.webkitRequestFullScreen();
+                      }
+                    } catch (e) {
+                      console.warn(e);
+                    }
+                    dispatch(setModal(MODAL.MULTI_VIEW));
+                  }}
+                >
+                  <IOGridOutline />
+                </IconButton>
+                <IconButton
+                  className="hide-on-mobile"
+                  toolTip={{
+                    text: 'Set rating to selected',
+                    position: 'left',
+                  }}
+                  onClick={() => dispatch(setModal(MODAL.BULK_RATING))}
+                >
+                  <IOSparkles />
+                </IconButton>
+                <IconButton
+                  className="hide-on-mobile"
+                  toolTip={{
+                    text: 'Add labels to selected',
+                    position: 'left',
+                  }}
+                  onClick={() => dispatch(setModal(MODAL.BULK_LABEL))}
+                >
+                  <IOPricetag />
+                </IconButton>
+                |
+              </>
+            ) : null}
             <span>
               ({max}/{data?.length || 0})
             </span>
-            {multi.length > 0 ? (
-              <IconButton
-                className="hide-on-mobile"
-                toolTip={{
-                  text: 'Start Multi View',
-                  position: 'left',
-                }}
-                onClick={() => {
-                  try {
-                    const docElm = document.documentElement as any;
-                    if (docElm.requestFullscreen) {
-                      docElm.requestFullscreen();
-                    } else if (docElm.msRequestFullscreen) {
-                      docElm.msRequestFullscreen();
-                    } else if (docElm.mozRequestFullScreen) {
-                      docElm.mozRequestFullScreen();
-                    } else if (docElm.webkitRequestFullScreen) {
-                      docElm.webkitRequestFullScreen();
-                    }
-                  } catch (e) {
-                    console.warn(e);
-                  }
-                  setMultiOpen(true);
-                }}
-              >
-                <IOGridOutline />
-              </IconButton>
-            ) : null}
             {search ? (
               <IconButton
                 toolTip={{
@@ -170,9 +179,7 @@ export default function Main() {
                 text: 'Search',
                 position: 'left',
               }}
-              onClick={() => {
-                setSModal(true);
-              }}
+              onClick={() => dispatch(setModal(MODAL.SEARCH))}
             >
               <IOSearch />
             </IconButton>
@@ -189,13 +196,23 @@ export default function Main() {
               <span style={double ? { color: 'green' } : undefined}> 2x</span>
             </IconButton>
             <IconButton
+              className="hide-on-mobile"
+              toolTip={{
+                text: 'Select all loaded elements',
+                position: 'left',
+              }}
+              onClick={() => {
+                dispatch(setMulti(cur.map((x) => x.e_id)));
+              }}
+            >
+              <IOCheckmarkDone />
+            </IconButton>
+            <IconButton
               toolTip={{
                 text: 'Edit Labels',
                 position: 'left',
               }}
-              onClick={() => {
-                setLModal(true);
-              }}
+              onClick={() => dispatch(setModal(MODAL.LABEL))}
             >
               <IOPricetag />
             </IconButton>
@@ -206,7 +223,7 @@ export default function Main() {
                 position: 'left',
               }}
               onClick={() => {
-                setEditMode(0);
+                dispatch(setEditMode(0));
               }}
               disabled={cur.length === 0}
             >
@@ -218,9 +235,7 @@ export default function Main() {
                 text: 'Download Media',
                 position: 'left',
               }}
-              onClick={() => {
-                setDModal(true);
-              }}
+              onClick={() => dispatch(setModal(MODAL.DOWNLOAD))}
             >
               <IODownloadOutline />
             </IconButton>
@@ -229,9 +244,7 @@ export default function Main() {
                 text: 'Manage Library',
                 position: 'left',
               }}
-              onClick={() => {
-                setLibModal(true);
-              }}
+              onClick={() => dispatch(setModal(MODAL.LIB))}
             >
               <IOScanCircleOutline />
             </IconButton>
@@ -306,22 +319,20 @@ export default function Main() {
             >
               {cur.map((e, index) => (
                 <MovieComp
-                  key={e.e_id}
+                  key={`${e.e_id}_${revision}`}
                   mov={e}
                   label={label}
                   reload={() => {
                     loadMovie(search);
                   }}
-                  setEditMode={() => {
-                    setEditMode(index);
-                  }}
+                  index={index}
                   multi={{
                     list: multi,
                     updateMulti: (id) => {
                       if (multi.includes(id)) {
-                        setMulti(multi.filter((dx) => dx !== id));
+                        dispatch(removeMulti(id));
                       } else {
-                        setMulti([...multi, id]);
+                        dispatch(addMulti(id));
                       }
                     },
                   }}

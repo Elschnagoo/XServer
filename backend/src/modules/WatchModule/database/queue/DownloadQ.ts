@@ -31,6 +31,12 @@ export default class DownloadQ extends CoreEntity {
   @EntityColumn(new LibPath())
   lib_path: string;
 
+  @Column({
+    dataType: 'json',
+    canBeNull: true,
+  })
+  label: string[] | null;
+
   constructor(prop?: EProperties<DownloadQ>) {
     super();
     this.state = prop?.state || StateTypeQEnum.PENDING;
@@ -38,5 +44,6 @@ export default class DownloadQ extends CoreEntity {
     this.error = prop?.error || null;
     this.download_path = prop?.download_path || '';
     this.lib_path = prop?.lib_path || '';
+    this.label = prop?.label || null;
   }
 }

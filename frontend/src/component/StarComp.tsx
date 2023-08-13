@@ -12,26 +12,31 @@ import { useGlobalContext } from '@/context/GlobalContext';
 
 const Star = [0, 1, 2, 3, 4];
 export default function StarComp(props: {
-  mov: MovieLib;
-  edit: boolean;
-  update: (mov: MovieLib) => void;
-  close: () => void;
+  option?: {
+    mov: MovieLib;
+    edit: boolean;
+    update: (mov: MovieLib) => void;
+    close: () => void;
+  };
+  onChange?: (val: number) => void;
 }) {
-  const { mov, edit, update, close } = props;
-  const [init, setInit] = useState<number | undefined>(mov.rating);
-  const [cur, setCur] = useState<number>((mov.rating || 0) - 1);
-  const [curHover, setCurHover] = useState<number>((mov.rating || 0) - 1);
+  const { option, onChange } = props;
+  const [init, setInit] = useState<number | undefined>(option?.mov.rating || 0);
+  const [cur, setCur] = useState<number>((option?.mov.rating || 0) - 1);
+  const [curHover, setCurHover] = useState<number>(
+    (option?.mov.rating || 0) - 1,
+  );
   const context = useGlobalContext();
 
   useEffect(() => {
-    if (init !== mov.rating) {
-      setCur((mov.rating || 0) - 1);
-      setCurHover((mov.rating || 0) - 1);
+    if (init !== option?.mov.rating) {
+      setCur((option?.mov.rating || 0) - 1);
+      setCurHover((option?.mov.rating || 0) - 1);
     }
-    setInit(mov.rating);
-  }, [init, mov.rating]);
+    setInit(option?.mov.rating);
+  }, [init, option?.mov.rating]);
 
-  if (edit) {
+  if (option?.edit || !option) {
     return (
       <Grid
         flex
@@ -49,17 +54,21 @@ export default function StarComp(props: {
               onMouseLeave={() => setCurHover(-1)}
               onClick={() => {
                 setCur(index);
-                context
-                  .updateMovie(mov.e_id, { rating: index + 1 })
-                  .then((res) => {
-                    if (!res.success || !res.data) {
-                      toast.error(`Fehler`);
-                    } else {
-                      update(res.data);
-                      close();
-                      // toast.success(`Bewertung gespeichert: ${index + 1}`);
-                    }
-                  });
+
+                onChange?.(index + 1);
+                if (option) {
+                  context
+                    .updateMovie(option.mov.e_id, { rating: index + 1 })
+                    .then((res) => {
+                      if (!res.success || !res.data) {
+                        toast.error(`Fehler`);
+                      } else {
+                        option.update(res.data);
+                        option.close();
+                        // toast.success(`Bewertung gespeichert: ${index + 1}`);
+                      }
+                    });
+                }
               }}
             >
               {index <= curHover || (curHover === -1 && index <= cur) ? (
@@ -73,14 +82,20 @@ export default function StarComp(props: {
         <div
           className="star-reset glx-pointer"
           onClick={() => {
-            context.updateMovie(mov.e_id, { rating: -1 }).then((res) => {
-              if (!res.success || !res.data) {
-                toast.error(`Fehler`);
-              } else {
-                update(res.data);
-                close();
-              }
-            });
+            onChange?.(-1);
+            setCur(-1);
+            if (option) {
+              context
+                .updateMovie(option.mov.e_id, { rating: -1 })
+                .then((res) => {
+                  if (!res.success || !res.data) {
+                    toast.error(`Fehler`);
+                  } else {
+                    option.update(res.data);
+                    option.close();
+                  }
+                });
+            }
           }}
         >
           <IOBackspaceOutline size={ISize.MD} />
@@ -90,3 +105,8 @@ export default function StarComp(props: {
   }
   return null;
 }
+
+StarComp.defaultProps = {
+  option: undefined,
+  onChange: undefined,
+};
