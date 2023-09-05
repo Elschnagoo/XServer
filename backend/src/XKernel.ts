@@ -1,4 +1,4 @@
-import Path from 'path';
+import Path, * as path from 'path';
 import Kernel, {
   CoreModule,
   cors,
@@ -11,7 +11,6 @@ import ELogger from '@grandlinex/bundle-elogger';
 
 import { Swagger } from '@grandlinex/swagger-mate';
 import e from 'express';
-import * as path from 'path';
 import SwaggerConf from './SwaggerConf';
 import WatchModule from './modules/WatchModule/WatchModule';
 import YTDLMod from './modules/YTDL/YTDLMod';

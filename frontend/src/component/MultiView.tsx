@@ -3,16 +3,17 @@ import { cnx, Grid, IconButton, IOClose } from '@grandlinex/react-components';
 import { MediaPlayer } from '@grandlinex/react-components/dist/components/mediaPlayer/MediaPlayer';
 import useAuthHelper from '@/utils/AuthUtil';
 import { selectMulti, setModal } from '@/store/MovieStore';
-import { useAppDispatch, useAppSelector } from '@/store';
+import { useAppDispatch, useAppSelector, usePlayMode } from '@/store';
 
 export default function MultiView() {
   const authHelper = useAuthHelper();
   const dispatch = useAppDispatch();
+  const mode = usePlayMode();
   const list = useAppSelector(selectMulti);
   const pList = useMemo(() => {
     return list.map((v) => [
       v,
-      authHelper(`/movie/stream/${v}`, true),
+      authHelper(`/movie/stream/${v}?${mode()}`, true),
       authHelper(`/movie/img/${v}?type=tn_1`, true),
     ]);
   }, [authHelper, list]);

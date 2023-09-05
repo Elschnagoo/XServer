@@ -41,7 +41,7 @@ import Label from '../../database/entities/Label';
         '400',
         '404',
         '409',
-        '500'
+        '500',
       ),
     },
   },
@@ -56,7 +56,7 @@ export default class NewLabelAction extends BaseApiAction<IKernel, WatchDB> {
     req: XRequest,
     res: XResponse,
     next: () => void,
-    data: JwtToken | null
+    data: JwtToken | null,
   ): Promise<void> {
     if (data) {
       const db = this.getModule().getDb();
@@ -81,7 +81,7 @@ export default class NewLabelAction extends BaseApiAction<IKernel, WatchDB> {
           icon: icon || null,
           color: color || null,
           label_order: label_order ?? 10,
-        })
+        }),
       );
       res.status(200).send(l);
       return;

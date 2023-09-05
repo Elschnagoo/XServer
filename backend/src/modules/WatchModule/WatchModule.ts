@@ -55,13 +55,13 @@ export default class WatchModule extends BaseKernelModule<
       new DownloadStatusAction(this),
       new DeleteDownloadAction(this),
       new AddLibPathAction(this),
-      new GetLibPathAction(this)
+      new GetLibPathAction(this),
     );
     this.addService(
       new QService(this),
       new FileMetaService(this),
       new ThumbService(this),
-      new DService(this)
+      new DService(this),
     );
   }
 

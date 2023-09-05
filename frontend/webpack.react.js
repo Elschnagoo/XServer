@@ -23,7 +23,7 @@ module.exports = {
       'backend',
       'public',
       'ui',
-      'renderer.js'
+      'renderer.js',
     ),
     compress: true,
     port: 9001, // Don't use port 9000 it's used for the electron env

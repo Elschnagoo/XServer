@@ -9,6 +9,7 @@ import MultiView from '@/component/MultiView';
 import LibModal from '@/component/LibModal';
 import BulkLabelModal from '@/component/BulkLabelModal';
 import BulkRatingModal from '@/component/BulkRatingModal';
+import WatchModal from '@/component/WatchModal';
 
 export default function ModalSwitch() {
   const modal = useAppSelector(selectModal);
@@ -27,6 +28,8 @@ export default function ModalSwitch() {
       return <DownloadModal />;
     case MODAL.LIB:
       return <LibModal />;
+    case MODAL.PLAY_MODE:
+      return <WatchModal />;
     default:
       return null;
   }

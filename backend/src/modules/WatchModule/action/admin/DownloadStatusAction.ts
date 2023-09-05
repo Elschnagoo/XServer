@@ -22,7 +22,7 @@ import DownloadQ from '../../database/queue/DownloadQ';
         true,
         '400',
         '404',
-        '500'
+        '500',
       ),
     },
   },
@@ -40,7 +40,7 @@ export default class DownloadStatusAction extends BaseApiAction<
     req: XRequest,
     res: XResponse,
     next: () => void,
-    data: JwtToken | null
+    data: JwtToken | null,
   ): Promise<void> {
     if (data) {
       const db = this.getModule().getDb();

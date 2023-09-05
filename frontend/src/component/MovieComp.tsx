@@ -44,7 +44,7 @@ import { ProbeInfo } from '@/lib/MediaHandlerTypes';
 import LabelComp from '@/component/LabelComp';
 import StarComp from '@/component/StarComp';
 import TitleComp from '@/component/TitleComp';
-import { useAppDispatch } from '@/store';
+import { useAppDispatch, usePlayMode } from '@/store';
 import { setEditMode, updateMovie } from '@/store/MovieStore';
 import ImgCarousel from '@/component/ImgCarousel';
 
@@ -91,6 +91,7 @@ const MovieComp = forwardRef<
   const dispatch = useAppDispatch();
   const playerRef = createRef<MediaPlayerRefType>();
   const [localLib, setLocalLib] = useState<MovieLib>(mov);
+  const mode = usePlayMode();
   const context = useGlobalContext();
   const [play, setPlay] = useState<boolean>(!!forcePlay);
   const [editLabel, setEditLabel] = useState<boolean>(editMode || false);
@@ -178,7 +179,7 @@ const MovieComp = forwardRef<
     });
   }, [authHelper, mov.e_id]);
   const stream = useMemo(() => {
-    return authHelper(`/movie/stream/${mov.e_id}`, true);
+    return authHelper(`/movie/stream/${mov.e_id}?${mode()}`, true);
   }, [authHelper, mov.e_id]);
   return (
     <Grid className="movie-com">
@@ -356,7 +357,7 @@ const MovieComp = forwardRef<
                 case 'open':
                   context.openExternalConfig({
                     url: authHelper(
-                      `/movie/stream/${mov.e_id}?profile=raw`,
+                      `/movie/stream/${mov.e_id}?${mode(true)}`,
                       true,
                       true,
                     ),

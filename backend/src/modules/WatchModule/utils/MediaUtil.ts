@@ -24,24 +24,24 @@ export default class MediaUtil {
     return (
       !!file.file_meta &&
       !!file.file_meta.streams.find((stream) =>
-        this.SupportedWebVideoCodec.includes(stream.codec_name)
+        this.SupportedWebVideoCodec.includes(stream.codec_name),
       ) &&
       this.SupportedWebVideoContainer.includes(
-        file.file_meta.format.format_name
+        file.file_meta.format.format_name,
       )
     );
   }
 
   static isSupportedVideoContainer(path: string): boolean {
     return MediaUtil.SupportedVideoContainer.includes(
-      Path.extname(path).toLowerCase()
+      Path.extname(path).toLowerCase(),
     );
   }
 
   static async prioritizeFile(
     db: WatchDB,
     files: string[],
-    type: 'web' | 'best'
+    type: 'web' | 'best',
   ): Promise<LibFile | null> {
     if (type === 'web') {
       return this.prioritizeWebFile(db, files);
@@ -54,7 +54,7 @@ export default class MediaUtil {
 
   static async prioritizeWebFile(
     db: WatchDB,
-    files: string[]
+    files: string[],
   ): Promise<LibFile | null> {
     if (files.length === 0) {
       return null;
@@ -75,7 +75,7 @@ export default class MediaUtil {
 
   static async prioritizeBestFile(
     db: WatchDB,
-    files: string[]
+    files: string[],
   ): Promise<LibFile | null> {
     if (files.length === 0) {
       return null;

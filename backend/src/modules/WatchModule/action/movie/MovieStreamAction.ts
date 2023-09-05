@@ -29,14 +29,6 @@ import Converter from '../../utils/Converter';
         },
         {
           in: 'query',
-          name: 'version',
-          required: false,
-          schema: {
-            type: 'string',
-          },
-        },
-        {
-          in: 'query',
           name: 'profile',
           required: false,
           schema: {
@@ -71,16 +63,12 @@ export default class MovieStreamAction extends BaseApiAction<IKernel, WatchDB> {
     req: XRequest,
     res: XResponse,
     next: () => void,
-    data: JwtToken | null
+    data: JwtToken | null,
   ): Promise<void> {
     if (data) {
       const { id } = req.params;
-      const { version, profile } = req.query;
-      if (
-        !id ||
-        (version && typeof version !== 'string') ||
-        (profile && typeof profile !== 'string')
-      ) {
+      const { profile } = req.query;
+      if (!id || (profile && typeof profile !== 'string')) {
         res.sendStatus(400);
         return;
       }

@@ -32,7 +32,7 @@ import LibFile from '../../database/entities/LibFile';
         new LibFile(),
         false,
         '400',
-        '500'
+        '500',
       ),
     },
   },
@@ -50,7 +50,7 @@ export default class MovieVersionAction extends BaseApiAction<
     req: XRequest,
     res: XResponse,
     next: () => void,
-    data: JwtToken | null
+    data: JwtToken | null,
   ): Promise<void> {
     if (data) {
       const { id } = req.params;

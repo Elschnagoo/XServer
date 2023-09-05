@@ -65,7 +65,7 @@ export default class MovieImgAction extends BaseApiAction<IKernel, WatchDB> {
     req: XRequest,
     res: XResponse,
     next: () => void,
-    data: JwtToken | null
+    data: JwtToken | null,
   ): Promise<void> {
     if (data) {
       const { id } = req.params;
@@ -82,7 +82,7 @@ export default class MovieImgAction extends BaseApiAction<IKernel, WatchDB> {
           this.mediaPath,
           dat.lib,
           dat.e_id,
-          `${type}.webp`
+          `${type}.webp`,
         );
         if (fs.existsSync(imgPath)) {
           res.status(200).sendFile(imgPath);

@@ -42,7 +42,7 @@ export default class BindLabelAction extends BaseApiAction<IKernel, WatchDB> {
     req: XRequest,
     res: XResponse,
     next: () => void,
-    data: JwtToken | null
+    data: JwtToken | null,
   ): Promise<void> {
     if (data) {
       const { label, mov_lib } = req.body;
@@ -78,7 +78,7 @@ export default class BindLabelAction extends BaseApiAction<IKernel, WatchDB> {
         new LabelMap({
           label,
           mov_lib,
-        })
+        }),
       );
 
       res.sendStatus(201);

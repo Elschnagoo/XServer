@@ -36,7 +36,7 @@ export default class DeleteMovieAction extends BaseApiAction<
   WatchClient
 > {
   constructor(
-    module: IBaseKernelModule<IKernel, WatchDB, WatchClient, any, any>
+    module: IBaseKernelModule<IKernel, WatchDB, WatchClient, any, any>,
   ) {
     super('DELETE', '/movie/e/:id', module, module.getKernel().getModule());
     this.handler = this.handler.bind(this);
@@ -46,7 +46,7 @@ export default class DeleteMovieAction extends BaseApiAction<
     req: XRequest,
     res: XResponse,
     next: () => void,
-    data: JwtToken | null
+    data: JwtToken | null,
   ): Promise<void> {
     if (data) {
       if (!req.params.id) {

@@ -49,7 +49,7 @@ export default function SearchModal() {
         className="glx-w-full-4"
         defaultState={search || defaultSearch}
         submit={{
-          buttonText: 'Suchen',
+          buttonText: 'Search',
           onSubmit: async ({ form }) => {
             dispatch(setMax(14));
             dispatch(setSearch(form));

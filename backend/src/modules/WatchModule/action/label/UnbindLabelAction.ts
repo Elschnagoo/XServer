@@ -8,7 +8,6 @@ import {
 } from '@grandlinex/kernel';
 import { SPath, SPathUtil } from '@grandlinex/swagger-mate';
 import { WatchDB } from '../../database';
-import LabelMap from '../../database/map/LabelMap';
 
 @SPath({
   '/movie/label/{id}': {
@@ -40,7 +39,7 @@ export default class UnbindLabelAction extends BaseApiAction<IKernel, WatchDB> {
     req: XRequest,
     res: XResponse,
     next: () => void,
-    data: JwtToken | null
+    data: JwtToken | null,
   ): Promise<void> {
     if (data) {
       const db = this.getModule().getDb();

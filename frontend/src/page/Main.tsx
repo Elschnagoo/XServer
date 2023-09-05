@@ -11,6 +11,7 @@ import {
   IODownloadOutline,
   IOGridOutline,
   IOLogOut,
+  IOPlayCircle,
   IOPricetag,
   IOScanCircleOutline,
   IOSearch,
@@ -25,7 +26,7 @@ import MovieComp from '@/component/MovieComp';
 import downloadFullPlaylist from '@/utils/PlaylistGen';
 import useAuthHelper from '@/utils/AuthUtil';
 import usePreload from '@/store/preload';
-import { useAppDispatch, useAppSelector } from '@/store';
+import { useAppDispatch, useAppSelector, usePlayMode } from '@/store';
 import {
   addMulti,
   removeMulti,
@@ -56,6 +57,7 @@ export default function Main() {
   const data = useAppSelector(selectMovie);
   const label = useAppSelector(selectLabel);
   const revision = useAppSelector(selectRevision);
+  const mode = usePlayMode();
   const [double, setDouble] = useState<boolean>(false);
   const context = useGlobalContext();
   const auth = useAuthHelper();
@@ -206,6 +208,16 @@ export default function Main() {
               }}
             >
               <IOCheckmarkDone />
+            </IconButton>{' '}
+            <IconButton
+              className="hide-on-mobile"
+              toolTip={{
+                text: 'Set play mode',
+                position: 'left',
+              }}
+              onClick={() => dispatch(setModal(MODAL.PLAY_MODE))}
+            >
+              <IOPlayCircle />
             </IconButton>
             <IconButton
               toolTip={{
@@ -261,7 +273,6 @@ export default function Main() {
             >
               <IOSync />
             </IconButton>
-
             <IconButton
               toolTip={{
                 text: 'Download Playlist',
@@ -269,7 +280,7 @@ export default function Main() {
               }}
               onClick={() => {
                 if (data) {
-                  downloadFullPlaylist('XServer', data, auth);
+                  downloadFullPlaylist('XServer', data, auth, mode);
                 }
               }}
             >

@@ -34,7 +34,7 @@ export default class DeleteDownloadAction extends BaseApiAction<
     req: XRequest,
     res: XResponse,
     next: () => void,
-    data: JwtToken | null
+    data: JwtToken | null,
   ): Promise<void> {
     const db = this.getModule().getDb();
     const done = await db.download.getObjList({

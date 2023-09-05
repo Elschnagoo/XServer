@@ -45,7 +45,7 @@ export default class AddLibPathAction extends BaseApiAction<IKernel, WatchDB> {
     req: e.Request,
     res: e.Response,
     next: () => void,
-    data: JwtToken
+    data: JwtToken,
   ): Promise<void> {
     const { body } = req;
     const { path, download } = body;
@@ -82,7 +82,7 @@ export default class AddLibPathAction extends BaseApiAction<IKernel, WatchDB> {
           error: null,
           lib: lib.e_id,
           state: StateTypeQEnum.PENDING,
-        })
+        }),
       );
       res.sendStatus(201);
     } catch (err) {

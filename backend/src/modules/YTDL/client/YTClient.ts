@@ -25,7 +25,7 @@ export default class YTClient extends CoreClient<
   // eslint-disable-next-line class-methods-use-this
   testTargetUrl(url: string) {
     return /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w.-]+)+[\w\-._~:/?#[\]@!$&'()*+,;=.]+$/.test(
-      url
+      url,
     );
   }
 

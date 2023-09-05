@@ -25,6 +25,14 @@ export enum MODAL {
   'BULK_LABEL',
   'BULK_RATING',
   'LIB',
+  'PLAY_MODE',
+}
+export enum PlayMode {
+  'DEFAULT' = 'default',
+  'RAW' = 'raw',
+  'BEST' = 'best',
+  'MEDIUM' = 'medium',
+  'LOW' = 'low',
 }
 
 export type MovieEnv = {
@@ -37,4 +45,5 @@ export type MovieEnv = {
   modal: MODAL | null;
   editMode: number;
   revision: number;
+  mode: PlayMode;
 };

@@ -33,7 +33,7 @@ export default class WatchClient extends BaseClient<IKernel, WatchDB> {
         ['FFMPEG_PATH', 'ffmpeg'],
         ['FFPROBE_PATH', 'ffprobe'],
         ['MAGIC_PRE', ''],
-        ['MEDIA_PATH', '']
+        ['MEDIA_PATH', ''],
       );
 
     this.mediaPath = mpath;
@@ -107,7 +107,7 @@ export default class WatchClient extends BaseClient<IKernel, WatchDB> {
     const prom = new Promise<boolean>((resolve) => {
       const proc = ffmpeg(path).takeScreenshots(
         { count: 5, fastSeek: true },
-        imgPath
+        imgPath,
       );
       proc.on('data', (err, dat) => {
         this.error(err);

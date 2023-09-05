@@ -15,7 +15,7 @@ export default class Downloader extends CoreLogChannel {
   constructor(
     log: IHaveLogger | CoreLogger,
     fPath: string,
-    cmd = 'youtube-dl'
+    cmd = 'youtube-dl',
   ) {
     super('Downloader', log);
     this.cmd = cmd;
@@ -72,7 +72,7 @@ export default class Downloader extends CoreLogChannel {
 
   async downloadResource(
     url: string,
-    log = false
+    log = false,
   ): Promise<{ fullPath: string; fileName: string }[] | null> {
     if (!this.checkEmptyFolder()) {
       this.error('Folder not empty or not exist');

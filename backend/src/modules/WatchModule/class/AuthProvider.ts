@@ -18,7 +18,7 @@ export default class AuthProvider extends BaseAuthProvider {
   async authorizeToken(
     username: string,
     token: string,
-    requestType: string
+    requestType: string,
   ): Promise<AuthResult> {
     return {
       valid: await this.isAllowed(username, token),

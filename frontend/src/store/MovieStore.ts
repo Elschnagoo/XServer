@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Label, MovieLib } from '@elschnagoo/xserver-con/dist/ApiTypes';
 import { RootState } from '@/store/store';
-import { MODAL, MovieEnv } from '@/lib';
+import { MODAL, MovieEnv, PlayMode } from '@/lib';
 
 const initialAppEnv: MovieEnv = {
   search: null,
@@ -13,6 +13,7 @@ const initialAppEnv: MovieEnv = {
   modal: null,
   editMode: -1,
   revision: 0,
+  mode: PlayMode.DEFAULT,
 };
 
 export const movState = createSlice({
@@ -67,6 +68,9 @@ export const movState = createSlice({
     setRevision: (state, action: PayloadAction<number>) => {
       state.revision = action.payload;
     },
+    setMode: (state, action: PayloadAction<PlayMode>) => {
+      state.mode = action.payload;
+    },
   },
 });
 
@@ -83,10 +87,12 @@ export const {
   setEditMode,
   resetMulti,
   setRevision,
+  setMode,
 } = movState.actions;
 
 export const selectSearch = (state: RootState) => state.movie.search;
 export const selectMax = (state: RootState) => state.movie.max;
+export const selectMode = (state: RootState) => state.movie.mode;
 export const selectLabel = (state: RootState) => state.movie.label;
 export const selectMovie = (state: RootState) => state.movie.movie;
 export const selectMulti = (state: RootState) => state.movie.multi;

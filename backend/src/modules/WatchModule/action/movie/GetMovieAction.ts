@@ -33,7 +33,7 @@ import { isUUID } from '../../utils/Validation';
         new MovieLib(),
         false,
         '400',
-        '500'
+        '500',
       ),
     },
   },
@@ -44,7 +44,7 @@ export default class GetMovieAction extends BaseApiAction<
   WatchClient
 > {
   constructor(
-    module: IBaseKernelModule<IKernel, WatchDB, WatchClient, any, any>
+    module: IBaseKernelModule<IKernel, WatchDB, WatchClient, any, any>,
   ) {
     super('GET', '/movie/e/:id', module, module.getKernel().getModule());
     this.handler = this.handler.bind(this);
@@ -54,7 +54,7 @@ export default class GetMovieAction extends BaseApiAction<
     req: XRequest,
     res: XResponse,
     next: () => void,
-    data: JwtToken | null
+    data: JwtToken | null,
   ): Promise<void> {
     if (data) {
       if (!req.params.id || !isUUID(req.params.id)) {

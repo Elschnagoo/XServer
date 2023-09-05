@@ -47,7 +47,7 @@ import MovieLib from '../../database/entities/MovieLib';
         false,
         '400',
         '404',
-        '500'
+        '500',
       ),
     },
   },
@@ -62,7 +62,7 @@ export default class UpdateMovieAction extends BaseApiAction<IKernel, WatchDB> {
     req: XRequest,
     res: XResponse,
     next: () => void,
-    data: JwtToken | null
+    data: JwtToken | null,
   ): Promise<void> {
     const { body } = req;
     const { rating, movie_name, movie_description } = body;

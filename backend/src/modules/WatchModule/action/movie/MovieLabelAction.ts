@@ -31,7 +31,7 @@ import { WatchDB } from '../../database';
         true,
         '400',
         '404',
-        '500'
+        '500',
       ),
     },
   },
@@ -46,7 +46,7 @@ export default class MovieLabelAction extends BaseApiAction<IKernel, WatchDB> {
     req: XRequest,
     res: XResponse,
     next: () => void,
-    data: JwtToken | null
+    data: JwtToken | null,
   ): Promise<void> {
     if (data) {
       const { id } = req.params;
@@ -69,7 +69,7 @@ export default class MovieLabelAction extends BaseApiAction<IKernel, WatchDB> {
         map.map(async (m) => ({
           label: await db.label.getObjById(m.label),
           map: m.e_id,
-        }))
+        })),
       );
 
       res.status(200).send(labels);

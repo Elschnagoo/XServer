@@ -1,6 +1,7 @@
 import { toast } from 'react-toastify';
 import { MovieLib } from '@elschnagoo/xserver-con/dist/ApiTypes';
 import useAuthHelper from '@/utils/AuthUtil';
+import { usePlayMode } from '@/store';
 
 function downloadPlaylist(title: string, text: string) {
   try {
@@ -29,11 +30,12 @@ export default function downloadFullPlaylist(
   title: string,
   files: MovieLib[],
   auth: ReturnType<typeof useAuthHelper>,
+  mode: ReturnType<typeof usePlayMode>,
 ) {
   const lines = ['#EXTM3U', `#PLAYLIST:${title}`];
   files.forEach((s) => {
     lines.push(`#EXTINF:-1, ${s.movie_name}`);
-    lines.push(auth(`/movie/stream/${s.e_id}?profile=raw`, true, true));
+    lines.push(auth(`/movie/stream/${s.e_id}?${mode(true)}`, true, true));
   });
 
   downloadPlaylist(title, lines.join('\n'));

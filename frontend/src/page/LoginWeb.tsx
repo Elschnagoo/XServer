@@ -52,7 +52,7 @@ const LoginWeb: React.FC<any> = function () {
     })();
   });
 
-  if (query.has('m') || LocalStorage.load('token') !== '') {
+  if (LocalStorage.load('token') !== '') {
     return (
       <div className="row wizard">
         <Grid className="item" flex flexC hCenter vCenter>

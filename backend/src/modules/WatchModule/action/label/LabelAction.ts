@@ -22,7 +22,7 @@ import Label from '../../database/entities/Label';
         true,
         '400',
         '404',
-        '500'
+        '500',
       ),
     },
   },
@@ -37,7 +37,7 @@ export default class LabelAction extends BaseApiAction<IKernel, WatchDB> {
     req: XRequest,
     res: XResponse,
     next: () => void,
-    data: JwtToken | null
+    data: JwtToken | null,
   ): Promise<void> {
     if (data) {
       const db = this.getModule().getDb();
@@ -51,7 +51,7 @@ export default class LabelAction extends BaseApiAction<IKernel, WatchDB> {
               order: 'ASC',
             },
           ],
-        })
+        }),
       );
       return;
     }

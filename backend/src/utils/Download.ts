@@ -42,7 +42,7 @@ function selectClient(url: string) {
 export default async function downStream(
   url: string,
   path: string,
-  fExt?: string
+  fExt?: string,
 ): Promise<{
   name: string;
   size: number;

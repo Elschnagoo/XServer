@@ -32,7 +32,7 @@ const SwaggerConf: SwaggerConfig = {
             false,
             '403',
             '400',
-            '500'
+            '500',
           ),
         },
         requestBody: SPathUtil.jsonBody({
@@ -78,7 +78,7 @@ const SwaggerConf: SwaggerConfig = {
         new LibFile(),
         new LibPath(),
         new Label(),
-        new DownloadQ()
+        new DownloadQ(),
       ),
       MLabel: {
         type: 'object',
