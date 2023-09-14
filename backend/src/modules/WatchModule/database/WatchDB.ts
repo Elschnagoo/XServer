@@ -19,6 +19,7 @@ import Patch002 from './patch/Patch002';
 import DownloadQ from './queue/DownloadQ';
 import Patch003 from './patch/Patch003';
 import Patch004 from './patch/Patch004';
+import Patch005 from './patch/Patch005';
 
 export default class WatchDB extends PGCon {
   types: CoreEntityWrapper<LibType>;
@@ -42,7 +43,7 @@ export default class WatchDB extends PGCon {
   labelMap: CoreEntityWrapper<LabelMap>;
 
   constructor(mod: IBaseKernelModule<any, any, any, any, any>) {
-    super(mod, '4');
+    super(mod, '5');
     this.types = this.registerEntity(new LibType());
     this.states = this.registerEntity(new StateTypeQ());
     this.lib = this.registerEntity(new Library());
@@ -60,6 +61,7 @@ export default class WatchDB extends PGCon {
       new Patch002(this),
       new Patch003(this),
       new Patch004(this),
+      new Patch005(this),
     );
   }
 

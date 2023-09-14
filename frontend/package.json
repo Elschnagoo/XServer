@@ -1,6 +1,6 @@
 {
   "name": "frontend",
-  "version": "1.4.2",
+  "version": "1.5.0",
   "private": true,
   "dependencies": {
     "@elschnagoo/xserver-con": "file:../backend/gen",
@@ -16,12 +16,12 @@
   "devDependencies": {
     "@types/react": "18.2.21",
     "@types/react-dom": "18.2.7",
-    "@typescript-eslint/eslint-plugin": "6.6.0",
-    "@typescript-eslint/parser": "6.6.0",
+    "@typescript-eslint/eslint-plugin": "6.7.0",
+    "@typescript-eslint/parser": "6.7.0",
     "copy-webpack-plugin": "11.0.0",
     "cross-env": "7.0.3",
     "css-loader": "6.8.1",
-    "eslint": "8.48.0",
+    "eslint": "8.49.0",
     "eslint-config-airbnb": "19.0.4",
     "eslint-config-airbnb-typescript": "17.1.0",
     "eslint-config-prettier": "9.0.0",
@@ -33,7 +33,7 @@
     "html-webpack-plugin": "5.5.3",
     "node-polyfill-webpack-plugin": "^2.0.1",
     "prettier": "3.0.3",
-    "sass": "1.66.1",
+    "sass": "1.67.0",
     "sass-loader": "13.3.2",
     "style-loader": "3.3.3",
     "ts-loader": "9.4.4",

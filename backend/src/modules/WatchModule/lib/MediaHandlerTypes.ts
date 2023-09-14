@@ -1,7 +1,7 @@
-export interface ProbeInfo {
+export type ProbeInfo = {
   streams: Stream[];
   format: Format;
-}
+};
 
 export interface Stream {
   index: number;

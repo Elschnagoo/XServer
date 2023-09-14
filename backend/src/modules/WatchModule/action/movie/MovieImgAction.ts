@@ -13,6 +13,7 @@ import { SPath } from '@grandlinex/swagger-mate';
 import { WatchDB } from '../../database';
 
 const thumps = ['tn_1', 'tn_2', 'tn_3', 'tn_4', 'tn_5'];
+const preview = 'tn_x';
 
 @SPath({
   '/movie/img/{id}': {
@@ -70,7 +71,12 @@ export default class MovieImgAction extends BaseApiAction<IKernel, WatchDB> {
     if (data) {
       const { id } = req.params;
       const { type } = req.query;
-      if (!type || !id || typeof type !== 'string' || !thumps.includes(type)) {
+      if (
+        !type ||
+        !id ||
+        typeof type !== 'string' ||
+        (!thumps.includes(type) && type !== preview)
+      ) {
         res.sendStatus(400);
         return;
       }
@@ -84,22 +90,29 @@ export default class MovieImgAction extends BaseApiAction<IKernel, WatchDB> {
           dat.e_id,
           `${type}.webp`,
         );
+        const vPath = path.join(
+          this.mediaPath,
+          dat.lib,
+          dat.e_id,
+          `${preview}.webm`,
+        );
         if (fs.existsSync(imgPath)) {
           res.status(200).sendFile(imgPath);
           return;
         }
-        if (type === 'poster') {
-          res
-            .status(200)
-            .sendFile(path.join(this.resPath, 'fallback', 'poster.jpg'));
+        if (type === preview) {
+          if (fs.existsSync(vPath)) {
+            res.status(200).sendFile(vPath);
+            return;
+          }
+          res.sendStatus(404);
           return;
         }
-        if (thumps.includes(type)) {
-          res
-            .status(200)
-            .sendFile(path.join(this.resPath, 'fallback', 'backdrop.png'));
-          return;
-        }
+
+        res
+          .status(200)
+          .sendFile(path.join(this.resPath, 'fallback', 'backdrop.png'));
+        return;
       }
       res.sendStatus(404);
       return;

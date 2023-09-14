@@ -11,6 +11,17 @@ import { WatchDB } from '../database';
 import { ProbeInfo } from '../lib/MediaHandlerTypes';
 import MovieLib from '../database/entities/MovieLib';
 import LibFile from '../database/entities/LibFile';
+import ThumbVFactory from '../utils/ThumbVFactory';
+
+function f(path: string, ...files: string[]) {
+  let p = true;
+  for (const file of files) {
+    if (!fs.existsSync(Path.join(path, file))) {
+      p = false;
+    }
+  }
+  return p;
+}
 
 export default class WatchClient extends BaseClient<IKernel, WatchDB> {
   private readonly lang: string;
@@ -98,40 +109,42 @@ export default class WatchClient extends BaseClient<IKernel, WatchDB> {
     return r.exitCode === 0;
   }
 
-  async makeThumbnail(path: string, imgPath: string): Promise<boolean> {
-    if (!fs.existsSync(path)) {
-      this.error(`File not found: ${path}`);
+  async makeThumbnail(
+    path: string,
+    imgPath: string,
+    duration?: number | null,
+  ): Promise<boolean> {
+    try {
+      const factory = new ThumbVFactory(imgPath, path, this);
+      let first;
+      let second;
+      if (typeof duration === 'number' && !f(imgPath, 'tn_x.webm')) {
+        first = await factory.run(duration);
+      } else {
+        first = true;
+      }
+
+      if (!f(imgPath, 'tn_1.webp', 'tn_5.webp')) {
+        second = await factory.exeFfmpeg(
+          ffmpeg(path).takeScreenshots({ count: 5, fastSeek: true }, imgPath),
+          'THUMB',
+        );
+
+        if (second) {
+          for (let x = 1; x < 6; x++) {
+            await this.convertImgAndRm(Path.join(imgPath, `tn_${x}.png`));
+          }
+        }
+      } else {
+        second = true;
+      }
+
+      return first && second;
+    } catch (e) {
+      this.error(`Error make thumbnail ${path}`);
+      this.error(e);
       return false;
     }
-
-    const prom = new Promise<boolean>((resolve) => {
-      const proc = ffmpeg(path).takeScreenshots(
-        { count: 5, fastSeek: true },
-        imgPath,
-      );
-      proc.on('data', (err, dat) => {
-        this.error(err);
-        this.log(dat);
-      });
-      proc.on('error', (err) => {
-        this.error(err);
-        resolve(false);
-      });
-      proc.on('end', () => {
-        this.debug(`Thump for ${path} created`);
-        resolve(true);
-      });
-    });
-
-    const conv = await prom;
-
-    if (conv) {
-      for (let x = 1; x < 6; x++) {
-        await this.convertImgAndRm(Path.join(imgPath, `tn_${x}.png`));
-      }
-    }
-
-    return conv;
   }
 
   async deleteMovie(movie: MovieLib, libFile?: LibFile) {

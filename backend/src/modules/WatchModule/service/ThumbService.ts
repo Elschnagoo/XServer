@@ -34,7 +34,13 @@ export default class ThumbService extends BaseLoopService<
           const file = await db.file.getObjById(el.lib_file);
 
           if (file) {
-            if (!(await client.makeThumbnail(file.file_path, mediaPath))) {
+            if (
+              !(await client.makeThumbnail(
+                file.file_path,
+                mediaPath,
+                file.duration,
+              ))
+            ) {
               this.error(`Error Make Thumbnails ${el.e_id}`);
             }
           } else {
