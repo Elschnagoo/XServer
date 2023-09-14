@@ -125,10 +125,9 @@ export default class WatchClient extends BaseClient<IKernel, WatchDB> {
       }
 
       if (!f(imgPath, 'tn_1.webp', 'tn_5.webp')) {
-        second = await factory.exeFfmpeg(
-          ffmpeg(path).takeScreenshots({ count: 5, fastSeek: true }, imgPath),
-          'THUMB',
-        );
+        second = await factory.exeFfmpeg(ffmpeg(path), 'THUMB', false, (c) => {
+          c.takeScreenshots({ count: 5, fastSeek: true }, imgPath);
+        });
 
         if (second) {
           for (let x = 1; x < 6; x++) {
