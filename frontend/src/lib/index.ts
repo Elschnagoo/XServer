@@ -47,4 +47,5 @@ export type MovieEnv = {
   editMode: number;
   revision: number;
   mode: PlayMode;
+  forcePreview: boolean;
 };

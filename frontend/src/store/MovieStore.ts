@@ -14,6 +14,7 @@ const initialAppEnv: MovieEnv = {
   editMode: -1,
   revision: 0,
   mode: PlayMode.DEFAULT,
+  forcePreview: false,
 };
 
 export const movState = createSlice({
@@ -68,6 +69,9 @@ export const movState = createSlice({
     setRevision: (state, action: PayloadAction<number>) => {
       state.revision = action.payload;
     },
+    setForcePreview: (state, action: PayloadAction<boolean>) => {
+      state.forcePreview = action.payload;
+    },
     setMode: (state, action: PayloadAction<PlayMode>) => {
       state.mode = action.payload;
     },
@@ -88,10 +92,13 @@ export const {
   resetMulti,
   setRevision,
   setMode,
+  setForcePreview,
 } = movState.actions;
 
 export const selectSearch = (state: RootState) => state.movie.search;
 export const selectMax = (state: RootState) => state.movie.max;
+export const selectForcePreview = (state: RootState) =>
+  state.movie.forcePreview;
 export const selectMode = (state: RootState) => state.movie.mode;
 export const selectLabel = (state: RootState) => state.movie.label;
 export const selectMovie = (state: RootState) => state.movie.movie;

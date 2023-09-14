@@ -44,8 +44,12 @@ import { ProbeInfo } from '@/lib/MediaHandlerTypes';
 import LabelComp from '@/component/LabelComp';
 import StarComp from '@/component/StarComp';
 import TitleComp from '@/component/TitleComp';
-import { useAppDispatch, usePlayMode } from '@/store';
-import { setEditMode, updateMovie } from '@/store/MovieStore';
+import { useAppDispatch, useAppSelector, usePlayMode } from '@/store';
+import {
+  selectForcePreview,
+  setEditMode,
+  updateMovie,
+} from '@/store/MovieStore';
 import VideoPreview from '@/component/VideoPreview';
 
 const SupportedWebVideoCodec = ['h264', 'vp8', 'vp9'];
@@ -90,6 +94,7 @@ const MovieComp = forwardRef<
   } = prop;
   const dispatch = useAppDispatch();
   const playerRef = createRef<MediaPlayerRefType>();
+  const forcePreview = useAppSelector(selectForcePreview);
   const [localLib, setLocalLib] = useState<MovieLib>(mov);
   const mode = usePlayMode();
   const context = useGlobalContext();
@@ -200,7 +205,7 @@ const MovieComp = forwardRef<
           </div>
           <HNavigator className="carosell">
             <Grid flex flexR>
-              <VideoPreview eid={mov.e_id} force={editMode} />
+              <VideoPreview eid={mov.e_id} force={editMode || forcePreview} />
               {thumbs.map(([key, dx]) => (
                 <img key={key} loading="lazy" alt="" src={dx} />
               ))}
