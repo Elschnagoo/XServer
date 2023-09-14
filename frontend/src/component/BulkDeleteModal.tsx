@@ -1,11 +1,5 @@
 import React, { useMemo } from 'react';
-import {
-  Form,
-  Grid,
-  InputOptionType,
-  LPulse,
-  Table,
-} from '@grandlinex/react-components';
+import { Button, Grid, LPulse, Table } from '@grandlinex/react-components';
 import { toast } from 'react-toastify';
 import { MovieLib } from '@elschnagoo/xserver-con';
 import { useGlobalContext } from '@/context/GlobalContext';
@@ -20,7 +14,7 @@ import {
 import usePreload from '@/store/preload';
 import BaseModal from '@/component/BaseModal';
 
-export default function BulkLabelModal() {
+export default function BulkDeleteModal() {
   const dispatch = useAppDispatch();
   const multi = useAppSelector(selectMulti);
   const search = useAppSelector(selectSearch);
@@ -49,35 +43,15 @@ export default function BulkLabelModal() {
     );
   }
   return (
-    <BaseModal title="Bulk Labeling">
-      <Form
-        className="glx-w-full-4"
-        submit={{
-          buttonText: 'Update Label',
-          loading: true,
-          onSubmit: async ({ form, setError }) => {
-            if (form.label.length === 0) {
-              setError({
-                field: [
-                  {
-                    key: 'label',
-                    message: 'Label list cannot be empty',
-                  },
-                ],
-              });
-              return;
-            }
+    <BaseModal title="Bulk Deletion">
+      <Grid flex flexRow flexEnd>
+        <Button
+          onClick={async () => {
             let warn = false;
-
             for (const cur of data) {
-              for (const curLabel of form.label) {
-                const l = await context.bindLabel({
-                  label: curLabel,
-                  mov_lib: cur.e_id,
-                });
-                if (!l.success) {
-                  warn = true;
-                }
+              const l = await context.deleteMovie(cur.e_id);
+              if (!l.success) {
+                warn = true;
               }
             }
             if (warn) {
@@ -88,24 +62,11 @@ export default function BulkLabelModal() {
 
             loadMovie(search, true);
             dispatch(setModal(null));
-          },
-        }}
-        options={[
-          [
-            {
-              key: 'label',
-              type: InputOptionType.TAG_SELECTOR,
-              label: 'Add Label',
-              items: label.map((l) => ({
-                key: l.e_id,
-                name: l.label_name,
-                icon: l.icon as any,
-                other: l.color,
-              })),
-            },
-          ],
-        ]}
-      />
+          }}
+        >
+          Delete Videos
+        </Button>
+      </Grid>
       <Table
         rowData={data}
         columnDefs={[

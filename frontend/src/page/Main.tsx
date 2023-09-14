@@ -18,6 +18,7 @@ import {
   IOServer,
   IOSparkles,
   IOSync,
+  IOTrash,
   LDots,
 } from '@grandlinex/react-components';
 import { MovieLib } from '@elschnagoo/xserver-con/dist/ApiTypes';
@@ -144,6 +145,16 @@ export default function Main() {
                   onClick={() => dispatch(setModal(MODAL.BULK_RATING))}
                 >
                   <IOSparkles />
+                </IconButton>
+                <IconButton
+                  className="hide-on-mobile"
+                  toolTip={{
+                    text: 'Delete selected',
+                    position: 'left',
+                  }}
+                  onClick={() => dispatch(setModal(MODAL.BULK_DELETE))}
+                >
+                  <IOTrash />
                 </IconButton>
                 <IconButton
                   className="hide-on-mobile"

@@ -10,6 +10,7 @@ import LibModal from '@/component/LibModal';
 import BulkLabelModal from '@/component/BulkLabelModal';
 import BulkRatingModal from '@/component/BulkRatingModal';
 import WatchModal from '@/component/WatchModal';
+import BulkDeleteModal from '@/component/BulkDeleteModal';
 
 export default function ModalSwitch() {
   const modal = useAppSelector(selectModal);
@@ -22,6 +23,8 @@ export default function ModalSwitch() {
       return <LabelModal />;
     case MODAL.BULK_LABEL:
       return <BulkLabelModal />;
+    case MODAL.BULK_DELETE:
+      return <BulkDeleteModal />;
     case MODAL.BULK_RATING:
       return <BulkRatingModal />;
     case MODAL.DOWNLOAD:

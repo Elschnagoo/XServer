@@ -46,7 +46,7 @@ import StarComp from '@/component/StarComp';
 import TitleComp from '@/component/TitleComp';
 import { useAppDispatch, usePlayMode } from '@/store';
 import { setEditMode, updateMovie } from '@/store/MovieStore';
-import ImgCarousel from '@/component/ImgCarousel';
+import VideoPreview from '@/component/VideoPreview';
 
 const SupportedWebVideoCodec = ['h264', 'vp8', 'vp9'];
 
@@ -110,15 +110,6 @@ const MovieComp = forwardRef<
     },
     [dispatch],
   );
-  /* const update = useCallback(() => {
-    context.getMovie(localLib.e_id).then((res) => {
-      if (res.success && res.data) {
-        updateL(res.data);
-      } else {
-        toast.error('Fehler beim Aktualisieren der Daten');
-      }
-    });
-  }, [context, localLib.e_id, updateL]); */
 
   useImperativeHandle(ref, () => ({
     updateLib(lib: MovieLib) {
@@ -203,13 +194,13 @@ const MovieComp = forwardRef<
           />
         </Grid>
       ) : (
-        <div className="carosell-container">
+        <div key={`${mov.e_id}_carosell`} className="carosell-container">
           <div className="play" onClick={() => setPlay(true)}>
             <IOPlay />
           </div>
           <HNavigator className="carosell">
             <Grid flex flexR>
-              {!editMode ? <ImgCarousel data={thumbs} /> : null}
+              <VideoPreview eid={mov.e_id} force={editMode} />
               {thumbs.map(([key, dx]) => (
                 <img key={key} loading="lazy" alt="" src={dx} />
               ))}

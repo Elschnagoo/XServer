@@ -68,9 +68,21 @@ html, body {
 $content-w: 520px;
 $content-h: 288px;
 
+.edit-modal{
+  .movie-com {
+    .video-preview {
+      video.glx-media-player {
+        width: $content-w;
+        height: $content-h;
+      }
+    }
+  }
+}
+
 .movie-com{
   min-height: 320px;
   width: $content-w;
+
 
   h4{
     padding-left: 4px;
@@ -228,8 +240,17 @@ $content-h: 288px;
           width: calc($content-w * 1.5) !important;
         }
       }
+      .movie-com {
+        .video-preview {
+          video.glx-media-player {
+            height: calc($content-h * 1.5) !important;
+            width: calc($content-w * 1.5) !important;
+          }
+        }
+      }
     }
   }
+
 }
 .s-modal{
   position: absolute;

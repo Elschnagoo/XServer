@@ -14,7 +14,7 @@ export default function ImgCarousel({ data }: { data: [string, string][] }) {
       }
     }, 2000);
     return () => clearInterval(timer);
-  });
+  }, [data.length, running]);
   return (
     <div
       className="hide-on-mobile"

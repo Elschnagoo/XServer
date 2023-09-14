@@ -24,6 +24,7 @@ export enum MODAL {
   'DOWNLOAD',
   'BULK_LABEL',
   'BULK_RATING',
+  'BULK_DELETE',
   'LIB',
   'PLAY_MODE',
 }
