@@ -21,7 +21,7 @@ export default function VideoPreview({
 
   return (
     <div
-      className="hide-on-mobile video-preview"
+      className="video-preview"
       onMouseEnter={() => {
         if (!force) {
           setTm(setTimeout(() => setRunning(true), 1000));
