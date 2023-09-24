@@ -1,6 +1,6 @@
 {
   "name": "@elschnagoo/xserver",
-  "version": "1.5.4",
+  "version": "1.6.0",
   "description": "GrandLineX Full Stack Demo Project",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

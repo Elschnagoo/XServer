@@ -62,7 +62,7 @@ export default function Main() {
   const [double, setDouble] = useState<boolean>(false);
   const context = useGlobalContext();
   const auth = useAuthHelper();
-  const { loadLabel, loadMovie } = usePreload();
+  const { loadLabel, loadMovie, loadRating } = usePreload();
   const cur = useMemo<MovieLib[]>(() => {
     if (!data) {
       return [];
@@ -277,6 +277,7 @@ export default function Main() {
                 position: 'left',
               }}
               onClick={() => {
+                loadRating();
                 loadLabel();
                 loadMovie(search);
                 dispatch(setMax(14));

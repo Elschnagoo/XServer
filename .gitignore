@@ -5,3 +5,4 @@
 .idea
 *.iml
 /uploadImage.ps1
+/frontend/src/component/dev.ts

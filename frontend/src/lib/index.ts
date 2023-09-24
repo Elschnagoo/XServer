@@ -1,4 +1,8 @@
-import { Label, MovieLib } from '@elschnagoo/xserver-con/dist/ApiTypes';
+import {
+  Label,
+  MovieLib,
+  RatingElement,
+} from '@elschnagoo/xserver-con/dist/ApiTypes';
 
 export enum Views {
   'LOGIN',
@@ -39,6 +43,7 @@ export enum PlayMode {
 export type MovieEnv = {
   search: Record<string, any> | null;
   label: Label[] | null;
+  rating: RatingElement[] | null;
   exclude: Label[] | null;
   movie: MovieLib[] | null;
   max: number;

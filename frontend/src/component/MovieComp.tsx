@@ -51,6 +51,7 @@ import {
   updateMovie,
 } from '@/store/MovieStore';
 import VideoPreview from '@/component/VideoPreview';
+import RatingHelper from '@/component/RatingHelper';
 
 const SupportedWebVideoCodec = ['h264', 'vp8', 'vp9'];
 
@@ -410,6 +411,7 @@ const MovieComp = forwardRef<
           />
         </Grid>
       </Grid>
+      {editMode && editStar ? <RatingHelper /> : null}
       <Grid
         style={{
           flexDirection: 'row-reverse',

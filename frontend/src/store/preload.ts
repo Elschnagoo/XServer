@@ -4,9 +4,11 @@ import { useAppSelector } from '@/store/hooks';
 import {
   selectLabel,
   selectMovie,
+  selectRating,
   selectRevision,
   setLabel,
   setMovie,
+  setRating,
   setRevision,
 } from '@/store/MovieStore';
 import { useGlobalContext } from '@/context/GlobalContext';
@@ -17,6 +19,7 @@ export default function usePreload() {
   const dispatch = useDispatch();
   const label = useAppSelector(selectLabel);
   const movie = useAppSelector(selectMovie);
+  const rating = useAppSelector(selectRating);
   const revision = useAppSelector(selectRevision);
   const loadLabel = useCallback(() => {
     context
@@ -26,6 +29,16 @@ export default function usePreload() {
       })
       .catch(() => {
         dispatch(setLabel([]));
+      });
+  }, [context, dispatch]);
+  const loadRating = useCallback(() => {
+    context
+      .getRating()
+      .then((res) => {
+        dispatch(setRating(res.data || []));
+      })
+      .catch(() => {
+        dispatch(setRating([]));
       });
   }, [context, dispatch]);
   const loadMovie = useCallback(
@@ -130,6 +143,11 @@ export default function usePreload() {
     }
   }, [label]);
   useEffect(() => {
+    if (rating === null) {
+      loadRating();
+    }
+  }, [rating]);
+  useEffect(() => {
     if (movie === null) {
       loadMovie();
     }
@@ -137,5 +155,6 @@ export default function usePreload() {
   return {
     loadMovie,
     loadLabel,
+    loadRating,
   };
 }

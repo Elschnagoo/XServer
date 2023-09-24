@@ -1,0 +1,40 @@
+import { Column, CoreEntity, Entity, EProperties } from '@grandlinex/kernel';
+
+@Entity('RatingElement')
+export default class RatingElement extends CoreEntity {
+  @Column({
+    dataType: 'string',
+    unique: true,
+  })
+  rating_label: string;
+
+  @Column({
+    dataType: 'int',
+  })
+  rating_order: number;
+
+  @Column({
+    dataType: 'int',
+  })
+  rating_value: number;
+
+  @Column({
+    dataType: 'boolean',
+  })
+  initial_value: boolean;
+
+  @Column({
+    dataType: 'string',
+    canBeNull: true,
+  })
+  icon: string | null;
+
+  constructor(props?: EProperties<RatingElement>) {
+    super();
+    this.rating_label = props?.rating_label || '';
+    this.icon = props?.icon ?? null;
+    this.rating_order = props?.rating_order ?? 0;
+    this.rating_value = props?.rating_value ?? 0;
+    this.initial_value = props?.initial_value ?? false;
+  }
+}

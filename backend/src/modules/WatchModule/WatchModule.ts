@@ -24,6 +24,7 @@ import DownloadStatusAction from './action/admin/DownloadStatusAction';
 import DeleteDownloadAction from './action/admin/DeleteDownloadAction';
 import AddLibPathAction from './action/admin/AddLibPathAction';
 import GetLibPathAction from './action/admin/GetLibPathAction';
+import RatingAction from './action/rating/RatingAction';
 
 export default class WatchModule extends BaseKernelModule<
   IKernel,
@@ -56,6 +57,8 @@ export default class WatchModule extends BaseKernelModule<
       new DeleteDownloadAction(this),
       new AddLibPathAction(this),
       new GetLibPathAction(this),
+      // rating
+      new RatingAction(this),
     );
     this.addService(
       new QService(this),

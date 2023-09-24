@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Label, MovieLib } from '@elschnagoo/xserver-con/dist/ApiTypes';
+import { RatingElement } from '@elschnagoo/xserver-con';
 import { RootState } from '@/store/store';
 import { MODAL, MovieEnv, PlayMode } from '@/lib';
 
@@ -8,6 +9,7 @@ const initialAppEnv: MovieEnv = {
   label: null,
   exclude: null,
   movie: null,
+  rating: null,
   max: 14,
   multi: [],
   modal: null,
@@ -41,6 +43,9 @@ export const movState = createSlice({
     },
     setLabel: (state, action: PayloadAction<Label[] | null>) => {
       state.label = action.payload;
+    },
+    setRating: (state, action: PayloadAction<RatingElement[] | null>) => {
+      state.rating = action.payload;
     },
     setSearch: (state, action: PayloadAction<Record<string, any> | null>) => {
       state.search = action.payload;
@@ -93,6 +98,7 @@ export const {
   setRevision,
   setMode,
   setForcePreview,
+  setRating,
 } = movState.actions;
 
 export const selectSearch = (state: RootState) => state.movie.search;
@@ -101,6 +107,7 @@ export const selectForcePreview = (state: RootState) =>
   state.movie.forcePreview;
 export const selectMode = (state: RootState) => state.movie.mode;
 export const selectLabel = (state: RootState) => state.movie.label;
+export const selectRating = (state: RootState) => state.movie.rating;
 export const selectMovie = (state: RootState) => state.movie.movie;
 export const selectMulti = (state: RootState) => state.movie.multi;
 export const selectModal = (state: RootState) => state.movie.modal;

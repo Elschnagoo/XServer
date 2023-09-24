@@ -12,14 +12,16 @@ import LibFile from './entities/LibFile';
 import StateTypeQ, { StateTypeQEnum } from './queue/StateTypeQ';
 import ScannerQ from './queue/ScannerQ';
 import MovieLib from './entities/MovieLib';
-import Patch001 from './patch/Patch001';
 import Label from './entities/Label';
 import LabelMap from './map/LabelMap';
-import Patch002 from './patch/Patch002';
 import DownloadQ from './queue/DownloadQ';
+import RatingElement from './entities/RatingElement';
+import Patch001 from './patch/Patch001';
+import Patch002 from './patch/Patch002';
 import Patch003 from './patch/Patch003';
 import Patch004 from './patch/Patch004';
 import Patch005 from './patch/Patch005';
+import Patch006 from './patch/Patch006';
 
 export default class WatchDB extends PGCon {
   types: CoreEntityWrapper<LibType>;
@@ -42,8 +44,10 @@ export default class WatchDB extends PGCon {
 
   labelMap: CoreEntityWrapper<LabelMap>;
 
+  ratingEl: CoreEntityWrapper<RatingElement>;
+
   constructor(mod: IBaseKernelModule<any, any, any, any, any>) {
-    super(mod, '5');
+    super(mod, '6');
     this.types = this.registerEntity(new LibType());
     this.states = this.registerEntity(new StateTypeQ());
     this.lib = this.registerEntity(new Library());
@@ -56,12 +60,14 @@ export default class WatchDB extends PGCon {
     this.download = this.registerEntity(new DownloadQ());
     this.label = this.registerEntity(new Label());
     this.labelMap = this.registerEntity(new LabelMap());
+    this.ratingEl = this.registerEntity(new RatingElement());
     this.setUpdateChain(
       new Patch001(this),
       new Patch002(this),
       new Patch003(this),
       new Patch004(this),
       new Patch005(this),
+      new Patch006(this),
     );
   }
 

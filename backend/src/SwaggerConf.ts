@@ -3,6 +3,7 @@ import LibFile from './modules/WatchModule/database/entities/LibFile';
 import Label from './modules/WatchModule/database/entities/Label';
 import DownloadQ from './modules/WatchModule/database/queue/DownloadQ';
 import LibPath from './modules/WatchModule/database/entities/LibPath';
+import RatingElement from './modules/WatchModule/database/entities/RatingElement';
 
 const SwaggerConf: SwaggerConfig = {
   info: {
@@ -79,6 +80,7 @@ const SwaggerConf: SwaggerConfig = {
         new LibPath(),
         new Label(),
         new DownloadQ(),
+        new RatingElement(),
       ),
       MLabel: {
         type: 'object',
