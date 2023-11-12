@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  Badge,
   Form,
   InputOptionType,
   IOClipboard,
@@ -9,13 +8,14 @@ import {
 } from '@grandlinex/react-components';
 import { toast } from 'react-toastify';
 import { BaseRowEvent } from '@grandlinex/react-components/dist/components/table/TableHook';
-import { Label } from '@elschnagoo/xserver-con';
+import { RatingElement } from '@elschnagoo/xserver-con';
+import { FormConf } from '@grandlinex/react-components/dist/components/form/FormTypes';
 import { useAppSelector } from '@/store';
-import { selectLabel } from '@/store/MovieStore';
+import { selectRating } from '@/store/MovieStore';
 import usePreload from '@/store/preload';
 import { useGlobalContext } from '@/context/GlobalContext';
 
-const formOptions = [
+const formOptions: FormConf = [
   [
     {
       key: 'it',
@@ -25,64 +25,55 @@ const formOptions = [
   ],
   [
     {
-      key: 'label_order',
+      key: 'rating_order',
       type: InputOptionType.NUMBER,
-      label: 'Label Order',
+      label: 'Rating order',
+    },
+  ],
+  [
+    {
+      key: 'rating_value',
+      type: InputOptionType.NUMBER,
+      label: 'Rating value',
       restriction: {
         min: 0,
-        max: 20,
       },
     },
   ],
   [
     {
-      key: 'color',
+      key: 'rating_type',
       type: InputOptionType.DROPDOWN,
-      label: 'Color',
+      label: 'Rating Type',
       items: [
         {
-          key: 'blue',
-          name: 'Blue',
+          key: 'BOOL',
+          name: 'Checkbox',
         },
         {
-          key: 'orange',
-          name: 'Orange',
-        },
-        {
-          key: 'green',
-          name: 'Green',
-        },
-        {
-          key: 'red',
-          name: 'Red',
-        },
-        {
-          key: 'black',
-          name: 'Black',
-        },
-        {
-          key: 'yellow',
-          name: 'Yellow',
+          key: 'STAR',
+          name: 'Stars',
         },
       ],
     },
   ],
 ];
-export default function LabelModal({
+export default function RatingModal({
   divRef,
 }: {
   divRef?: React.RefObject<HTMLDivElement>;
 }) {
-  const { loadLabel } = usePreload();
+  const { loadRating } = usePreload();
   const context = useGlobalContext();
-  const label = useAppSelector(selectLabel);
+  const rating = useAppSelector(selectRating);
   const [fState, setFState] = useState<Record<string, any>>({
-    color: 'blue',
     it: { text: '', icon: null },
-    label_order: '',
+    rating_order: '',
+    rating_value: '',
+    rating_type: 'BOOL',
   });
   const [formId, setFormId] = useState(uuid());
-  if (!label) {
+  if (!rating) {
     return null;
   }
   return (
@@ -94,54 +85,58 @@ export default function LabelModal({
         submit={{
           buttonText: 'Create',
           onSubmit: async ({ form, setError }) => {
-            const label_name = form.it?.text;
-            if (!label_name || label_name === '') {
+            const rating_label = form.it?.text;
+            if (!rating_label || rating_label === '') {
               setError({
                 field: [
                   {
                     key: 'it',
-                    message: 'Label name must be set',
+                    message: 'Rating name must be set',
                   },
                 ],
               });
               return;
             }
             const icon = form.it?.icon || undefined;
-            const color = form.color || undefined;
-            const label_order = Number.isInteger(form.label_order)
-              ? form.label_order
+            const rating_order = Number.isInteger(form.rating_order)
+              ? form.rating_order
+              : undefined;
+            const rating_value = Number.isInteger(form.rating_value)
+              ? form.rating_value
               : undefined;
             const param = {
-              label_name,
+              rating_label,
               icon,
-              color,
-              label_order,
+              rating_order,
+              rating_value,
+              rating_type: form.rating_type,
             };
-            const l = await context.postLabel(param);
+            const l = await context.postRating(param);
             if (l.success) {
-              toast.success('Label successfully created');
-              loadLabel();
+              toast.success('Rating successfully created');
+              loadRating();
             } else {
-              toast.error('Error while creating label');
+              toast.error('Error while creating rating');
             }
           },
         }}
         options={formOptions}
       />
       <Table
-        rowData={label}
+        rowData={rating}
         rowAction={[
-          (row: BaseRowEvent<Label>) => ({
+          (row: BaseRowEvent<RatingElement>) => ({
             name: 'Copy',
             icon: <IOClipboard />,
             onClick: () => {
               setFState({
-                color: row.data.color,
                 it: {
-                  text: row.data.label_name,
+                  text: row.data.rating_label,
                   icon: row.data.icon || null,
                 },
-                label_order: row.data.label_order,
+                rating_order: row.data.rating_order,
+                rating_value: row.data.rating_value,
+                rating_type: row.data.rating_type,
               });
               setFormId(uuid());
               divRef?.current?.scroll({ top: 0, behavior: 'smooth' });
@@ -150,7 +145,7 @@ export default function LabelModal({
         ]}
         columnDefs={[
           {
-            field: 'label_name',
+            field: 'rating_label',
             headerName: 'Name',
           },
           {
@@ -158,24 +153,16 @@ export default function LabelModal({
             headerName: 'Icon',
           },
           {
-            field: 'color',
-            headerName: 'Color',
+            field: 'rating_order',
+            headerName: 'Rating order',
           },
           {
-            field: 'label_order',
-            headerName: 'Order',
+            field: 'rating_value',
+            headerName: 'Rating Value',
           },
           {
-            field: 'preview',
-            headerName: 'Preview',
-            cellRenderer: (params) => (
-              <Badge
-                key={params.data.e_id}
-                text={params.data.label_name}
-                color={params.data.color as any}
-                icon={(params.data.icon as any) || undefined}
-              />
-            ),
+            field: 'rating_type',
+            headerName: 'Type',
           },
         ]}
         extendRowRenderer={(params) => (
@@ -183,45 +170,46 @@ export default function LabelModal({
             key={formId}
             className="glx-w-full-4"
             defaultState={{
-              color: params.data.color,
-              label_order: params.data.label_order,
-              it: {
-                text: params.data.label_name,
-                icon: params.data.icon || null,
-              },
+              it: { text: params.data.rating_label, icon: params.data.icon },
+              rating_order: params.data.rating_order,
+              rating_value: params.data.rating_value,
+              rating_type: params.data.rating_type,
             }}
             submit={{
               buttonText: 'Create',
               onSubmit: async ({ form, setError }) => {
-                const label_name = form.it?.text;
-                if (!label_name || label_name === '') {
+                const rating_label = form.it?.text;
+                if (!rating_label || rating_label === '') {
                   setError({
                     field: [
                       {
                         key: 'it',
-                        message: 'Label name must be set',
+                        message: 'Rating name must be set',
                       },
                     ],
                   });
                   return;
                 }
                 const icon = form.it?.icon || undefined;
-                const color = form.color || undefined;
-                const label_order = Number.isInteger(form.label_order)
-                  ? form.label_order
+                const rating_order = Number.isInteger(form.rating_order)
+                  ? form.rating_order
+                  : undefined;
+                const rating_value = Number.isInteger(form.rating_value)
+                  ? form.rating_value
                   : undefined;
                 const param = {
-                  label_name,
+                  rating_label,
                   icon,
-                  color,
-                  label_order,
+                  rating_order,
+                  rating_value,
+                  rating_type: form.rating_type,
                 };
-                const l = await context.updateLabel(params.data.e_id, param);
+                const l = await context.updateRating(params.data.e_id, param);
                 if (l.success) {
-                  toast.success('Label successfully updated');
-                  loadLabel();
+                  toast.success('Rating successfully updated');
+                  loadRating();
                 } else {
-                  toast.error('Error while updating label');
+                  toast.error('Error while updating rating');
                 }
               },
             }}
@@ -232,6 +220,6 @@ export default function LabelModal({
     </>
   );
 }
-LabelModal.defaultProps = {
+RatingModal.defaultProps = {
   divRef: undefined,
 };

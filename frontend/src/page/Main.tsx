@@ -7,15 +7,15 @@ import {
   IOCheckmarkDone,
   IOCloseCircle,
   IOCloseCircleOutline,
+  IOContract,
   IODownload,
-  IODownloadOutline,
+  IOExpand,
   IOGridOutline,
   IOLogOut,
-  IOPlayCircle,
   IOPricetag,
-  IOScanCircleOutline,
   IOSearch,
   IOServer,
+  IOSettings,
   IOSparkles,
   IOSync,
   IOTrash,
@@ -23,7 +23,6 @@ import {
 } from '@grandlinex/react-components';
 import { MovieLib } from '@elschnagoo/xserver-con/dist/ApiTypes';
 import { useGlobalContext } from '@/context/GlobalContext';
-import MovieComp from '@/component/MovieComp';
 import downloadFullPlaylist from '@/utils/PlaylistGen';
 import useAuthHelper from '@/utils/AuthUtil';
 import usePreload from '@/store/preload';
@@ -35,6 +34,7 @@ import {
   selectEditMode,
   selectLabel,
   selectMax,
+  selectModal,
   selectMovie,
   selectMulti,
   selectRevision,
@@ -48,6 +48,7 @@ import {
 import EditModal from '@/component/EditModal';
 import { MODAL } from '@/lib';
 import ModalSwitch from '@/component/ModalSwitch';
+import MovieComp from '@/component/MovieComp';
 
 export default function Main() {
   const dispatch = useAppDispatch();
@@ -58,8 +59,10 @@ export default function Main() {
   const data = useAppSelector(selectMovie);
   const label = useAppSelector(selectLabel);
   const revision = useAppSelector(selectRevision);
+  const modal = useAppSelector(selectModal);
   const mode = usePlayMode();
   const [double, setDouble] = useState<boolean>(false);
+  const [full, setFull] = useState<boolean>(false);
   const context = useGlobalContext();
   const auth = useAuthHelper();
   const { loadLabel, loadMovie, loadRating } = usePreload();
@@ -223,25 +226,6 @@ export default function Main() {
             <IconButton
               className="hide-on-mobile"
               toolTip={{
-                text: 'Set play mode',
-                position: 'left',
-              }}
-              onClick={() => dispatch(setModal(MODAL.PLAY_MODE))}
-            >
-              <IOPlayCircle />
-            </IconButton>
-            <IconButton
-              toolTip={{
-                text: 'Edit Labels',
-                position: 'left',
-              }}
-              onClick={() => dispatch(setModal(MODAL.LABEL))}
-            >
-              <IOPricetag />
-            </IconButton>
-            <IconButton
-              className="hide-on-mobile"
-              toolTip={{
                 text: 'Edit Mode',
                 position: 'left',
               }}
@@ -251,25 +235,6 @@ export default function Main() {
               disabled={cur.length === 0}
             >
               <IOServer />
-            </IconButton>
-            <IconButton
-              className="hide-on-mobile"
-              toolTip={{
-                text: 'Download Media',
-                position: 'left',
-              }}
-              onClick={() => dispatch(setModal(MODAL.DOWNLOAD))}
-            >
-              <IODownloadOutline />
-            </IconButton>
-            <IconButton
-              toolTip={{
-                text: 'Manage Library',
-                position: 'left',
-              }}
-              onClick={() => dispatch(setModal(MODAL.LIB))}
-            >
-              <IOScanCircleOutline />
             </IconButton>
             <IconButton
               toolTip={{
@@ -297,6 +262,54 @@ export default function Main() {
               }}
             >
               <IODownload />
+            </IconButton>
+            <IconButton
+              toolTip={{
+                text: 'Toggle Fullscreen',
+                position: 'left',
+              }}
+              onClick={() => {
+                try {
+                  if (!full) {
+                    setFull(true);
+                    const docElm = document.documentElement as any;
+                    if (docElm.requestFullscreen) {
+                      docElm.requestFullscreen();
+                    } else if (docElm.msRequestFullscreen) {
+                      docElm.msRequestFullscreen();
+                    } else if (docElm.mozRequestFullScreen) {
+                      docElm.mozRequestFullScreen();
+                    } else if (docElm.webkitRequestFullScreen) {
+                      docElm.webkitRequestFullScreen();
+                    }
+                  } else {
+                    setFull(false);
+                    const doc = document as any;
+                    if (doc.exitFullscreen) {
+                      doc.exitFullscreen();
+                    } else if (doc.msExitFullscreen) {
+                      doc.msExitFullscreen();
+                    } else if (doc.mozCancelFullScreen) {
+                      doc.mozCancelFullScreen();
+                    } else if (doc.webkitCancelFullScreen) {
+                      doc.webkitCancelFullScreen();
+                    }
+                  }
+                } catch (e) {
+                  console.warn(e);
+                }
+              }}
+            >
+              {full ? <IOContract /> : <IOExpand />}
+            </IconButton>
+            <IconButton
+              toolTip={{
+                text: 'Settings',
+                position: 'left',
+              }}
+              onClick={() => dispatch(setModal(MODAL.SETTINGS))}
+            >
+              <IOSettings />
             </IconButton>
             <IconButton
               toolTip={{
@@ -340,27 +353,28 @@ export default function Main() {
                 }
               }}
             >
-              {cur.map((e, index) => (
-                <MovieComp
-                  key={`${e.e_id}_${revision}`}
-                  mov={e}
-                  label={label}
-                  reload={() => {
-                    loadMovie(search);
-                  }}
-                  index={index}
-                  multi={{
-                    list: multi,
-                    updateMulti: (id) => {
-                      if (multi.includes(id)) {
-                        dispatch(removeMulti(id));
-                      } else {
-                        dispatch(addMulti(id));
-                      }
-                    },
-                  }}
-                />
-              ))}
+              {modal !== MODAL.MULTI_VIEW
+                ? cur.map((e, index) => (
+                    <MovieComp
+                      key={`${e.e_id}_${revision}`}
+                      mov={e}
+                      reload={() => {
+                        loadMovie(search);
+                      }}
+                      index={index}
+                      multi={{
+                        list: multi,
+                        updateMulti: (id) => {
+                          if (multi.includes(id)) {
+                            dispatch(removeMulti(id));
+                          } else {
+                            dispatch(addMulti(id));
+                          }
+                        },
+                      }}
+                    />
+                  ))
+                : null}
               {cur.length === 0 ? <Grid> No Elements</Grid> : null}
             </Grid>
           )}

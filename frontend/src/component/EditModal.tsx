@@ -13,7 +13,7 @@ import {
   IOChevronForward,
   IOClose,
   IOInformationCircle,
-  IOPricetag,
+  IOSettings,
   KeyBind,
   Tooltip,
   useKeyListener,
@@ -22,7 +22,6 @@ import { toast } from 'react-toastify';
 import { useAppDispatch, useAppSelector } from '@/store';
 import {
   selectEditMode,
-  selectLabel,
   selectMovie,
   selectSearch,
   setEditMode,
@@ -40,7 +39,6 @@ export default function EditModal() {
   const context = useGlobalContext();
   const { loadMovie } = usePreload();
   const ref = useRef(createRef<MovieComRefType>());
-  const label = useAppSelector(selectLabel);
   const data = useAppSelector(selectMovie);
   const [forcePlay, setForcePlay] = useState<boolean>(false);
   const [doubleTime, setDoubleTime] = useState<boolean>(false);
@@ -280,7 +278,7 @@ export default function EditModal() {
     [keyListerner],
   );
   useKeyListener(keyListerner);
-  if (!label || !data || !cur) {
+  if (!data || !cur) {
     return null;
   }
   return (
@@ -292,14 +290,12 @@ export default function EditModal() {
           </Tooltip>
           <IconButton
             toolTip={{
-              text: 'Edit Labels',
+              text: 'Settings',
               position: 'left',
             }}
-            onClick={() => {
-              dispatch(setModal(MODAL.LABEL));
-            }}
+            onClick={() => dispatch(setModal(MODAL.SETTINGS))}
           >
-            <IOPricetag />
+            <IOSettings />
           </IconButton>
           <CheckBox
             className="h-fix"
@@ -351,7 +347,7 @@ export default function EditModal() {
           </IconButton>
         </Grid>
 
-        <Grid className="glx-h-full" flexR vCenter fullWidth gap={12}>
+        <Grid className="glx-h-full" fullWidth flexR vCenter gap={12}>
           <Grid flex hCenter>
             <IconButton
               disabled={pos === 0}
@@ -370,7 +366,6 @@ export default function EditModal() {
               mov={cur}
               forcePlay={forcePlay}
               doubleTime={doubleTime}
-              label={label}
               showProgress
               reload={() => {
                 loadMovie(search || undefined);

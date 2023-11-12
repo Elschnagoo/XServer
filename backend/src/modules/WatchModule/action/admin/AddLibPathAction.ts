@@ -2,11 +2,11 @@ import {
   BaseApiAction,
   IBaseKernelModule,
   IKernel,
-  JwtToken,
+  SPath,
+  SPathUtil,
+  XActionEvent,
 } from '@grandlinex/kernel';
-import e from 'express';
 
-import { SPath, SPathUtil } from '@grandlinex/swagger-mate';
 import fs from 'fs';
 import { WatchDB } from '../../database';
 import ScannerQ from '../../database/queue/ScannerQ';
@@ -41,12 +41,7 @@ export default class AddLibPathAction extends BaseApiAction<IKernel, WatchDB> {
     this.handler = this.handler.bind(this);
   }
 
-  async handler(
-    req: e.Request,
-    res: e.Response,
-    next: () => void,
-    data: JwtToken,
-  ): Promise<void> {
+  async handler({ res, req }: XActionEvent): Promise<void> {
     const { body } = req;
     const { path, download } = body;
     if (!path) {

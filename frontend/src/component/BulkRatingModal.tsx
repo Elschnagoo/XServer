@@ -12,7 +12,7 @@ import {
 } from '@/store/MovieStore';
 import usePreload from '@/store/preload';
 import BaseModal from '@/component/BaseModal';
-import StarComp from '@/component/StarComp';
+import StarCompV2 from '@/component/StarCompV2';
 
 export default function BulkRatingModal() {
   const dispatch = useAppDispatch();
@@ -50,7 +50,7 @@ export default function BulkRatingModal() {
         </Grid>
       ) : (
         <>
-          <StarComp onChange={(e) => setRating(e)} />
+          <StarCompV2 onChange={(e) => setRating(e)} />
           <Grid flex flexRow flexEnd>
             <Button
               onClick={async () => {

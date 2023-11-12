@@ -25,6 +25,11 @@ import DeleteDownloadAction from './action/admin/DeleteDownloadAction';
 import AddLibPathAction from './action/admin/AddLibPathAction';
 import GetLibPathAction from './action/admin/GetLibPathAction';
 import RatingAction from './action/rating/RatingAction';
+import UpdateLabelAction from './action/label/UpdateLabelAction';
+import SetMovieRatingAction from './action/movie/SetMovieRatingAction';
+import GetMovieRatingAction from './action/movie/GetMovieRatingAction';
+import NewRatingAction from './action/rating/NewRatingAction';
+import UpdateRatingAction from './action/rating/UpdateRatingAction';
 
 export default class WatchModule extends BaseKernelModule<
   IKernel,
@@ -46,9 +51,12 @@ export default class WatchModule extends BaseKernelModule<
       new BindLabelAction(this),
       new UnbindLabelAction(this),
       new DeleteMovieAction(this),
+      new SetMovieRatingAction(this),
+      new GetMovieRatingAction(this),
       // label
       new LabelAction(this),
       new NewLabelAction(this),
+      new UpdateLabelAction(this),
       // admin
       new ScanLibAction(this),
       new UpdateMovieAction(this),
@@ -59,6 +67,8 @@ export default class WatchModule extends BaseKernelModule<
       new GetLibPathAction(this),
       // rating
       new RatingAction(this),
+      new NewRatingAction(this),
+      new UpdateRatingAction(this),
     );
     this.addService(
       new QService(this),

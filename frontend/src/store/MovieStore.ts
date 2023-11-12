@@ -3,6 +3,7 @@ import { Label, MovieLib } from '@elschnagoo/xserver-con/dist/ApiTypes';
 import { RatingElement } from '@elschnagoo/xserver-con';
 import { RootState } from '@/store/store';
 import { MODAL, MovieEnv, PlayMode } from '@/lib';
+import LocalStorage from '@/utils/LocalStorage';
 
 const initialAppEnv: MovieEnv = {
   search: null,
@@ -16,7 +17,7 @@ const initialAppEnv: MovieEnv = {
   editMode: -1,
   revision: 0,
   mode: PlayMode.DEFAULT,
-  forcePreview: false,
+  forcePreview: LocalStorage.flagLoad('forcePreview'),
 };
 
 export const movState = createSlice({

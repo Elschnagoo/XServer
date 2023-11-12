@@ -2,12 +2,11 @@ import {
   BaseApiAction,
   IBaseKernelModule,
   IKernel,
-  JwtToken,
-  XRequest,
-  XResponse,
+  SPath,
+  SPathUtil,
+  XActionEvent,
 } from '@grandlinex/kernel';
 
-import { SPath, SPathUtil } from '@grandlinex/swagger-mate';
 import { WatchDB } from '../../database';
 import MovieLib from '../../database/entities/MovieLib';
 
@@ -58,12 +57,7 @@ export default class UpdateMovieAction extends BaseApiAction<IKernel, WatchDB> {
     this.handler = this.handler.bind(this);
   }
 
-  async handler(
-    req: XRequest,
-    res: XResponse,
-    next: () => void,
-    data: JwtToken | null,
-  ): Promise<void> {
+  async handler({ res, req }: XActionEvent): Promise<void> {
     const { body } = req;
     const { rating, movie_name, movie_description } = body;
     const ratingValid =

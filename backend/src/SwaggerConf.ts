@@ -1,9 +1,10 @@
-import { SPathUtil, SwaggerConfig } from '@grandlinex/swagger-mate';
+import { SPathUtil, SwaggerConfig } from '@grandlinex/kernel';
 import LibFile from './modules/WatchModule/database/entities/LibFile';
 import Label from './modules/WatchModule/database/entities/Label';
 import DownloadQ from './modules/WatchModule/database/queue/DownloadQ';
 import LibPath from './modules/WatchModule/database/entities/LibPath';
 import RatingElement from './modules/WatchModule/database/entities/RatingElement';
+import MovieRating from './modules/WatchModule/database/entities/MovieRating';
 
 const SwaggerConf: SwaggerConfig = {
   info: {
@@ -81,6 +82,7 @@ const SwaggerConf: SwaggerConfig = {
         new Label(),
         new DownloadQ(),
         new RatingElement(),
+        new MovieRating(),
       ),
       MLabel: {
         type: 'object',

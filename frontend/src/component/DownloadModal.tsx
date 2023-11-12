@@ -15,7 +15,6 @@ import { toast } from 'react-toastify';
 import { useGlobalContext } from '@/context/GlobalContext';
 import { useAppSelector } from '@/store';
 import { selectLabel } from '@/store/MovieStore';
-import BaseModal from '@/component/BaseModal';
 
 export default function DownloadModal() {
   const context = useGlobalContext();
@@ -27,7 +26,7 @@ export default function DownloadModal() {
     return null;
   }
   return (
-    <BaseModal title="Download Media">
+    <>
       <Form
         className="glx-w-full-4"
         submit={{
@@ -142,6 +141,6 @@ export default function DownloadModal() {
           <LPulse />
         </Grid>
       )}
-    </BaseModal>
+    </>
   );
 }

@@ -14,7 +14,6 @@ import {
 } from '@grandlinex/react-components';
 import { toast } from 'react-toastify';
 import { useGlobalContext } from '@/context/GlobalContext';
-import BaseModal from '@/component/BaseModal';
 
 export default function LibModal() {
   const context = useGlobalContext();
@@ -23,7 +22,7 @@ export default function LibModal() {
   });
 
   return (
-    <BaseModal title="Library Path">
+    <>
       <Form
         className="glx-w-full-4"
         submit={{
@@ -136,6 +135,6 @@ export default function LibModal() {
           <LPulse />
         </Grid>
       )}
-    </BaseModal>
+    </>
   );
 }

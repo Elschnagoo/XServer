@@ -2,14 +2,13 @@ import {
   BaseApiAction,
   IBaseKernelModule,
   IKernel,
-  JwtToken,
-  XRequest,
-  XResponse,
+  SPath,
+  XActionEvent,
 } from '@grandlinex/kernel';
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { SPath } from '@grandlinex/swagger-mate';
+
 import { WatchDB } from '../../database';
 
 const thumps = ['tn_1', 'tn_2', 'tn_3', 'tn_4', 'tn_5'];
@@ -62,12 +61,7 @@ export default class MovieImgAction extends BaseApiAction<IKernel, WatchDB> {
     this.resPath = module.getKernel().getConfigStore().get('RES_PATH')!;
   }
 
-  async handler(
-    req: XRequest,
-    res: XResponse,
-    next: () => void,
-    data: JwtToken | null,
-  ): Promise<void> {
+  async handler({ res, req, data }: XActionEvent): Promise<void> {
     if (data) {
       const { id } = req.params;
       const { type } = req.query;

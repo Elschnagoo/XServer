@@ -2,13 +2,12 @@ import {
   BaseApiAction,
   IBaseKernelModule,
   IKernel,
-  JwtToken,
-  XRequest,
-  XResponse,
+  SPath,
+  XActionEvent,
 } from '@grandlinex/kernel';
 
 import * as fs from 'fs';
-import { SPath } from '@grandlinex/swagger-mate';
+
 import { WatchDB } from '../../database';
 import Converter from '../../utils/Converter';
 
@@ -59,12 +58,7 @@ export default class MovieStreamAction extends BaseApiAction<IKernel, WatchDB> {
     this.converter = new Converter(this.getKernel());
   }
 
-  async handler(
-    req: XRequest,
-    res: XResponse,
-    next: () => void,
-    data: JwtToken | null,
-  ): Promise<void> {
+  async handler({ res, req, data }: XActionEvent): Promise<void> {
     if (data) {
       const { id } = req.params;
       const { profile } = req.query;

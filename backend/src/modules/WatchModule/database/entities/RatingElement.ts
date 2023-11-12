@@ -1,5 +1,10 @@
 import { Column, CoreEntity, Entity, EProperties } from '@grandlinex/kernel';
 
+export enum RatingElementType {
+  'BOOL' = 'BOOL',
+  'STAR' = 'STAR',
+}
+
 @Entity('RatingElement')
 export default class RatingElement extends CoreEntity {
   @Column({
@@ -19,9 +24,9 @@ export default class RatingElement extends CoreEntity {
   rating_value: number;
 
   @Column({
-    dataType: 'boolean',
+    dataType: 'string',
   })
-  initial_value: boolean;
+  rating_type: RatingElementType;
 
   @Column({
     dataType: 'string',
@@ -35,6 +40,6 @@ export default class RatingElement extends CoreEntity {
     this.icon = props?.icon ?? null;
     this.rating_order = props?.rating_order ?? 0;
     this.rating_value = props?.rating_value ?? 0;
-    this.initial_value = props?.initial_value ?? false;
+    this.rating_type = props?.rating_type ?? RatingElementType.BOOL;
   }
 }

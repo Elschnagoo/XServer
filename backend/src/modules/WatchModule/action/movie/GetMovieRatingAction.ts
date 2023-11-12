@@ -8,13 +8,15 @@ import {
 } from '@grandlinex/kernel';
 
 import { WatchDB } from '../../database';
+import MovieRating from '../../database/entities/MovieRating';
+import WatchClient from '../../client/WatchClient';
 
 @SPath({
-  '/movie/label/{id}': {
+  '/movie/rating/{id}': {
     get: {
       tags: ['Watch'],
-      operationId: 'getMoviesLabel',
-      summary: 'Get Movie label',
+      operationId: 'getMovieRating',
+      summary: 'Get Movie rating',
       parameters: [
         {
           in: 'path',
@@ -27,18 +29,23 @@ import { WatchDB } from '../../database';
       ],
       responses: SPathUtil.refResponse(
         '200',
-        SPathUtil.schemaPath('MLabel'),
+        new MovieRating(),
         true,
         '400',
-        '404',
         '500',
       ),
     },
   },
 })
-export default class MovieLabelAction extends BaseApiAction<IKernel, WatchDB> {
-  constructor(module: IBaseKernelModule<IKernel, WatchDB, any, any, any>) {
-    super('GET', '/movie/label/:id', module, module.getKernel().getModule());
+export default class GetMovieRatingAction extends BaseApiAction<
+  IKernel,
+  WatchDB,
+  WatchClient
+> {
+  constructor(
+    module: IBaseKernelModule<IKernel, WatchDB, WatchClient, any, any>,
+  ) {
+    super('GET', '/movie/rating/:id', module, module.getKernel().getModule());
     this.handler = this.handler.bind(this);
   }
 
@@ -46,28 +53,27 @@ export default class MovieLabelAction extends BaseApiAction<IKernel, WatchDB> {
     if (data) {
       const { id } = req.params;
 
-      const db = this.getModule().getDb();
-      const dat = await db.movieLib.getObjById(id);
+      if (!id) {
+        res.sendStatus(400);
+        return;
+      }
 
-      if (!dat) {
+      const db = this.getModule().getDb();
+
+      const movie = await db.movieLib.getObjById(id);
+      if (!movie) {
         res.sendStatus(404);
         return;
       }
 
-      const map = await db.labelMap.getObjList({
+      const rElement = await db.movRating.getObjList({
         search: {
-          mov_lib: dat.e_id,
+          movie: movie.e_id,
         },
       });
 
-      const labels = await Promise.all(
-        map.map(async (m) => ({
-          label: await db.label.getObjById(m.label),
-          map: m.e_id,
-        })),
-      );
-
-      res.status(200).send(labels);
+      res.status(200);
+      res.send(rElement);
       return;
     }
 

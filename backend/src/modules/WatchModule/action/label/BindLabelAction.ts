@@ -2,11 +2,11 @@ import {
   BaseApiAction,
   IBaseKernelModule,
   IKernel,
-  JwtToken,
-  XRequest,
-  XResponse,
+  SPath,
+  SPathUtil,
+  XActionEvent,
 } from '@grandlinex/kernel';
-import { SPath, SPathUtil } from '@grandlinex/swagger-mate';
+
 import { WatchDB } from '../../database';
 import LabelMap from '../../database/map/LabelMap';
 
@@ -38,12 +38,7 @@ export default class BindLabelAction extends BaseApiAction<IKernel, WatchDB> {
     this.handler = this.handler.bind(this);
   }
 
-  async handler(
-    req: XRequest,
-    res: XResponse,
-    next: () => void,
-    data: JwtToken | null,
-  ): Promise<void> {
+  async handler({ res, req, data }: XActionEvent): Promise<void> {
     if (data) {
       const { label, mov_lib } = req.body;
       if (

@@ -11,11 +11,18 @@ import { WatchDB } from '../../database';
 import Label from '../../database/entities/Label';
 
 @SPath({
-  '/label': {
-    post: {
+  '/label/{id}': {
+    patch: {
       tags: ['Watch'],
-      operationId: 'postLabel',
-      summary: 'Create new label',
+      operationId: 'updateLabel',
+      summary: 'Update label',
+      parameters: [
+        {
+          required: true,
+          name: 'id',
+          in: 'path',
+        },
+      ],
       requestBody: SPathUtil.jsonBody({
         type: 'object',
         properties: {
@@ -32,7 +39,6 @@ import Label from '../../database/entities/Label';
             type: 'integer',
           },
         },
-        required: ['label_name'],
       }),
       responses: SPathUtil.refResponse(
         '201',
@@ -46,19 +52,19 @@ import Label from '../../database/entities/Label';
     },
   },
 })
-export default class NewLabelAction extends BaseApiAction<IKernel, WatchDB> {
+export default class UpdateLabelAction extends BaseApiAction<IKernel, WatchDB> {
   constructor(module: IBaseKernelModule<IKernel, WatchDB, any, any, any>) {
-    super('POST', '/label', module, module.getKernel().getModule());
+    super('PATCH', '/label/:id', module, module.getKernel().getModule());
     this.handler = this.handler.bind(this);
   }
 
   async handler({ res, req, data }: XActionEvent): Promise<void> {
     if (data) {
+      const { id } = req.params;
       const db = this.getModule().getDb();
       const { label_name, icon, color, label_order } = req.body;
       if (
-        !label_name ||
-        typeof label_name !== 'string' ||
+        (!!label_name && typeof label_name !== 'string') ||
         (!!icon && typeof icon !== 'string') ||
         (!!color && typeof color !== 'string') ||
         (label_order !== undefined && typeof label_order !== 'number')
@@ -66,18 +72,17 @@ export default class NewLabelAction extends BaseApiAction<IKernel, WatchDB> {
         res.sendStatus(400);
         return;
       }
-      if (await db.label.findObj({ label_name })) {
-        res.sendStatus(409);
+      const cur = await db.label.getObjById(id);
+      if (!cur) {
+        res.sendStatus(404);
         return;
       }
-      const l = await db.label.createObject(
-        new Label({
-          label_name,
-          icon: icon || null,
-          color: color || null,
-          label_order: label_order ?? 10,
-        }),
-      );
+      const l = await db.label.updateObject(cur.e_id, {
+        label_name,
+        icon,
+        color,
+        label_order,
+      });
       res.status(200).send(l);
       return;
     }

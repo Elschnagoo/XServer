@@ -2,12 +2,11 @@ import React, {
   createRef,
   ElementRef,
   forwardRef,
-  useCallback,
   useImperativeHandle,
   useMemo,
   useState,
 } from 'react';
-import { Label, MovieLib } from '@elschnagoo/xserver-con/dist/ApiTypes';
+import { MovieLib } from '@elschnagoo/xserver-con/dist/ApiTypes';
 import {
   CheckBox,
   DropDownIconMenu,
@@ -42,7 +41,6 @@ import { useGlobalContext } from '@/context/GlobalContext';
 import DurationComp from '@/component/DurationComp';
 import { ProbeInfo } from '@/lib/MediaHandlerTypes';
 import LabelComp from '@/component/LabelComp';
-import StarComp from '@/component/StarComp';
 import TitleComp from '@/component/TitleComp';
 import { useAppDispatch, useAppSelector, usePlayMode } from '@/store';
 import {
@@ -51,7 +49,7 @@ import {
   updateMovie,
 } from '@/store/MovieStore';
 import VideoPreview from '@/component/VideoPreview';
-import RatingHelper from '@/component/RatingHelper';
+import RatingComp from '@/component/RatingComp';
 
 const SupportedWebVideoCodec = ['h264', 'vp8', 'vp9'];
 
@@ -69,7 +67,6 @@ const MovieComp = forwardRef<
   },
   {
     mov: MovieLib;
-    label: Label[];
     reload: () => void;
     editMode?: boolean;
     forcePlay?: boolean;
@@ -84,7 +81,6 @@ const MovieComp = forwardRef<
 >((prop, ref) => {
   const {
     mov,
-    label,
     editMode,
     reload,
     multi,
@@ -109,13 +105,10 @@ const MovieComp = forwardRef<
     () => !!multi?.list.includes(mov.e_id),
     [mov.e_id, multi],
   );
-  const updateL = useCallback(
-    (lib: MovieLib) => {
-      setLocalLib(lib);
-      dispatch(updateMovie(lib));
-    },
-    [dispatch],
-  );
+  const updateL = (lib: MovieLib) => {
+    setLocalLib(lib);
+    dispatch(updateMovie(lib));
+  };
 
   useImperativeHandle(ref, () => ({
     updateLib(lib: MovieLib) {
@@ -259,21 +252,23 @@ const MovieComp = forwardRef<
             )}
           </IconButton>
 
-          <IconButton
-            /* toolTip={{
-                          text: 'Bewerten',
-                          position: 'left',
-                        }} */
-            onClick={() => setEditStar(!editStar)}
-          >
-            {editStar ? (
-              <span className="icon-active">
+          {!editMode && (
+            <IconButton
+              /* toolTip={{
+                                text: 'Bewerten',
+                                position: 'left',
+                              }} */
+              onClick={() => setEditStar(!editStar)}
+            >
+              {editStar ? (
+                <span className="icon-active">
+                  <IOSparkles />
+                </span>
+              ) : (
                 <IOSparkles />
-              </span>
-            ) : (
-              <IOSparkles />
-            )}
-          </IconButton>
+              )}
+            </IconButton>
+          )}
 
           {play ? (
             <IconButton
@@ -411,14 +406,15 @@ const MovieComp = forwardRef<
           />
         </Grid>
       </Grid>
-      {editMode && editStar ? <RatingHelper /> : null}
+      {/* editMode && editStar ? <RatingHelper /> : null */}
       <Grid
         style={{
           flexDirection: 'row-reverse',
         }}
         flex={editMode}
       >
-        <StarComp
+        <RatingComp
+          className={editMode ? 'edit-rating' : undefined}
           option={{
             mov: localLib,
             edit: editStar,
@@ -426,12 +422,8 @@ const MovieComp = forwardRef<
             update: updateL,
           }}
         />
-        <LabelComp
-          label={label}
-          id={mov.e_id}
-          focus={!!editMode}
-          edit={editLabel}
-        />
+
+        <LabelComp id={mov.e_id} focus={!!editMode} edit={editLabel} />
       </Grid>
     </Grid>
   );

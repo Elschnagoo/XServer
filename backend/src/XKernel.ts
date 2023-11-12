@@ -3,13 +3,13 @@ import Kernel, {
   CoreModule,
   cors,
   KernelEndpoint,
+  Swagger,
   XRequest,
   XUtil,
 } from '@grandlinex/kernel';
 import PGCon from '@grandlinex/bundle-postgresql';
 import ELogger from '@grandlinex/bundle-elogger';
 
-import { Swagger } from '@grandlinex/swagger-mate';
 import e from 'express';
 import SwaggerConf from './SwaggerConf';
 import WatchModule from './modules/WatchModule/WatchModule';

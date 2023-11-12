@@ -145,8 +145,11 @@ $content-h: 288px;
   position: relative;
   flex-grow: 0;
   min-width: 300px;
+
+  .star-text{
+    font-weight: bold;
+  }
   .star-reset{
-    position: absolute;
     right: 0;
   }
 }
@@ -179,10 +182,10 @@ $content-h: 288px;
     .edit-main{
       padding-top: 20px;
 //      outline: 1px solid white;
-      width: calc(100% - 120px);
+      width: calc(100% - 600px);
       height: calc(100% - 20px);
       .movie-com{
-        width: 100%;
+        width: calc(100% - 4px);
       }
        .carosell{
          @extend .glx-flex-h-center;
@@ -340,4 +343,12 @@ $content-h: 288px;
 
 .glx-tooltip-content{
   white-space: pre-line;
+}
+
+.edit-rating{
+  position: absolute;
+  top: 64px;
+  right: 0;
+  width: 480px;
+  padding-right: 30px;
 }

@@ -2,11 +2,11 @@ import {
   BaseApiAction,
   IBaseKernelModule,
   IKernel,
-  JwtToken,
+  SPath,
+  SPathUtil,
+  XActionEvent,
 } from '@grandlinex/kernel';
-import e from 'express';
 
-import { SPath, SPathUtil } from '@grandlinex/swagger-mate';
 import { WatchDB } from '../../database';
 import ScannerQ from '../../database/queue/ScannerQ';
 import { StateTypeQEnum } from '../../database/queue/StateTypeQ';
@@ -27,12 +27,7 @@ export default class ScanLibAction extends BaseApiAction<IKernel, WatchDB> {
     this.handler = this.handler.bind(this);
   }
 
-  async handler(
-    req: e.Request,
-    res: e.Response,
-    next: () => void,
-    data: JwtToken,
-  ): Promise<void> {
+  async handler({ res }: XActionEvent): Promise<void> {
     const db = this.getModule().getDb();
     const list = await db.lib.getObjList();
 

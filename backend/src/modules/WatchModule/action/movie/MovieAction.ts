@@ -2,12 +2,12 @@ import {
   BaseApiAction,
   IBaseKernelModule,
   IKernel,
-  JwtToken,
-  XRequest,
-  XResponse,
+  SComponent,
+  SPath,
+  SPathUtil,
+  XActionEvent,
 } from '@grandlinex/kernel';
 
-import { SComponent, SPath, SPathUtil } from '@grandlinex/swagger-mate';
 import { WatchDB } from '../../database';
 import MovieLib from '../../database/entities/MovieLib';
 import { isUUID } from '../../utils/Validation';
@@ -85,12 +85,7 @@ export default class MovieAction extends BaseApiAction<IKernel, WatchDB> {
     this.handler = this.handler.bind(this);
   }
 
-  async handler(
-    req: XRequest,
-    res: XResponse,
-    next: () => void,
-    data: JwtToken | null,
-  ): Promise<void> {
+  async handler({ res, req, data }: XActionEvent): Promise<void> {
     if (data) {
       const { min, max, label, exclude } = req.query;
 
@@ -121,6 +116,7 @@ export default class MovieAction extends BaseApiAction<IKernel, WatchDB> {
       const dat = await db.searchQuery(mi, ma, lab, exc);
 
       res.status(200).send(dat);
+
       return;
     }
 

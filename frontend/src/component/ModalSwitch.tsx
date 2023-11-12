@@ -3,14 +3,11 @@ import { useAppSelector } from '@/store';
 import { selectModal } from '@/store/MovieStore';
 import { MODAL } from '@/lib';
 import SearchModal from '@/component/SearchModal';
-import LabelModal from '@/component/LabelModal';
-import DownloadModal from '@/component/DownloadModal';
 import MultiView from '@/component/MultiView';
-import LibModal from '@/component/LibModal';
 import BulkLabelModal from '@/component/BulkLabelModal';
 import BulkRatingModal from '@/component/BulkRatingModal';
-import WatchModal from '@/component/WatchModal';
 import BulkDeleteModal from '@/component/BulkDeleteModal';
+import Settings from '@/page/Settings';
 
 export default function ModalSwitch() {
   const modal = useAppSelector(selectModal);
@@ -19,20 +16,14 @@ export default function ModalSwitch() {
       return <MultiView />;
     case MODAL.SEARCH:
       return <SearchModal />;
-    case MODAL.LABEL:
-      return <LabelModal />;
     case MODAL.BULK_LABEL:
       return <BulkLabelModal />;
     case MODAL.BULK_DELETE:
       return <BulkDeleteModal />;
     case MODAL.BULK_RATING:
       return <BulkRatingModal />;
-    case MODAL.DOWNLOAD:
-      return <DownloadModal />;
-    case MODAL.LIB:
-      return <LibModal />;
-    case MODAL.PLAY_MODE:
-      return <WatchModal />;
+    case MODAL.SETTINGS:
+      return <Settings />;
     default:
       return null;
   }

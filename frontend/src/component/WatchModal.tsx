@@ -8,8 +8,8 @@ import {
   setModal,
   setMode,
 } from '@/store/MovieStore';
-import BaseModal from '@/component/BaseModal';
 import { PlayMode } from '@/lib';
+import LocalStorage from '@/utils/LocalStorage';
 
 export default function WatchModal() {
   const mode = useAppSelector(selectMode);
@@ -20,39 +20,38 @@ export default function WatchModal() {
     [],
   );
   return (
-    <BaseModal title="Play Mode">
-      <Form
-        className="glx-w-full-4"
-        defaultState={{
-          mode,
-          preview: forcePreview,
-        }}
-        submit={{
-          buttonText: 'Set mode',
-          onSubmit: async ({ form }) => {
-            dispatch(setModal(null));
-            dispatch(setMode(form.mode));
-            dispatch(setForcePreview(form.preview));
+    <Form
+      className="glx-w-full-4"
+      defaultState={{
+        mode,
+        preview: forcePreview,
+      }}
+      submit={{
+        buttonText: 'Set mode',
+        onSubmit: async ({ form }) => {
+          dispatch(setModal(null));
+          dispatch(setMode(form.mode));
+          dispatch(setForcePreview(form.preview));
+          LocalStorage.flagSave('forcePreview', form.preview);
+        },
+      }}
+      options={[
+        [
+          {
+            key: 'mode',
+            type: InputOptionType.DROPDOWN,
+            label: 'Mode',
+            items: opts,
           },
-        }}
-        options={[
-          [
-            {
-              key: 'mode',
-              type: InputOptionType.DROPDOWN,
-              label: 'Mode',
-              items: opts,
-            },
-          ],
-          [
-            {
-              key: 'preview',
-              type: InputOptionType.CHECKBOX,
-              label: 'Force play preview',
-            },
-          ],
-        ]}
-      />
-    </BaseModal>
+        ],
+        [
+          {
+            key: 'preview',
+            type: InputOptionType.CHECKBOX,
+            label: 'Force play preview',
+          },
+        ],
+      ]}
+    />
   );
 }

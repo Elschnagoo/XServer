@@ -2,12 +2,11 @@ import {
   BaseApiAction,
   IBaseKernelModule,
   IKernel,
-  JwtToken,
-  XRequest,
-  XResponse,
+  SPath,
+  SPathUtil,
+  XActionEvent,
 } from '@grandlinex/kernel';
 
-import { SPath, SPathUtil } from '@grandlinex/swagger-mate';
 import { WatchDB } from '../../database';
 import { StateTypeQEnum } from '../../database/queue/StateTypeQ';
 
@@ -30,12 +29,7 @@ export default class DeleteDownloadAction extends BaseApiAction<
     this.handler = this.handler.bind(this);
   }
 
-  async handler(
-    req: XRequest,
-    res: XResponse,
-    next: () => void,
-    data: JwtToken | null,
-  ): Promise<void> {
+  async handler({ res, req }: XActionEvent): Promise<void> {
     const db = this.getModule().getDb();
     const done = await db.download.getObjList({
       search: { state: StateTypeQEnum.DONE },

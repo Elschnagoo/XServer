@@ -22,6 +22,8 @@ import Patch003 from './patch/Patch003';
 import Patch004 from './patch/Patch004';
 import Patch005 from './patch/Patch005';
 import Patch006 from './patch/Patch006';
+import Patch007 from './patch/Patch007';
+import MovieRating from './entities/MovieRating';
 
 export default class WatchDB extends PGCon {
   types: CoreEntityWrapper<LibType>;
@@ -46,8 +48,10 @@ export default class WatchDB extends PGCon {
 
   ratingEl: CoreEntityWrapper<RatingElement>;
 
+  movRating: CoreEntityWrapper<MovieRating>;
+
   constructor(mod: IBaseKernelModule<any, any, any, any, any>) {
-    super(mod, '6');
+    super(mod, '7');
     this.types = this.registerEntity(new LibType());
     this.states = this.registerEntity(new StateTypeQ());
     this.lib = this.registerEntity(new Library());
@@ -61,6 +65,8 @@ export default class WatchDB extends PGCon {
     this.label = this.registerEntity(new Label());
     this.labelMap = this.registerEntity(new LabelMap());
     this.ratingEl = this.registerEntity(new RatingElement());
+    this.movRating = this.registerEntity(new MovieRating());
+
     this.setUpdateChain(
       new Patch001(this),
       new Patch002(this),
@@ -68,6 +74,7 @@ export default class WatchDB extends PGCon {
       new Patch004(this),
       new Patch005(this),
       new Patch006(this),
+      new Patch007(this),
     );
   }
 

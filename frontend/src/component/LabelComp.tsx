@@ -1,5 +1,4 @@
 import React from 'react';
-import { Label } from '@elschnagoo/xserver-con/dist/ApiTypes';
 import {
   Badge,
   BadgeColor,
@@ -11,16 +10,17 @@ import {
 } from '@grandlinex/react-components';
 import { toast } from 'react-toastify';
 import { useGlobalContext } from '@/context/GlobalContext';
+import { useAppSelector } from '@/store';
+import { selectLabel } from '@/store/MovieStore';
 
 export default function LabelComp(props: {
   id: string;
-  label: Label[];
   edit: boolean;
   focus: boolean;
 }) {
-  const { id, label, edit, focus } = props;
+  const { id, edit, focus } = props;
   const contex = useGlobalContext();
-
+  const label = useAppSelector(selectLabel)!;
   const [movLabel, , reload] = useQData(async () => {
     return (await contex.getMoviesLabel(id)).data?.sort(
       (a, b) => a.label.label_order - b.label.label_order,

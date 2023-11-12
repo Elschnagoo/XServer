@@ -24,13 +24,10 @@ export type AppEnv = {
 export enum MODAL {
   'MULTI_VIEW',
   'SEARCH',
-  'LABEL',
-  'DOWNLOAD',
   'BULK_LABEL',
   'BULK_RATING',
   'BULK_DELETE',
-  'LIB',
-  'PLAY_MODE',
+  'SETTINGS',
 }
 export enum PlayMode {
   'DEFAULT' = 'default',

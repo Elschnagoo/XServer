@@ -2,11 +2,11 @@ import {
   BaseApiAction,
   IBaseKernelModule,
   IKernel,
-  JwtToken,
-  XRequest,
-  XResponse,
+  SPath,
+  SPathUtil,
+  XActionEvent,
 } from '@grandlinex/kernel';
-import { SPath, SPathUtil } from '@grandlinex/swagger-mate';
+
 import { WatchDB } from '../../database';
 import Label from '../../database/entities/Label';
 
@@ -33,12 +33,7 @@ export default class LabelAction extends BaseApiAction<IKernel, WatchDB> {
     this.handler = this.handler.bind(this);
   }
 
-  async handler(
-    req: XRequest,
-    res: XResponse,
-    next: () => void,
-    data: JwtToken | null,
-  ): Promise<void> {
+  async handler({ res, data }: XActionEvent): Promise<void> {
     if (data) {
       const db = this.getModule().getDb();
 

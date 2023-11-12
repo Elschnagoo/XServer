@@ -12,6 +12,7 @@ import { ProbeInfo } from '../lib/MediaHandlerTypes';
 import MovieLib from '../database/entities/MovieLib';
 import LibFile from '../database/entities/LibFile';
 import ThumbVFactory from '../utils/ThumbVFactory';
+import { RatingElementType } from '../database/entities/RatingElement';
 
 function f(path: string, ...files: string[]) {
   let p = true;
@@ -157,6 +158,16 @@ export default class WatchClient extends BaseClient<IKernel, WatchDB> {
     for (const l of label) {
       await db.labelMap.delete(l.e_id);
     }
+
+    const rat = await db.movRating.getObjList({
+      search: {
+        movie: movie.e_id,
+      },
+    });
+    for (const r of rat) {
+      await db.movRating.delete(r.e_id);
+    }
+
     await db.movieLib.delete(movie.e_id);
 
     if (
@@ -171,5 +182,42 @@ export default class WatchClient extends BaseClient<IKernel, WatchDB> {
       }
       await db.file.delete(libFile.e_id);
     }
+  }
+
+  async updateRating(mov: MovieLib): Promise<MovieLib> {
+    const db = this.getModule().getDb();
+    const maxRatings = await db.ratingEl.getObjList();
+    const mx = maxRatings.reduce((a, b) => a + b.rating_value, 0);
+
+    let calc = 0;
+    const ratings = await db.movRating.getObjList({
+      search: {
+        movie: mov.e_id,
+      },
+    });
+
+    for (const rat of maxRatings) {
+      const r = ratings.find((e) => e.element === rat.e_id);
+      if (r) {
+        switch (rat.rating_type) {
+          case RatingElementType.BOOL:
+            calc += rat.rating_value * r.rating_value;
+            break;
+          case RatingElementType.STAR:
+            calc += rat.rating_value * (r.rating_value / 5);
+            break;
+          default:
+        }
+      }
+    }
+
+    await db.movieLib.updateObject(mov.e_id, {
+      rating: Math.round((calc / mx) * 5),
+    });
+
+    return {
+      ...mov,
+      rating: Math.round((calc / mx) * 5),
+    };
   }
 }

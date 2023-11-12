@@ -2,11 +2,11 @@ import {
   BaseApiAction,
   IBaseKernelModule,
   IKernel,
-  JwtToken,
-  XRequest,
-  XResponse,
+  SPath,
+  SPathUtil,
+  XActionEvent,
 } from '@grandlinex/kernel';
-import { SPath, SPathUtil } from '@grandlinex/swagger-mate';
+
 import { WatchDB } from '../../database';
 import WatchClient from '../../client/WatchClient';
 import MovieLib from '../../database/entities/MovieLib';
@@ -50,12 +50,7 @@ export default class GetMovieAction extends BaseApiAction<
     this.handler = this.handler.bind(this);
   }
 
-  async handler(
-    req: XRequest,
-    res: XResponse,
-    next: () => void,
-    data: JwtToken | null,
-  ): Promise<void> {
+  async handler({ res, req, data }: XActionEvent): Promise<void> {
     if (data) {
       if (!req.params.id || !isUUID(req.params.id)) {
         res.sendStatus(400);
