@@ -20,6 +20,10 @@ export enum SearchOrder {
   DURATION_DSC = 'duration_dsc',
   NAME_ASC = 'name_asc',
   NAME_DSC = 'name_dsc',
+  LAST_PLAYED_ASC = 'last_played_asc',
+  LAST_PLAYED_DSC = 'last_played_dsc',
+  PLAYS_ASC = 'plays_asc',
+  PLAYS_DSC = 'plays_dsc',
   SHUFFLE = 'shuffle',
 }
 export enum Sync {
@@ -141,7 +145,7 @@ export default function SearchModal() {
               items: [
                 {
                   key: SearchOrder.DATE_DSC,
-                  name: 'Date (Descending ,default)',
+                  name: 'Date (Descending, default)',
                 },
                 {
                   key: SearchOrder.DATE_ASC,
@@ -170,6 +174,22 @@ export default function SearchModal() {
                 {
                   key: SearchOrder.NAME_DSC,
                   name: 'Name (Z-A)',
+                },
+                {
+                  key: SearchOrder.PLAYS_ASC,
+                  name: 'Plays (Ascending)',
+                },
+                {
+                  key: SearchOrder.PLAYS_DSC,
+                  name: 'Plays (Descending)',
+                },
+                {
+                  key: SearchOrder.LAST_PLAYED_ASC,
+                  name: 'Last Played (Ascending)',
+                },
+                {
+                  key: SearchOrder.LAST_PLAYED_DSC,
+                  name: 'Last Played (Descending)',
                 },
                 {
                   key: SearchOrder.SHUFFLE,

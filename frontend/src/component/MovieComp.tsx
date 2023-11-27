@@ -29,6 +29,8 @@ import {
   Progress,
   Tooltip,
   useQData,
+  useUIContext,
+  uuid,
 } from '@grandlinex/react-components';
 import moment from 'moment';
 import {
@@ -69,6 +71,7 @@ const MovieComp = forwardRef<
     mov: MovieLib;
     reload: () => void;
     editMode?: boolean;
+    trace?: string;
     forcePlay?: boolean;
     doubleTime?: boolean;
     showProgress?: boolean;
@@ -83,12 +86,14 @@ const MovieComp = forwardRef<
     mov,
     editMode,
     reload,
+    trace,
     multi,
     forcePlay,
     doubleTime,
     showProgress,
     index,
   } = prop;
+  const ui = useUIContext();
   const dispatch = useAppDispatch();
   const playerRef = createRef<MediaPlayerRefType>();
   const forcePreview = useAppSelector(selectForcePreview);
@@ -169,7 +174,10 @@ const MovieComp = forwardRef<
     });
   }, [authHelper, mov.e_id]);
   const stream = useMemo(() => {
-    return authHelper(`/movie/stream/${mov.e_id}?${mode()}`, true);
+    return authHelper(
+      `/movie/stream/${mov.e_id}?trace=${trace || uuid()}${mode()}`,
+      true,
+    );
   }, [authHelper, mov.e_id]);
   return (
     <Grid className="movie-com">
@@ -230,7 +238,16 @@ const MovieComp = forwardRef<
             <>
               <b>{meta.res}p</b>
               <DurationComp dur={meta.duration} />
-              <Tooltip position="left" text={`${meta.size} ${meta.container}`}>
+              <Tooltip
+                position="bottom"
+                text={`Container: ${meta.container}\nSize: ${
+                  meta.size
+                }\nPlays: ${mov.played_count ?? 0}\nLast Played: ${
+                  mov.last_played
+                    ? new Date(mov.last_played).toLocaleString()
+                    : 'never'
+                }`}
+              >
                 {meta.web ? <IOFlash /> : <IOFlashOff />}
               </Tooltip>
             </>
@@ -406,19 +423,24 @@ const MovieComp = forwardRef<
           />
         </Grid>
       </Grid>
-      {/* editMode && editStar ? <RatingHelper /> : null */}
       <Grid
         style={{
           flexDirection: 'row-reverse',
         }}
-        flex={editMode}
+        flex={editMode && !ui.tooltipDisabled}
       >
         <RatingComp
-          className={editMode ? 'edit-rating' : undefined}
+          className={
+            editMode && !ui.tooltipDisabled ? 'edit-rating' : undefined
+          }
           option={{
             mov: localLib,
             edit: editStar,
-            close: () => setEditStar(false),
+            close: () => {
+              if (!editMode) {
+                setEditStar(false);
+              }
+            },
             update: updateL,
           }}
         />

@@ -20,7 +20,7 @@ export default function StarCompV2({
   onChange?: (val: number) => void;
   start?: number;
   icon?: INames;
-  message?: { text: string; tooltip: string };
+  message?: { text: React.ReactNode; tooltip: string };
 }) {
   const [init, setInit] = useState<number | undefined>(start ?? 0);
   const [cur, setCur] = useState<number>((start ?? 0) - 1);

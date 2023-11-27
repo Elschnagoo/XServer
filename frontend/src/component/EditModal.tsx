@@ -17,6 +17,8 @@ import {
   KeyBind,
   Tooltip,
   useKeyListener,
+  useUIContext,
+  uuid,
 } from '@grandlinex/react-components';
 import { toast } from 'react-toastify';
 import { useAppDispatch, useAppSelector } from '@/store';
@@ -34,6 +36,8 @@ import { MODAL } from '@/lib';
 
 export default function EditModal() {
   const dispatch = useAppDispatch();
+  const ui = useUIContext();
+
   const parentPos = useAppSelector(selectEditMode);
   const search = useAppSelector(selectSearch);
   const context = useGlobalContext();
@@ -44,6 +48,7 @@ export default function EditModal() {
   const [doubleTime, setDoubleTime] = useState<boolean>(false);
   const [pos, setPos] = useState<number>(parentPos ?? 0);
   const [numPos, setNumPos] = useState<number>(parentPos ?? 0);
+  const trace = useMemo(() => uuid(), []);
 
   const cur = useMemo(() => data?.[pos], [data, pos]);
   const setStar = useCallback(
@@ -359,11 +364,15 @@ export default function EditModal() {
               <IOChevronBack size={24} />
             </IconButton>
           </Grid>
-          <Grid flex className="edit-main">
+          <Grid
+            flex
+            className={['edit-main', [!ui.tooltipDisabled, 'edit-desktop']]}
+          >
             <MovieComp
               ref={ref.current}
               key={`edit_${cur.e_id}`}
               mov={cur}
+              trace={trace}
               forcePlay={forcePlay}
               doubleTime={doubleTime}
               showProgress

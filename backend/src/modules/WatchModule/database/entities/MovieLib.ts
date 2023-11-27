@@ -36,6 +36,18 @@ export default class MovieLib extends CoreEntity {
   created: Date;
 
   @Column({
+    dataType: 'date',
+    canBeNull: true,
+  })
+  last_played: Date | null;
+
+  @Column({
+    dataType: 'int',
+    canBeNull: true,
+  })
+  played_count: number | null;
+
+  @Column({
     dataType: 'boolean',
   })
   synced: boolean;
@@ -58,5 +70,7 @@ export default class MovieLib extends CoreEntity {
     this.disabled = props?.disabled ?? false;
     this.lib_file = props?.lib_file || '';
     this.rating = props?.rating ?? null;
+    this.last_played = props?.last_played ?? null;
+    this.played_count = props?.played_count ?? null;
   }
 }

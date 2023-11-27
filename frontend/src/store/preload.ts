@@ -122,6 +122,31 @@ export default function usePreload() {
                   new Date(a.created).getTime() - new Date(b.created).getTime(),
               );
               break;
+
+            case SearchOrder.PLAYS_ASC:
+              data = data.sort(
+                (a, b) => (a.played_count || 0) - (b.played_count || 0),
+              );
+              break;
+            case SearchOrder.PLAYS_DSC:
+              data = data.sort(
+                (a, b) => (b.played_count || 0) - (a.played_count || 0),
+              );
+              break;
+            case SearchOrder.LAST_PLAYED_ASC:
+              data = data.sort(
+                (a, b) =>
+                  new Date(a.last_played || 0).getTime() -
+                  new Date(b.last_played || 0).getTime(),
+              );
+              break;
+            case SearchOrder.LAST_PLAYED_DSC:
+              data = data.sort(
+                (a, b) =>
+                  new Date(b.last_played || 0).getTime() -
+                  new Date(a.last_played || 0).getTime(),
+              );
+              break;
             case SearchOrder.DATE_DSC:
             default:
               break;

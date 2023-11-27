@@ -17,12 +17,12 @@ export function usePlayMode() {
   return useCallback(
     (forceRaw = false) => {
       if (forceRaw && (mode === PlayMode.DEFAULT || mode === PlayMode.RAW)) {
-        return `profile=${PlayMode.RAW}`;
+        return `&profile=${PlayMode.RAW}`;
       }
       if (!forceRaw && mode === PlayMode.DEFAULT) {
         return '';
       }
-      return `profile=${mode}`;
+      return `&profile=${mode}`;
     },
     [mode],
   );

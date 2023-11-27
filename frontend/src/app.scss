@@ -179,10 +179,11 @@ $content-h: 288px;
       right: 4px;
 
     }
+    .edit-desktop{
+      width: calc(100% - 600px);
+    }
     .edit-main{
       padding-top: 20px;
-//      outline: 1px solid white;
-      width: calc(100% - 600px);
       height: calc(100% - 20px);
       .movie-com{
         width: calc(100% - 4px);

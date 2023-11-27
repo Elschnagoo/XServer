@@ -1,5 +1,11 @@
 import React, { useMemo } from 'react';
-import { cnx, Grid, IconButton, IOClose } from '@grandlinex/react-components';
+import {
+  cnx,
+  Grid,
+  IconButton,
+  IOClose,
+  uuid,
+} from '@grandlinex/react-components';
 import { MediaPlayer } from '@grandlinex/react-components/dist/components/mediaPlayer/MediaPlayer';
 import useAuthHelper from '@/utils/AuthUtil';
 import { selectMulti, setModal } from '@/store/MovieStore';
@@ -13,7 +19,7 @@ export default function MultiView() {
   const pList = useMemo(() => {
     return list.map((v) => [
       v,
-      authHelper(`/movie/stream/${v}?${mode()}`, true),
+      authHelper(`/movie/stream/${v}?trace=${uuid()}${mode()}`, true),
       authHelper(`/movie/img/${v}?type=tn_1`, true),
     ]);
   }, [authHelper, list]);

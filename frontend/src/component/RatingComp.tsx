@@ -62,7 +62,12 @@ export default function RatingComp({
           return (
             <StarCompV2
               message={{
-                text: e.rating_label,
+                text: (
+                  <span>
+                    {e.rating_label}
+                    {!cur && <span style={{ color: 'lightblue' }}> *</span>}
+                  </span>
+                ),
                 tooltip: `Rating weight: ${e.rating_value}`,
               }}
               icon={e.icon as any}
@@ -101,6 +106,7 @@ export default function RatingComp({
                   })}
                 <Tooltip text={`Rating weight: ${e.rating_value}`}>
                   {e.rating_label}
+                  {!cur && <span style={{ color: 'lightblue' }}> *</span>}
                 </Tooltip>
               </Grid>
               <CheckBox

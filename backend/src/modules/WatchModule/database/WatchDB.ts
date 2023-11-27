@@ -16,13 +16,7 @@ import Label from './entities/Label';
 import LabelMap from './map/LabelMap';
 import DownloadQ from './queue/DownloadQ';
 import RatingElement from './entities/RatingElement';
-import Patch001 from './patch/Patch001';
-import Patch002 from './patch/Patch002';
-import Patch003 from './patch/Patch003';
-import Patch004 from './patch/Patch004';
-import Patch005 from './patch/Patch005';
-import Patch006 from './patch/Patch006';
-import Patch007 from './patch/Patch007';
+import * as Patch from './patch';
 import MovieRating from './entities/MovieRating';
 
 export default class WatchDB extends PGCon {
@@ -51,7 +45,7 @@ export default class WatchDB extends PGCon {
   movRating: CoreEntityWrapper<MovieRating>;
 
   constructor(mod: IBaseKernelModule<any, any, any, any, any>) {
-    super(mod, '7');
+    super(mod, '8');
     this.types = this.registerEntity(new LibType());
     this.states = this.registerEntity(new StateTypeQ());
     this.lib = this.registerEntity(new Library());
@@ -68,13 +62,14 @@ export default class WatchDB extends PGCon {
     this.movRating = this.registerEntity(new MovieRating());
 
     this.setUpdateChain(
-      new Patch001(this),
-      new Patch002(this),
-      new Patch003(this),
-      new Patch004(this),
-      new Patch005(this),
-      new Patch006(this),
-      new Patch007(this),
+      new Patch.Patch001(this),
+      new Patch.Patch002(this),
+      new Patch.Patch003(this),
+      new Patch.Patch004(this),
+      new Patch.Patch005(this),
+      new Patch.Patch006(this),
+      new Patch.Patch007(this),
+      new Patch.Patch008(this),
     );
   }
 

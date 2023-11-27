@@ -37,6 +37,9 @@ import WatchClient from '../../client/WatchClient';
           rating: {
             type: 'integer',
           },
+          noCalc: {
+            type: 'boolean',
+          },
         },
         required: ['element', 'rating'],
       }),
@@ -79,7 +82,7 @@ export default class SetMovieRatingAction extends BaseApiAction<
         res.sendStatus(404);
         return;
       }
-      const { element, rating } = req.body;
+      const { element, rating, noCalc } = req.body;
 
       const rElement = await db.ratingEl.getObjById(element);
 
@@ -131,7 +134,13 @@ export default class SetMovieRatingAction extends BaseApiAction<
       }
 
       res.status(200);
-      res.send(await client.updateRating(movie));
+
+      if (noCalc !== true) {
+        res.send(await client.updateRating(movie));
+      } else {
+        res.send(movie);
+      }
+
       return;
     }
 

@@ -49,6 +49,8 @@ export default class MovieScanner extends BaseScanner {
               disabled: false,
               rating: null,
               lib_file: fId,
+              last_played: null,
+              played_count: null,
             }),
           );
           if (labelList) {
