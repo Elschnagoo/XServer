@@ -32,6 +32,7 @@ import {
   removeMulti,
   resetMulti,
   selectEditMode,
+  selectForceSuggest,
   selectLabel,
   selectMax,
   selectModal,
@@ -58,6 +59,7 @@ export default function Main() {
   const search = useAppSelector(selectSearch);
   const data = useAppSelector(selectMovie);
   const label = useAppSelector(selectLabel);
+  const forceSuggestions = useAppSelector(selectForceSuggest);
   const revision = useAppSelector(selectRevision);
   const modal = useAppSelector(selectModal);
   const mode = usePlayMode();
@@ -361,6 +363,7 @@ export default function Main() {
                       reload={() => {
                         loadMovie(search);
                       }}
+                      suggest={forceSuggestions}
                       index={index}
                       multi={{
                         list: multi,

@@ -18,6 +18,7 @@ const initialAppEnv: MovieEnv = {
   revision: 0,
   mode: PlayMode.DEFAULT,
   forcePreview: LocalStorage.flagLoad('forcePreview'),
+  forceSuggest: LocalStorage.flagLoad('suggestion'),
 };
 
 export const movState = createSlice({
@@ -78,6 +79,9 @@ export const movState = createSlice({
     setForcePreview: (state, action: PayloadAction<boolean>) => {
       state.forcePreview = action.payload;
     },
+    setForceSuggest: (state, action: PayloadAction<boolean>) => {
+      state.forceSuggest = action.payload;
+    },
     setMode: (state, action: PayloadAction<PlayMode>) => {
       state.mode = action.payload;
     },
@@ -100,12 +104,15 @@ export const {
   setMode,
   setForcePreview,
   setRating,
+  setForceSuggest,
 } = movState.actions;
 
 export const selectSearch = (state: RootState) => state.movie.search;
 export const selectMax = (state: RootState) => state.movie.max;
 export const selectForcePreview = (state: RootState) =>
   state.movie.forcePreview;
+export const selectForceSuggest = (state: RootState) =>
+  state.movie.forceSuggest;
 export const selectMode = (state: RootState) => state.movie.mode;
 export const selectLabel = (state: RootState) => state.movie.label;
 export const selectRating = (state: RootState) => state.movie.rating;

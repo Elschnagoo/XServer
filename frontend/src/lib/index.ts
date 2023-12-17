@@ -50,4 +50,5 @@ export type MovieEnv = {
   revision: number;
   mode: PlayMode;
   forcePreview: boolean;
+  forceSuggest: boolean;
 };

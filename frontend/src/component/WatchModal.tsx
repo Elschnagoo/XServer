@@ -3,8 +3,10 @@ import { Form, InputOptionType } from '@grandlinex/react-components';
 import { useAppDispatch, useAppSelector } from '@/store';
 import {
   selectForcePreview,
+  selectForceSuggest,
   selectMode,
   setForcePreview,
+  setForceSuggest,
   setModal,
   setMode,
 } from '@/store/MovieStore';
@@ -14,6 +16,8 @@ import LocalStorage from '@/utils/LocalStorage';
 export default function WatchModal() {
   const mode = useAppSelector(selectMode);
   const forcePreview = useAppSelector(selectForcePreview);
+  const forceSuggestions = useAppSelector(selectForceSuggest);
+
   const dispatch = useAppDispatch();
   const option = LocalStorage.jsonLoad<{ max: number }>('multiView', {
     max: 4,
@@ -28,6 +32,7 @@ export default function WatchModal() {
       defaultState={{
         mode,
         preview: forcePreview,
+        suggest: forceSuggestions,
         max: option.max,
       }}
       submit={{
@@ -37,6 +42,8 @@ export default function WatchModal() {
           dispatch(setMode(form.mode));
           dispatch(setForcePreview(form.preview));
           LocalStorage.flagSave('forcePreview', form.preview);
+          dispatch(setForceSuggest(form.suggest));
+          LocalStorage.flagSave('suggestion', form.suggest);
           LocalStorage.jsonSave('multiView', {
             max: form.max,
           });
@@ -56,6 +63,13 @@ export default function WatchModal() {
             key: 'preview',
             type: InputOptionType.CHECKBOX,
             label: 'Force play preview',
+          },
+        ],
+        [
+          {
+            key: 'suggest',
+            type: InputOptionType.CHECKBOX,
+            label: 'Force label suggestion',
           },
         ],
         [
