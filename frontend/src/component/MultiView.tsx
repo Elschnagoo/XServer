@@ -10,11 +10,15 @@ import { MediaPlayer } from '@grandlinex/react-components/dist/components/mediaP
 import useAuthHelper from '@/utils/AuthUtil';
 import { selectMulti, setModal } from '@/store/MovieStore';
 import { useAppDispatch, useAppSelector, usePlayMode } from '@/store';
+import LocalStorage from '@/utils/LocalStorage';
 
 export default function MultiView() {
   const authHelper = useAuthHelper();
   const dispatch = useAppDispatch();
   const mode = usePlayMode();
+  const option = LocalStorage.jsonLoad<{ max: number }>('multiView', {
+    max: 4,
+  })!;
   const list = useAppSelector(selectMulti);
   const pList = useMemo(() => {
     return list.map((v) => [
@@ -26,14 +30,21 @@ export default function MultiView() {
   return (
     <>
       <Grid flex flexR className="multi-view glx-flex-wrap">
-        {pList.slice(0, 4).map(([id, steam, poster]) => (
+        {pList.slice(0, option.max).map(([id, steam, poster], index, el) => (
           <div
             id={`${id}_steam`}
             className={cnx(
-              [pList.length === 1, 'multi-el-single'],
-              [pList.length === 2, 'multi-el-dual'],
-              [pList.length > 2, 'multi-el'],
+              [el.length === 1, 'multi-el-single'],
+              [el.length === 2, 'multi-el-dual'],
+              [el.length > 2, 'multi-el'],
             )}
+            style={
+              pList.length > 2
+                ? {
+                    width: `calc(100% / ${Math.round(el.length / 2)})`,
+                  }
+                : undefined
+            }
           >
             <MediaPlayer src={steam} poster={poster} />
           </div>

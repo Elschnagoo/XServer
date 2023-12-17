@@ -45,6 +45,7 @@ export default function EditModal() {
   const ref = useRef(createRef<MovieComRefType>());
   const data = useAppSelector(selectMovie);
   const [forcePlay, setForcePlay] = useState<boolean>(false);
+  const [forceSuggest, setForceSuggest] = useState<boolean>(false);
   const [doubleTime, setDoubleTime] = useState<boolean>(false);
   const [pos, setPos] = useState<number>(parentPos ?? 0);
   const [numPos, setNumPos] = useState<number>(parentPos ?? 0);
@@ -310,6 +311,12 @@ export default function EditModal() {
           Autoplay{' '}
           <CheckBox
             className="h-fix"
+            checked={forceSuggest}
+            onChange={() => setForceSuggest(!forceSuggest)}
+          />{' '}
+          Auto-suggest{' '}
+          <CheckBox
+            className="h-fix"
             checked={doubleTime}
             onChange={() => setDoubleTime(!doubleTime)}
           />{' '}
@@ -375,6 +382,7 @@ export default function EditModal() {
               trace={trace}
               forcePlay={forcePlay}
               doubleTime={doubleTime}
+              suggest={forceSuggest}
               showProgress
               reload={() => {
                 loadMovie(search || undefined);

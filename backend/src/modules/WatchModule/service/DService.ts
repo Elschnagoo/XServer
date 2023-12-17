@@ -44,6 +44,7 @@ export default class DService extends BaseLoopService<IKernel, WatchDB> {
             nPath,
             f.fileName,
             dw.label || undefined,
+            dw.download_path,
           );
         }
         this.log(`Download: ${dw.download_path} complete`);

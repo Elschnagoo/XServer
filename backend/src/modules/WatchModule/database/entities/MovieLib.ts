@@ -31,6 +31,12 @@ export default class MovieLib extends CoreEntity {
   rating: number | null;
 
   @Column({
+    dataType: 'text',
+    canBeNull: true,
+  })
+  movie_url: string | null;
+
+  @Column({
     dataType: 'date',
   })
   created: Date;
@@ -72,5 +78,6 @@ export default class MovieLib extends CoreEntity {
     this.rating = props?.rating ?? null;
     this.last_played = props?.last_played ?? null;
     this.played_count = props?.played_count ?? null;
+    this.movie_url = props?.movie_url ?? null;
   }
 }

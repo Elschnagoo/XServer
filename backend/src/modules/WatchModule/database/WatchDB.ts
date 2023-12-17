@@ -18,6 +18,8 @@ import DownloadQ from './queue/DownloadQ';
 import RatingElement from './entities/RatingElement';
 import * as Patch from './patch';
 import MovieRating from './entities/MovieRating';
+import LabelAlias from './entities/LabelAlias';
+import Patch009 from './patch/Patch009';
 
 export default class WatchDB extends PGCon {
   types: CoreEntityWrapper<LibType>;
@@ -38,6 +40,8 @@ export default class WatchDB extends PGCon {
 
   label: CoreEntityWrapper<Label>;
 
+  labelAlias: CoreEntityWrapper<LabelAlias>;
+
   labelMap: CoreEntityWrapper<LabelMap>;
 
   ratingEl: CoreEntityWrapper<RatingElement>;
@@ -45,7 +49,7 @@ export default class WatchDB extends PGCon {
   movRating: CoreEntityWrapper<MovieRating>;
 
   constructor(mod: IBaseKernelModule<any, any, any, any, any>) {
-    super(mod, '8');
+    super(mod, '9');
     this.types = this.registerEntity(new LibType());
     this.states = this.registerEntity(new StateTypeQ());
     this.lib = this.registerEntity(new Library());
@@ -57,6 +61,7 @@ export default class WatchDB extends PGCon {
     this.scanQ = this.registerEntity(new ScannerQ());
     this.download = this.registerEntity(new DownloadQ());
     this.label = this.registerEntity(new Label());
+    this.labelAlias = this.registerEntity(new LabelAlias());
     this.labelMap = this.registerEntity(new LabelMap());
     this.ratingEl = this.registerEntity(new RatingElement());
     this.movRating = this.registerEntity(new MovieRating());
@@ -70,6 +75,7 @@ export default class WatchDB extends PGCon {
       new Patch.Patch006(this),
       new Patch.Patch007(this),
       new Patch.Patch008(this),
+      new Patch.Patch009(this),
     );
   }
 

@@ -6,3 +6,4 @@
 *.iml
 /uploadImage.ps1
 /frontend/src/component/dev.ts
+/token.http

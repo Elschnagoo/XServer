@@ -23,6 +23,7 @@ export default class MovieScanner extends BaseScanner {
     fPath: string,
     name: string,
     labelList?: string[],
+    url?: string,
   ): Promise<void> {
     try {
       if (!(await this.db.file.findObj({ file_path: fPath }))) {
@@ -51,6 +52,7 @@ export default class MovieScanner extends BaseScanner {
               lib_file: fId,
               last_played: null,
               played_count: null,
+              movie_url: url || null,
             }),
           );
           if (labelList) {

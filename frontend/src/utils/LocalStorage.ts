@@ -16,11 +16,11 @@ export default class LocalStorage {
     }
   }
 
-  static jsonLoad<T = any>(key: string): T | null {
+  static jsonLoad<T = any>(key: string, defaultValue?: T): T | null {
     try {
       return JSON.parse(this.load(key));
     } catch (e) {
-      return null;
+      return defaultValue ?? null;
     }
   }
 

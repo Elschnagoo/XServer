@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Badge,
   BadgeColor,
@@ -15,70 +15,135 @@ import { toast } from 'react-toastify';
 import { useGlobalContext } from '@/context/GlobalContext';
 import { useAppSelector } from '@/store';
 import { selectLabel } from '@/store/MovieStore';
+import LoadingComp from '@/component/LoadingComp';
 
 export default function DownloadModal() {
   const context = useGlobalContext();
+  const [loading, setLoading] = useState(false);
+  const [form, setForm] = useState<{
+    url: string;
+    meta: string;
+    label: string[];
+  }>({
+    url: '',
+    meta: '',
+    label: [],
+  });
+  const [error, setError] = useState<any>(undefined);
   const [data, , reload] = useQData(async () => {
     return (await context.getDownloadQ()).data;
   });
   const label = useAppSelector(selectLabel);
+
+  const download = async () => {
+    if (!form.url || form.url === '') {
+      setError({
+        field: [
+          {
+            key: 'url',
+            message: 'URL cannot be empty',
+          },
+        ],
+      });
+      return;
+    }
+    setLoading(true);
+    const l = await context.downloadMedia({
+      url: form.url,
+      label: form.label?.map((e: string) => ({ e_id: e })),
+    });
+    if (l.success) {
+      toast.success('Download queued');
+      reload();
+      setForm({ url: '', meta: '', label: [] });
+    } else {
+      toast.error('Error adding download');
+    }
+    setLoading(false);
+  };
+  const getLabel = async () => {
+    if (!form.url || form.url === '') {
+      setError({
+        field: [
+          {
+            key: 'url',
+            message: 'URL cannot be empty',
+          },
+        ],
+      });
+      return;
+    }
+    setLoading(true);
+    const l = await context.downloadLabelSuggestions({
+      url: form.url,
+    });
+    if (l.success) {
+      toast.success('Label added');
+      setForm({
+        url: form.url,
+        meta: l.data?.search.map((a) => a.text).join('\n') || '',
+        label: l.data?.label.map((e) => e.e_id) || [],
+      });
+    } else {
+      toast.error('Error get label');
+    }
+    setLoading(false);
+  };
+
   if (!label) {
     return null;
   }
   return (
     <>
-      <Form
-        className="glx-w-full-4"
-        submit={{
-          buttonText: 'Download element',
-          loading: true,
-          onSubmit: async ({ form, setError, clear }) => {
-            if (!form.url || form.url === '') {
-              setError({
-                field: [
-                  {
-                    key: 'url',
-                    message: 'URL cannot be empty',
-                  },
-                ],
-              });
-            }
-            const l = await context.downloadMedia({
-              url: form.url,
-              label: form.label?.map((e: string) => ({ e_id: e })),
-            });
-            if (l.success) {
-              toast.success('Download queued');
-              reload();
-              clear();
-            } else {
-              toast.error('Error adding download');
-            }
-          },
-        }}
-        options={[
-          [
-            {
-              key: 'url',
-              type: InputOptionType.TEXT,
-              label: 'URL',
-            },
-          ],
-          [
-            {
-              key: 'label',
-              type: InputOptionType.TAG_SELECTOR,
-              label: 'Add Label',
-              items: label.map((l) => ({
-                key: l.e_id,
-                name: l.label_name,
-                icon: l.icon as any,
-                other: l.color,
-              })),
-            },
-          ],
-        ]}
-      />
+      <LoadingComp loading={loading}>
+        <Form
+          className="glx-w-full-4"
+          defaultState={form}
+          defaultError={error}
+          onChange={(e) => {
+            setError(undefined);
+            setForm(e.form);
+            console.log(e.form);
+          }}
+          options={[
+            [
+              {
+                key: 'url',
+                type: InputOptionType.TEXT,
+                label: 'URL',
+              },
+            ],
+            [
+              {
+                key: 'label',
+                type: InputOptionType.TAG_SELECTOR,
+                label: 'Add Label',
+                items: label.map((l) => ({
+                  key: l.e_id,
+                  name: l.label_name,
+                  icon: l.icon as any,
+                  other: l.color,
+                })),
+              },
+            ],
+            [
+              {
+                key: 'meta',
+                type: InputOptionType.TEXT_FIELD,
+                label: 'Meta (View Only)',
+                disabled: true,
+                restriction: {
+                  rows: 10,
+                },
+              },
+            ],
+          ]}
+        />
+        <Grid flex flexRow hCenter>
+          <Button onClick={getLabel}>Get Label</Button>
+          <Button onClick={download}>Download element</Button>
+        </Grid>
+      </LoadingComp>
 
       {data ? (
         <>

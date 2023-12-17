@@ -6,6 +6,7 @@ import Patch005 from './Patch005';
 import Patch006 from './Patch006';
 import Patch007 from './Patch007';
 import Patch008 from './Patch008';
+import Patch009 from './Patch009';
 
 export {
   Patch001,
@@ -16,4 +17,5 @@ export {
   Patch006,
   Patch007,
   Patch008,
+  Patch009,
 };

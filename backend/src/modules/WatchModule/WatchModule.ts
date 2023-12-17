@@ -30,6 +30,11 @@ import SetMovieRatingAction from './action/movie/SetMovieRatingAction';
 import GetMovieRatingAction from './action/movie/GetMovieRatingAction';
 import NewRatingAction from './action/rating/NewRatingAction';
 import UpdateRatingAction from './action/rating/UpdateRatingAction';
+import NewLabelAliasAction from './action/alias/NewLabelAliasAction';
+import DeleteLabelAliasAction from './action/alias/DeleteLabelAliasAction';
+import LabelAliasAction from './action/alias/LabelAliasAction';
+import LabelLookupAction from './action/label/LabelLookupAction';
+import DownloadLabelSuggestionsAction from './action/admin/DownloadLabelSuggestionsAction';
 
 export default class WatchModule extends BaseKernelModule<
   IKernel,
@@ -48,8 +53,6 @@ export default class WatchModule extends BaseKernelModule<
       new MovieImgAction(this),
       new MovieStreamAction(this),
       new MovieLabelAction(this),
-      new BindLabelAction(this),
-      new UnbindLabelAction(this),
       new DeleteMovieAction(this),
       new SetMovieRatingAction(this),
       new GetMovieRatingAction(this),
@@ -57,10 +60,18 @@ export default class WatchModule extends BaseKernelModule<
       new LabelAction(this),
       new NewLabelAction(this),
       new UpdateLabelAction(this),
+      new BindLabelAction(this),
+      new UnbindLabelAction(this),
+      new LabelLookupAction(this),
+      // label alias
+      new LabelAliasAction(this),
+      new NewLabelAliasAction(this),
+      new DeleteLabelAliasAction(this),
       // admin
       new ScanLibAction(this),
       new UpdateMovieAction(this),
       new DownloadAction(this),
+      new DownloadLabelSuggestionsAction(this),
       new DownloadStatusAction(this),
       new DeleteDownloadAction(this),
       new AddLibPathAction(this),

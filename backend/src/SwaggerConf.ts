@@ -5,6 +5,7 @@ import DownloadQ from './modules/WatchModule/database/queue/DownloadQ';
 import LibPath from './modules/WatchModule/database/entities/LibPath';
 import RatingElement from './modules/WatchModule/database/entities/RatingElement';
 import MovieRating from './modules/WatchModule/database/entities/MovieRating';
+import LabelAlias from './modules/WatchModule/database/entities/LabelAlias';
 
 const SwaggerConf: SwaggerConfig = {
   info: {
@@ -83,6 +84,7 @@ const SwaggerConf: SwaggerConfig = {
         new DownloadQ(),
         new RatingElement(),
         new MovieRating(),
+        new LabelAlias(),
       ),
       MLabel: {
         type: 'object',

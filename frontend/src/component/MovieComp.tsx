@@ -71,6 +71,7 @@ const MovieComp = forwardRef<
     mov: MovieLib;
     reload: () => void;
     editMode?: boolean;
+    suggest?: boolean;
     trace?: string;
     forcePlay?: boolean;
     doubleTime?: boolean;
@@ -101,7 +102,12 @@ const MovieComp = forwardRef<
   const mode = usePlayMode();
   const context = useGlobalContext();
   const [play, setPlay] = useState<boolean>(!!forcePlay);
-  const [editLabel, setEditLabel] = useState<boolean>(editMode || false);
+  const [editLabel, setEditLabel] = useState<boolean>(
+    (!!editMode && !prop.suggest) || false,
+  );
+  const [suggest, setSuggest] = useState<boolean>(
+    editMode || prop.suggest || false,
+  );
   const [editStar, setEditStar] = useState<boolean>(editMode || false);
   const [playerStatus, setPlayerstatus] =
     useState<PlayerUpdateEvent<any> | null>(null);
@@ -345,6 +351,15 @@ const MovieComp = forwardRef<
                 icon: 'IOOpenOutline',
                 label: 'Open Video in new tab',
               },
+              ...(mov.movie_url
+                ? [
+                    {
+                      key: 'open-original',
+                      icon: 'IOOpen' as INames,
+                      label: 'Open Original',
+                    },
+                  ]
+                : []),
               ...(index !== undefined
                 ? [
                     {
@@ -355,6 +370,11 @@ const MovieComp = forwardRef<
                   ]
                 : []),
               {
+                key: 'suggest',
+                icon: 'IOPricetags',
+                label: 'Label Suggestion',
+              },
+              {
                 key: 'delete',
                 icon: 'IOTrash',
                 label: 'Delete Video',
@@ -363,6 +383,15 @@ const MovieComp = forwardRef<
             left
             onChange={(key) => {
               switch (key) {
+                case 'suggest':
+                  setSuggest(!suggest);
+                  break;
+                case 'open-original':
+                  context.openExternalConfig({
+                    url: mov.movie_url!,
+                    external: true,
+                  });
+                  break;
                 case 'open':
                   context.openExternalConfig({
                     url: authHelper(
@@ -445,7 +474,13 @@ const MovieComp = forwardRef<
           }}
         />
 
-        <LabelComp id={mov.e_id} focus={!!editMode} edit={editLabel} />
+        <LabelComp
+          id={mov.e_id}
+          focus={!!editMode}
+          edit={editLabel}
+          suggest={suggest}
+          title={mov.movie_name}
+        />
       </Grid>
     </Grid>
   );
@@ -453,6 +488,8 @@ const MovieComp = forwardRef<
 
 MovieComp.defaultProps = {
   editMode: undefined,
+  suggest: undefined,
+  trace: undefined,
   forcePlay: undefined,
   doubleTime: undefined,
   showProgress: undefined,

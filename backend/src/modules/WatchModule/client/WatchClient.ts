@@ -13,6 +13,7 @@ import MovieLib from '../database/entities/MovieLib';
 import LibFile from '../database/entities/LibFile';
 import ThumbVFactory from '../utils/ThumbVFactory';
 import { RatingElementType } from '../database/entities/RatingElement';
+import Label from '../database/entities/Label';
 
 function f(path: string, ...files: string[]) {
   let p = true;
@@ -52,6 +53,40 @@ export default class WatchClient extends BaseClient<IKernel, WatchDB> {
     this.ffmpeg = ffmpegS;
     this.ffprobe = ffprobe;
     this.magicPre = magicPre && magicPre !== '' ? magicPre : null;
+  }
+
+  async labelFromString(...inputs: string[]): Promise<Label[]> {
+    const db = this.getModule().getDb();
+    const set = new Set<string>();
+    const label = new Set<string>();
+
+    inputs
+      .map((d) => d.toLowerCase())
+      .forEach((e) => {
+        const spl = e.split(' ').filter((c) => c !== '');
+        for (let x = 0; x < spl.length; x++) {
+          for (let y = 0; y + x < spl.length; y++) {
+            set.add(spl.slice(y, y + x + 1).join(' '));
+          }
+        }
+      });
+    set.delete('');
+    this.debug(Array.from(set));
+
+    const allLabel = await db.label.getObjList();
+    for (const cur of set) {
+      allLabel
+        .filter((e) => cur.includes(e.label_name.toLowerCase()))
+        .forEach((e) => label.add(e.e_id));
+
+      const el = await db.labelAlias.getObjList({
+        search: {
+          alias: cur,
+        },
+      });
+      el.forEach((e) => label.add(e.label));
+    }
+    return allLabel.filter((e) => label.has(e.e_id));
   }
 
   async inspectFile(path: string): Promise<ProbeInfo | null> {
