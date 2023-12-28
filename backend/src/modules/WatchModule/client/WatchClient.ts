@@ -234,12 +234,13 @@ export default class WatchClient extends BaseClient<IKernel, WatchDB> {
     for (const rat of maxRatings) {
       const r = ratings.find((e) => e.element === rat.e_id);
       if (r) {
+        const reval = r.rating_value >= 0 ? r.rating_value : 0;
         switch (rat.rating_type) {
           case RatingElementType.BOOL:
-            calc += rat.rating_value * r.rating_value;
+            calc += rat.rating_value * reval;
             break;
           case RatingElementType.STAR:
-            calc += rat.rating_value * (r.rating_value / 5);
+            calc += rat.rating_value * (reval / 5);
             break;
           default:
         }

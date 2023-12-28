@@ -176,7 +176,7 @@ export default function RatingModal({
               rating_type: params.data.rating_type,
             }}
             submit={{
-              buttonText: 'Create',
+              buttonText: 'Update',
               onSubmit: async ({ form, setError }) => {
                 const rating_label = form.it?.text;
                 if (!rating_label || rating_label === '') {

@@ -304,26 +304,20 @@ $content-h: 288px;
   background: $main-background;
   z-index: 400;
   .multi-el{
-    height: calc(50% - 2px);
+//    height: calc(50% - 2px);
     video{
       width: 100%;
       height: calc(100% - 2px);
     }
   }
   .multi-el-dual{
+    @extend .multi-el;
     width: 50%;
     height: calc(100% - 2px);
-    video{
-      width: 100%;
-      height: calc(100% - 2px);
-    }
   }
   .multi-el-single{
+    @extend .multi-el;
     height: calc(100% - 2px);
-    video{
-      width: 100%;
-      height: calc(100% - 2px);
-    }
   }
 }
 .multi-close{

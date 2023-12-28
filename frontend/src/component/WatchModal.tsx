@@ -11,7 +11,7 @@ import {
   setMode,
 } from '@/store/MovieStore';
 import { PlayMode } from '@/lib';
-import LocalStorage from '@/utils/LocalStorage';
+import PersistentStorage from '@/utils/PersistentStorage';
 
 export default function WatchModal() {
   const mode = useAppSelector(selectMode);
@@ -19,9 +19,8 @@ export default function WatchModal() {
   const forceSuggestions = useAppSelector(selectForceSuggest);
 
   const dispatch = useAppDispatch();
-  const option = LocalStorage.jsonLoad<{ max: number }>('multiView', {
-    max: 4,
-  })!;
+  const option = PersistentStorage.getMultiOptions();
+
   const opts = useMemo(
     () => Object.values(PlayMode).map((v) => ({ key: v, name: v })),
     [],
@@ -33,7 +32,8 @@ export default function WatchModal() {
         mode,
         preview: forcePreview,
         suggest: forceSuggestions,
-        max: option.max,
+        maxR: option.maxR,
+        maxC: option.maxC,
       }}
       submit={{
         buttonText: 'Save',
@@ -41,11 +41,12 @@ export default function WatchModal() {
           dispatch(setModal(null));
           dispatch(setMode(form.mode));
           dispatch(setForcePreview(form.preview));
-          LocalStorage.flagSave('forcePreview', form.preview);
+          PersistentStorage.flagSave('forcePreview', form.preview);
           dispatch(setForceSuggest(form.suggest));
-          LocalStorage.flagSave('suggestion', form.suggest);
-          LocalStorage.jsonSave('multiView', {
-            max: form.max,
+          PersistentStorage.flagSave('suggestion', form.suggest);
+          PersistentStorage.setMultiOptions({
+            maxR: form.maxR,
+            maxC: form.maxC,
           });
         },
       }}
@@ -74,9 +75,19 @@ export default function WatchModal() {
         ],
         [
           {
-            key: 'max',
+            key: 'maxR',
             type: InputOptionType.NUMBER,
-            label: 'Maximum videos shown in multi view',
+            label: 'Set max rows shown in multi view',
+            restriction: {
+              min: 1,
+            },
+          },
+        ],
+        [
+          {
+            key: 'maxC',
+            type: InputOptionType.NUMBER,
+            label: 'Set max columns shown in multi view',
             restriction: {
               min: 1,
             },

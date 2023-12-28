@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { MovieLib } from '@elschnagoo/xserver-con';
 import { toast } from 'react-toastify';
 import {
@@ -14,10 +14,17 @@ import { useGlobalContext } from '@/context/GlobalContext';
 import { useAppSelector } from '@/store';
 import { selectRating } from '@/store/MovieStore';
 
+function cr(rating: number | undefined) {
+  let rat = rating ?? 0;
+  if (rat < 0) {
+    rat = 0;
+  }
+  return rat;
+}
 export default function RatingComp({
   option,
   className,
-}: {
+}: Readonly<{
   className?: string;
   option: {
     mov: MovieLib;
@@ -25,13 +32,34 @@ export default function RatingComp({
     update: (mov: MovieLib) => void;
     close: () => void;
   };
-}) {
+}>) {
   const { mov, edit, update, close } = option;
   const ratings = useAppSelector(selectRating);
   const context = useGlobalContext();
+  const max = useMemo(
+    () => ratings?.reduce((a, b) => a + b.rating_value, 0) ?? 0,
+    [ratings],
+  );
+
   const [rData, , reload] = useQData(async () => {
-    return (await context.getMovieRating(mov.e_id)).data || [];
+    return (await context.getMovieRating(mov.e_id)).data ?? [];
   });
+  const maxCur = useMemo(
+    () =>
+      rData?.reduce((a, b) => {
+        const rat = ratings?.find((x) => b.element === x.e_id);
+        if (rat && rat.rating_type === 'BOOL') {
+          return a + cr(b.rating_value) * rat.rating_value;
+        }
+        if (rat && rat.rating_type === 'STAR') {
+          return a + cr(b.rating_value / 5) * rat.rating_value;
+        }
+        return a;
+      }, 0) ?? 0,
+    [rData, ratings],
+  );
+  const perc = useMemo(() => maxCur / max, [maxCur, max]);
+  const calcR = useMemo(() => 5 * perc, [perc]);
   if (!edit) {
     return null;
   }
@@ -40,7 +68,9 @@ export default function RatingComp({
       <StarCompV2
         message={{
           text: 'Total',
-          tooltip: 'Total rating',
+          tooltip: `Total rating (${maxCur}/${max})[${Math.trunc(
+            perc * 100,
+          )}%,${calcR.toFixed(2)}]`,
         }}
         start={mov.rating}
         onChange={(n) => {
@@ -68,7 +98,9 @@ export default function RatingComp({
                     {!cur && <span style={{ color: 'lightblue' }}> *</span>}
                   </span>
                 ),
-                tooltip: `Rating weight: ${e.rating_value}`,
+                tooltip: `Rating weight: ${Math.trunc(
+                  (cr(cur?.rating_value) / 5) * e.rating_value,
+                )}/${e.rating_value}`,
               }}
               icon={e.icon as any}
               start={cur?.rating_value}
@@ -104,7 +136,11 @@ export default function RatingComp({
                   getIcon(e.icon as any)({
                     size: ISize.SM,
                   })}
-                <Tooltip text={`Rating weight: ${e.rating_value}`}>
+                <Tooltip
+                  text={`Rating weight: ${Math.trunc(
+                    cr(cur?.rating_value) * e.rating_value,
+                  )}/${e.rating_value}`}
+                >
                   {e.rating_label}
                   {!cur && <span style={{ color: 'lightblue' }}> *</span>}
                 </Tooltip>
