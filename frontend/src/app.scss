@@ -346,3 +346,32 @@ $content-h: 288px;
   width: 480px;
   padding-right: 30px;
 }
+
+.suggestion-item{
+  img {
+    width: 100%;
+  }
+
+  a{
+    color: $main-text;
+  }
+
+  .glx-flex-wrap{
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+}
+
+.find-match-form{
+  .glx-form--row:nth-child(2){
+
+    > .glx-form--input:nth-child(1){
+      width: calc(100% - 80px);
+    }
+    > .glx-form--input:nth-child(2){
+
+      width: 60px;
+    }
+  }
+
+}

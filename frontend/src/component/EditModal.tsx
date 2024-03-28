@@ -49,6 +49,7 @@ export default function EditModal() {
   const [doubleTime, setDoubleTime] = useState<boolean>(false);
   const [pos, setPos] = useState<number>(parentPos ?? 0);
   const [numPos, setNumPos] = useState<number>(parentPos ?? 0);
+  const [findMatch, setFindMatch] = useState<boolean>(false);
   const trace = useMemo(() => uuid(), []);
 
   const cur = useMemo(() => data?.[pos], [data, pos]);
@@ -308,13 +309,19 @@ export default function EditModal() {
             checked={forcePlay}
             onChange={() => setForcePlay(!forcePlay)}
           />{' '}
-          Autoplay{' '}
+          <Tooltip text="Autoplay video">Autoplay</Tooltip>{' '}
           <CheckBox
             className="h-fix"
             checked={forceSuggest}
             onChange={() => setForceSuggest(!forceSuggest)}
           />{' '}
-          Auto-suggest{' '}
+          <Tooltip text="Auto suggest labels from title">Auto-suggest</Tooltip>{' '}
+          <CheckBox
+            className="h-fix"
+            checked={findMatch}
+            onChange={() => setFindMatch(!findMatch)}
+          />{' '}
+          <Tooltip text="Find labels by Search Query">Find-Match</Tooltip>{' '}
           <CheckBox
             className="h-fix"
             checked={doubleTime}
@@ -388,6 +395,7 @@ export default function EditModal() {
                 loadMovie(search || undefined);
               }}
               editMode
+              autoFindMatch={findMatch}
             />
           </Grid>
           <Grid flex vCenter>

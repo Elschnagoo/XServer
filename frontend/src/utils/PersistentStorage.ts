@@ -12,4 +12,15 @@ export default class PersistentStorage extends LocalStorage {
   static setMultiOptions(options: MultiViewOptions) {
     return LocalStorage.jsonSave<MultiViewOptions>('multiView', options);
   }
+
+  static getDefaultQuery() {
+    return LocalStorage.load(
+      'default-query',
+      'https://www.youtube.com/results?search_query=',
+    )!;
+  }
+
+  static setDefaultQuery(options: string) {
+    return LocalStorage.save('default-query', options);
+  }
 }

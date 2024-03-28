@@ -1,5 +1,4 @@
 import React, { useMemo } from 'react';
-import { MovieLib } from '@elschnagoo/xserver-con';
 import { toast } from 'react-toastify';
 import {
   CheckBox,
@@ -13,6 +12,7 @@ import StarCompV2 from '@/component/StarCompV2';
 import { useGlobalContext } from '@/context/GlobalContext';
 import { useAppSelector } from '@/store';
 import { selectRating } from '@/store/MovieStore';
+import { useMovieContext } from '@/context/MovieContext';
 
 function cr(rating: number | undefined) {
   let rat = rating ?? 0;
@@ -27,13 +27,13 @@ export default function RatingComp({
 }: Readonly<{
   className?: string;
   option: {
-    mov: MovieLib;
     edit: boolean;
-    update: (mov: MovieLib) => void;
     close: () => void;
   };
 }>) {
-  const { mov, edit, update, close } = option;
+  const mc = useMovieContext();
+  const { mov, update } = mc;
+  const { edit, close } = option;
   const ratings = useAppSelector(selectRating);
   const context = useGlobalContext();
   const max = useMemo(
@@ -74,7 +74,7 @@ export default function RatingComp({
         }}
         start={mov.rating}
         onChange={(n) => {
-          context.updateMovie(option.mov.e_id, { rating: n }).then((res) => {
+          context.updateMovie(mov.e_id, { rating: n }).then((res) => {
             if (!res.success || !res.data) {
               toast.error(`Error`);
             } else {
@@ -106,7 +106,7 @@ export default function RatingComp({
               start={cur?.rating_value}
               onChange={(n) => {
                 context
-                  .setMovieRating(option.mov.e_id, {
+                  .setMovieRating(mov.e_id, {
                     element: e.e_id,
                     rating: n,
                   })
@@ -150,7 +150,7 @@ export default function RatingComp({
                 value={!!cur?.rating_value}
                 onChange={(c) => {
                   context
-                    .setMovieRating(option.mov.e_id, {
+                    .setMovieRating(mov.e_id, {
                       element: e.e_id,
                       rating: c ? 1 : 0,
                     })

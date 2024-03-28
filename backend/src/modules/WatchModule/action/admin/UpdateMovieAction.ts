@@ -38,6 +38,9 @@ import MovieLib from '../../database/entities/MovieLib';
           movie_description: {
             type: 'string',
           },
+          movie_url: {
+            type: 'string',
+          },
         },
       }),
       responses: SPathUtil.refResponse(
@@ -59,7 +62,7 @@ export default class UpdateMovieAction extends BaseApiAction<IKernel, WatchDB> {
 
   async handler({ res, req }: XActionEvent): Promise<void> {
     const { body } = req;
-    const { rating, movie_name, movie_description } = body;
+    const { rating, movie_name, movie_description, movie_url } = body;
     const ratingValid =
       rating === undefined ||
       (typeof rating === 'number' && rating >= -1 && rating <= 5);
@@ -92,6 +95,9 @@ export default class UpdateMovieAction extends BaseApiAction<IKernel, WatchDB> {
     }
     if (movie_description && movieDescriptionValid) {
       changeRecord.movie_description = movie_description;
+    }
+    if (typeof movie_url === 'string' || movie_url === null) {
+      changeRecord.movie_url = movie_url;
     }
     const dx = await db.movieLib.updateObject(req.params.id, changeRecord);
     if (dx) {

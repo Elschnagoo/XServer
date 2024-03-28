@@ -20,6 +20,7 @@ export default function WatchModal() {
 
   const dispatch = useAppDispatch();
   const option = PersistentStorage.getMultiOptions();
+  const query = PersistentStorage.getDefaultQuery();
 
   const opts = useMemo(
     () => Object.values(PlayMode).map((v) => ({ key: v, name: v })),
@@ -34,6 +35,7 @@ export default function WatchModal() {
         suggest: forceSuggestions,
         maxR: option.maxR,
         maxC: option.maxC,
+        query,
       }}
       submit={{
         buttonText: 'Save',
@@ -44,6 +46,7 @@ export default function WatchModal() {
           PersistentStorage.flagSave('forcePreview', form.preview);
           dispatch(setForceSuggest(form.suggest));
           PersistentStorage.flagSave('suggestion', form.suggest);
+          PersistentStorage.setDefaultQuery(form.query);
           PersistentStorage.setMultiOptions({
             maxR: form.maxR,
             maxC: form.maxC,
@@ -71,6 +74,13 @@ export default function WatchModal() {
             key: 'suggest',
             type: InputOptionType.CHECKBOX,
             label: 'Force label suggestion',
+          },
+        ],
+        [
+          {
+            key: 'query',
+            type: InputOptionType.TEXT,
+            label: 'Set default query for label video match',
           },
         ],
         [

@@ -29,14 +29,26 @@ export default class YTClient extends CoreClient<
     );
   }
 
-  async getFullResourceInfo(url: string): Promise<FullResourceMeta[] | null> {
+  async getFullResourceInfo(
+    url: string,
+    opts?: string[],
+  ): Promise<FullResourceMeta[] | null> {
     if (!this.testTargetUrl(url)) {
       return null;
     }
-    const res = await XUtil.exec(this.cmd, ['--skip-download', '-j', url]);
+
+    const args = ['--skip-download', '-j'];
+    if (opts) {
+      args.push(...opts);
+    }
+    const res = await XUtil.exec(this.cmd, [...args, url], {
+      onStdErr: (data: string) => {
+        this.error(Buffer.from(data).toString('utf-8'));
+      },
+    });
 
     if (res.exitCode !== null && res.exitCode !== 0) {
-      console.log(res.exitCode, res.stderr);
+      this.log(res.exitCode, res.stderr);
       return null;
     }
 

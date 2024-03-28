@@ -2,6 +2,7 @@ import React, {
   createRef,
   ElementRef,
   forwardRef,
+  useEffect,
   useImperativeHandle,
   useMemo,
   useState,
@@ -52,6 +53,8 @@ import {
 } from '@/store/MovieStore';
 import VideoPreview from '@/component/VideoPreview';
 import RatingComp from '@/component/RatingComp';
+import FindMatchComp from '@/component/FindMatchComp';
+import MovieContext, { MovieDataContext } from '@/context/MovieContext';
 
 const SupportedWebVideoCodec = ['h264', 'vp8', 'vp9'];
 
@@ -76,6 +79,7 @@ const MovieComp = forwardRef<
     forcePlay?: boolean;
     doubleTime?: boolean;
     showProgress?: boolean;
+    autoFindMatch?: boolean;
     index?: number;
     multi?: {
       updateMulti: (id: string) => void;
@@ -93,8 +97,10 @@ const MovieComp = forwardRef<
     doubleTime,
     showProgress,
     index,
+    autoFindMatch,
   } = prop;
   const ui = useUIContext();
+  const [updateKey, refreshUpdateKey] = useState(uuid());
   const dispatch = useAppDispatch();
   const playerRef = createRef<MediaPlayerRefType>();
   const forcePreview = useAppSelector(selectForcePreview);
@@ -102,6 +108,7 @@ const MovieComp = forwardRef<
   const mode = usePlayMode();
   const context = useGlobalContext();
   const [play, setPlay] = useState<boolean>(!!forcePlay);
+  const [findMatch, setFindMatch] = useState<boolean>(!!autoFindMatch);
   const [editLabel, setEditLabel] = useState<boolean>(
     (!!editMode && !prop.suggest) || false,
   );
@@ -112,18 +119,20 @@ const MovieComp = forwardRef<
   const [playerStatus, setPlayerstatus] =
     useState<PlayerUpdateEvent<any> | null>(null);
 
+  useEffect(() => {
+    setFindMatch(!!autoFindMatch);
+  }, [autoFindMatch]);
+
   const has = useMemo(
     () => !!multi?.list.includes(mov.e_id),
     [mov.e_id, multi],
   );
-  const updateL = (lib: MovieLib) => {
-    setLocalLib(lib);
-    dispatch(updateMovie(lib));
-  };
 
   useImperativeHandle(ref, () => ({
     updateLib(lib: MovieLib) {
-      updateL(lib);
+      setLocalLib(lib);
+      dispatch(updateMovie(lib));
+      refreshUpdateKey(uuid());
     },
     togglePlay() {
       setPlay(!play);
@@ -185,304 +194,335 @@ const MovieComp = forwardRef<
       true,
     );
   }, [authHelper, mov.e_id]);
+  const mc = useMemo(
+    () =>
+      new MovieDataContext({
+        mov,
+        update: (lib: MovieLib) => {
+          setLocalLib(lib);
+          dispatch(updateMovie(lib));
+          refreshUpdateKey(uuid());
+        },
+      }),
+    [dispatch, mov],
+  );
   return (
-    <Grid className="movie-com">
-      <TitleComp mov={localLib} update={updateL} />
-      {play ? (
-        <Grid flex flexC hCenter vCenter>
-          <MediaPlayer
-            ref={playerRef}
-            autoplay={editMode}
-            src={stream}
-            onProgress={(e) => {
-              if (showProgress) {
-                setPlayerstatus(e);
-              }
-            }}
-            onPlay={() => {
-              if (playerRef.current && doubleTime) {
-                playerRef.current.setPlayBackRate(2.0);
-              }
-            }}
-          />
-        </Grid>
-      ) : (
-        <div key={`${mov.e_id}_carosell`} className="carosell-container">
-          <div className="play" onClick={() => setPlay(true)}>
-            <IOPlay />
+    <MovieContext.Provider value={mc}>
+      <Grid className="movie-com">
+        <TitleComp />
+        {play ? (
+          <Grid flex flexC hCenter vCenter>
+            <MediaPlayer
+              ref={playerRef}
+              autoplay={editMode}
+              src={stream}
+              onProgress={(e) => {
+                if (showProgress) {
+                  setPlayerstatus(e);
+                }
+              }}
+              onPlay={() => {
+                if (playerRef.current && doubleTime) {
+                  playerRef.current.setPlayBackRate(2.0);
+                }
+              }}
+            />
+          </Grid>
+        ) : (
+          <div key={`${mov.e_id}_carosell`} className="carosell-container">
+            <div className="play" onClick={() => setPlay(true)}>
+              <IOPlay />
+            </div>
+            <HNavigator className="carosell">
+              <Grid flex flexR>
+                <VideoPreview eid={mov.e_id} force={editMode || forcePreview} />
+                {thumbs.map(([key, dx]) => (
+                  <img key={key} loading="lazy" alt="" src={dx} />
+                ))}
+              </Grid>
+            </HNavigator>
           </div>
-          <HNavigator className="carosell">
-            <Grid flex flexR>
-              <VideoPreview eid={mov.e_id} force={editMode || forcePreview} />
-              {thumbs.map(([key, dx]) => (
-                <img key={key} loading="lazy" alt="" src={dx} />
-              ))}
-            </Grid>
-          </HNavigator>
-        </div>
-      )}
+        )}
 
-      <Grid flex flexR flexSpaceB className="glx-p-8 glx-flex-wrap" hCenter>
-        <Grid flex vCenter gap={12} grow={1} className="glx-mr-12">
-          <div>{moment(mov.created).format('DD.MM.YY - HH:mm')}</div>
-          {playerStatus ? (
-            <Grid grow={1}>
-              <Progress
-                cur={playerStatus.currentTime}
-                max={playerStatus.duration}
-              />
-            </Grid>
-          ) : null}
-        </Grid>
-        <Grid flex flexR gap={8} hCenter vCenter>
-          {localLib.rating !== null ? (
-            <b>
-              <IOStar /> {localLib.rating}
-            </b>
-          ) : null}
-          {meta ? (
-            <>
-              <b>{meta.res}p</b>
-              <DurationComp dur={meta.duration} />
-              <Tooltip
-                position="bottom"
-                text={`Container: ${meta.container}\nSize: ${
-                  meta.size
-                }\nPlays: ${mov.played_count ?? 0}\nLast Played: ${
-                  mov.last_played
-                    ? new Date(mov.last_played).toLocaleString()
-                    : 'never'
-                }`}
-              >
-                {meta.web ? <IOFlash /> : <IOFlashOff />}
-              </Tooltip>
-            </>
-          ) : null}
+        <Grid flex flexR flexSpaceB className="glx-p-8 glx-flex-wrap" hCenter>
+          <Grid flex vCenter gap={12} grow={1} className="glx-mr-12">
+            <div>{moment(mov.created).format('DD.MM.YY - HH:mm')}</div>
+            {playerStatus ? (
+              <Grid grow={1}>
+                <Progress
+                  cur={playerStatus.currentTime}
+                  max={playerStatus.duration}
+                />
+              </Grid>
+            ) : null}
+          </Grid>
+          <Grid flex flexR gap={8} hCenter vCenter>
+            {localLib.rating !== null ? (
+              <b>
+                <IOStar /> {localLib.rating}
+              </b>
+            ) : null}
+            {meta ? (
+              <>
+                <b>{meta.res}p</b>
+                <DurationComp dur={meta.duration} />
+                <Tooltip
+                  position="bottom"
+                  text={`Container: ${meta.container}\nSize: ${
+                    meta.size
+                  }\nPlays: ${mov.played_count ?? 0}\nLast Played: ${
+                    mov.last_played
+                      ? new Date(mov.last_played).toLocaleString()
+                      : 'never'
+                  }`}
+                >
+                  {meta.web ? <IOFlash /> : <IOFlashOff />}
+                </Tooltip>
+              </>
+            ) : null}
 
-          <IconButton
-            /* toolTip={{
-                          text: 'Label bearbeiten',
-                          position: 'left',
-                        }} */
-            onClick={() => setEditLabel(!editLabel)}
-          >
-            {editLabel ? (
-              <span className="icon-active">
-                <IOPricetag />
-              </span>
-            ) : (
-              <IOPricetag />
-            )}
-          </IconButton>
-
-          {!editMode && (
             <IconButton
               /* toolTip={{
-                                text: 'Bewerten',
-                                position: 'left',
-                              }} */
-              onClick={() => setEditStar(!editStar)}
+                              text: 'Label bearbeiten',
+                              position: 'left',
+                            }} */
+              onClick={() => setEditLabel(!editLabel)}
             >
-              {editStar ? (
+              {editLabel ? (
                 <span className="icon-active">
-                  <IOSparkles />
+                  <IOPricetag />
                 </span>
               ) : (
-                <IOSparkles />
+                <IOPricetag />
               )}
             </IconButton>
-          )}
 
-          {play ? (
-            <IconButton
-              /* toolTip={{
-                                text: 'Abspielen beenden',
-                                position: 'left',
-                              }} */
-              onClick={() => setPlay(!play)}
-            >
-              <span className="icon-active">
-                <IOEyeOffOutline />
-              </span>
-            </IconButton>
-          ) : null}
-          {meta?.web && !play ? (
-            <IconButton
-              /* toolTip={{
-                                text: 'Abspielen',
-                                position: 'left',
-                              }} */
-              onClick={() => setPlay(!play)}
-            >
-              <IOPlay />
-            </IconButton>
-          ) : null}
-          {!meta?.web && !play ? (
-            <IconButton
-              /* toolTip={{
-                                text: 'Abspielen (Konvertieren)',
-                                position: 'left',
-                              }} */
-              onClick={() => setPlay(!play)}
-            >
-              <IOTvOutline />
-            </IconButton>
-          ) : null}
+            {!editMode && (
+              <IconButton
+                /* toolTip={{
+                                      text: 'Bewerten',
+                                      position: 'left',
+                                    }} */
+                onClick={() => setEditStar(!editStar)}
+              >
+                {editStar ? (
+                  <span className="icon-active">
+                    <IOSparkles />
+                  </span>
+                ) : (
+                  <IOSparkles />
+                )}
+              </IconButton>
+            )}
 
-          {multi && (
-            <Tooltip
-              className="hide-on-mobile h-fix"
-              position="left"
-              text="Select for bulk action."
-            >
-              <CheckBox
-                className="h-fix"
-                checked={has}
-                value={has}
-                onChange={() => multi.updateMulti(mov.e_id)}
-              />
-            </Tooltip>
-          )}
+            {play ? (
+              <IconButton
+                /* toolTip={{
+                                      text: 'Abspielen beenden',
+                                      position: 'left',
+                                    }} */
+                onClick={() => setPlay(!play)}
+              >
+                <span className="icon-active">
+                  <IOEyeOffOutline />
+                </span>
+              </IconButton>
+            ) : null}
+            {meta?.web && !play ? (
+              <IconButton
+                /* toolTip={{
+                                      text: 'Abspielen',
+                                      position: 'left',
+                                    }} */
+                onClick={() => setPlay(!play)}
+              >
+                <IOPlay />
+              </IconButton>
+            ) : null}
+            {!meta?.web && !play ? (
+              <IconButton
+                /* toolTip={{
+                                      text: 'Abspielen (Konvertieren)',
+                                      position: 'left',
+                                    }} */
+                onClick={() => setPlay(!play)}
+              >
+                <IOTvOutline />
+              </IconButton>
+            ) : null}
 
-          <DropDownIconMenu
-            menu={[
-              {
-                key: 'open',
-                icon: 'IOOpenOutline',
-                label: 'Open Video in new tab',
-              },
-              ...(mov.movie_url
-                ? [
-                    {
-                      key: 'open-original',
-                      icon: 'IOOpen' as INames,
-                      label: 'Open Original',
-                    },
-                  ]
-                : []),
-              ...(index !== undefined
-                ? [
-                    {
-                      key: 'edit',
-                      icon: 'IOServer' as INames,
-                      label: 'Edit Mode',
-                    },
-                  ]
-                : []),
-              {
-                key: 'suggest',
-                icon: 'IOPricetags',
-                label: 'Label Suggestion',
-              },
-              {
-                key: 'delete',
-                icon: 'IOTrash',
-                label: 'Delete Video',
-              },
-            ]}
-            left
-            onChange={(key) => {
-              switch (key) {
-                case 'suggest':
-                  setSuggest(!suggest);
-                  break;
-                case 'open-original':
-                  context.openExternalConfig({
-                    url: mov.movie_url!,
-                    external: true,
-                  });
-                  break;
-                case 'open':
-                  context.openExternalConfig({
-                    url: authHelper(
-                      `/movie/stream/${mov.e_id}?${mode(true)}`,
-                      true,
-                      true,
-                    ),
-                    external: true,
-                  });
+            {multi && (
+              <Tooltip
+                className="hide-on-mobile h-fix"
+                position="left"
+                text="Select for bulk action."
+              >
+                <CheckBox
+                  className="h-fix"
+                  checked={has}
+                  value={has}
+                  onChange={() => multi.updateMulti(mov.e_id)}
+                />
+              </Tooltip>
+            )}
 
-                  break;
-                case 'delete':
-                  toast.dark(
-                    <Grid flex flexC gap={12}>
-                      <span>
-                        Delete Medium [{mov.movie_name}] from File system
-                      </span>
-                      <Grid flex flexR gap={12} hCenter>
-                        <IconButton
-                          onClick={() => {
-                            context.deleteMovie(mov.e_id).then((r) => {
-                              if (r.success) {
-                                toast.success('Element deleted');
-                              } else {
-                                toast.error('Error deleting element');
-                              }
-                              reload();
-                            });
-                          }}
-                        >
-                          <IOCheckmark />
-                        </IconButton>
-                        <IconButton
-                          onClick={() => {
-                            toast.dismiss();
-                          }}
-                        >
-                          <IOClose />
-                        </IconButton>
-                      </Grid>
-                    </Grid>,
-                    {
-                      autoClose: false,
-                      icon: <IOTrash />,
-                    },
-                  );
-                  break;
-                case 'edit':
-                  if (index !== undefined) {
-                    dispatch(setEditMode(index));
-                  }
+            <DropDownIconMenu
+              menu={[
+                {
+                  key: 'open',
+                  icon: 'IOOpenOutline',
+                  label: 'Open Video in new tab',
+                },
+                ...(mov.movie_url
+                  ? [
+                      {
+                        key: 'open-original',
+                        icon: 'IOOpen' as INames,
+                        label: 'Open Original',
+                      },
+                    ]
+                  : []),
+                {
+                  key: 'suggest--video',
+                  icon: 'IOPricetags' as INames,
+                  label: 'Video Suggestion',
+                  checkBox: true,
+                  value: findMatch,
+                },
+                {
+                  key: 'suggest--label',
+                  icon: 'IOPricetags',
+                  label: 'Label Suggestion',
+                  checkBox: true,
+                  value: suggest,
+                },
+                ...(index !== undefined
+                  ? [
+                      {
+                        key: 'edit',
+                        icon: 'IOServer' as INames,
+                        label: 'Edit Mode',
+                      },
+                    ]
+                  : []),
+                {
+                  key: 'delete',
+                  icon: 'IOTrash',
+                  label: 'Delete Video',
+                },
+              ]}
+              left
+              onChange={(key) => {
+                switch (key) {
+                  case 'suggest--label':
+                    setSuggest(!suggest);
+                    break;
+                  case 'suggest--video':
+                    setFindMatch(!findMatch);
+                    break;
+                  case 'open-original':
+                    context.openExternalConfig({
+                      url: mov.movie_url!,
+                      external: true,
+                    });
+                    break;
+                  case 'open':
+                    context.openExternalConfig({
+                      url: authHelper(
+                        `/movie/stream/${mov.e_id}?${mode(true)}`,
+                        true,
+                        true,
+                      ),
+                      external: true,
+                    });
 
-                  break;
-                default:
-                  break;
-              }
-            }}
+                    break;
+                  case 'delete':
+                    toast.dark(
+                      <Grid flex flexC gap={12}>
+                        <span>
+                          Delete Medium [{mov.movie_name}] from File system
+                        </span>
+                        <Grid flex flexR gap={12} hCenter>
+                          <IconButton
+                            onClick={() => {
+                              context.deleteMovie(mov.e_id).then((r) => {
+                                if (r.success) {
+                                  toast.success('Element deleted');
+                                } else {
+                                  toast.error('Error deleting element');
+                                }
+                                reload();
+                              });
+                            }}
+                          >
+                            <IOCheckmark />
+                          </IconButton>
+                          <IconButton
+                            onClick={() => {
+                              toast.dismiss();
+                            }}
+                          >
+                            <IOClose />
+                          </IconButton>
+                        </Grid>
+                      </Grid>,
+                      {
+                        autoClose: false,
+                        icon: <IOTrash />,
+                      },
+                    );
+                    break;
+                  case 'edit':
+                    if (index !== undefined) {
+                      dispatch(setEditMode(index));
+                    }
+
+                    break;
+                  default:
+                    break;
+                }
+              }}
+            />
+          </Grid>
+        </Grid>
+        <Grid
+          style={{
+            flexDirection: 'row-reverse',
+          }}
+          flex={editMode && !ui.tooltipDisabled}
+        >
+          <LabelComp
+            key={`label_${updateKey}`}
+            id={mov.e_id}
+            focus={!!editMode}
+            edit={editLabel}
+            suggest={suggest}
+            title={mov.movie_name}
           />
+          <Grid
+            flex
+            flexC
+            gap={12}
+            className={
+              editMode && !ui.tooltipDisabled ? 'edit-rating' : undefined
+            }
+          >
+            {findMatch && <FindMatchComp />}
+            <RatingComp
+              option={{
+                edit: editStar,
+                close: () => {
+                  if (!editMode) {
+                    setEditStar(false);
+                  }
+                },
+              }}
+            />
+          </Grid>
         </Grid>
       </Grid>
-      <Grid
-        style={{
-          flexDirection: 'row-reverse',
-        }}
-        flex={editMode && !ui.tooltipDisabled}
-      >
-        <RatingComp
-          className={
-            editMode && !ui.tooltipDisabled ? 'edit-rating' : undefined
-          }
-          option={{
-            mov: localLib,
-            edit: editStar,
-            close: () => {
-              if (!editMode) {
-                setEditStar(false);
-              }
-            },
-            update: updateL,
-          }}
-        />
-
-        <LabelComp
-          id={mov.e_id}
-          focus={!!editMode}
-          edit={editLabel}
-          suggest={suggest}
-          title={mov.movie_name}
-        />
-      </Grid>
-    </Grid>
+    </MovieContext.Provider>
   );
 });
 
@@ -495,6 +535,7 @@ MovieComp.defaultProps = {
   showProgress: undefined,
   index: undefined,
   multi: undefined,
+  autoFindMatch: undefined,
 };
 
 export default MovieComp;
