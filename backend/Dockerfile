@@ -38,6 +38,8 @@ ENTRYPOINT ["/init"]
 
 FROM elschnagoo/base:latest  as app
 
+RUN apt install nano -y
+
 COPY ./dist /app/dist
 COPY ./res /app/res
 COPY ./public /app/public
