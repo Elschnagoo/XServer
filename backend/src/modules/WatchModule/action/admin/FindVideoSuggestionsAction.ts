@@ -125,6 +125,7 @@ export default class FindVideoSuggestionsAction extends BaseApiAction<
     const el = await db.movieLib.getObjById(element);
     if (!el) {
       res.sendStatus(404);
+
       return;
     }
 
@@ -140,7 +141,10 @@ export default class FindVideoSuggestionsAction extends BaseApiAction<
       const start = 1 + (page ?? 0) * 3;
       const end = 3 + (page ?? 0) * 3;
       const rUrl =
-        url + encodeURIComponent(title ?? el.movie_name).replace(/%20/g, '+');
+        url +
+        encodeURIComponent(title ?? el.movie_name)
+          .replace(/%20/g, '+')
+          .replace(/[\s~`!@#$%^&*(){}[\];:"'<,.>?/\\|_-]/g, '');
       this.debug('rUrl', rUrl);
       info = await ytClient.getFullResourceInfo(rUrl, [
         '--playlist-star',

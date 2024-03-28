@@ -95,15 +95,20 @@ export default function Main() {
       <Grid flex className="main" flexC vCenter>
         <Grid className="header" flex flexR vCenter flexSpaceB>
           <Grid flex vCenter className="glx-pl-4">
-            X-Server
-            <span className="hide-on-mobile">
-              - {getDocumentMeta('REACT_APP_VERSION')}
-            </span>
+            <div className="hide-on-mobile">
+              X-Server - {getDocumentMeta('REACT_APP_VERSION')}
+            </div>
           </Grid>
           <Grid flex flexR gap={4} vCenter>
             {multi.length > 0 ? (
               <>
-                <span>({multi.length} selected)</span>
+                <span
+                  style={{
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  ({multi.length} sel.)
+                </span>
                 <IconButton
                   toolTip={{
                     text: 'Reset Selection',
@@ -116,7 +121,6 @@ export default function Main() {
                   <IOCloseCircle />
                 </IconButton>
                 <IconButton
-                  className="hide-on-mobile"
                   toolTip={{
                     text: 'Start Multi View',
                     position: 'left',

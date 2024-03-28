@@ -38,6 +38,7 @@ const defaultSearch = {
   exclude: [],
   order: SearchOrder.DATE_DSC,
   sync: Sync.ALL,
+  link: false,
 };
 export default function SearchModal() {
   const { loadMovie } = usePreload();
@@ -88,6 +89,25 @@ export default function SearchModal() {
                 min: 0,
                 max: 5,
               },
+            },
+            {
+              key: 'link',
+              type: InputOptionType.DROPDOWN,
+              label: 'Has Link',
+              items: [
+                {
+                  key: 'default',
+                  name: 'Default',
+                },
+                {
+                  key: 'has',
+                  name: 'Has Link',
+                },
+                {
+                  key: 'hasnot',
+                  name: 'Has no Link',
+                },
+              ],
             },
           ],
           [

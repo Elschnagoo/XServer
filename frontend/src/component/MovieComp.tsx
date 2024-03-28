@@ -20,6 +20,7 @@ import {
   IOEyeOffOutline,
   IOFlash,
   IOFlashOff,
+  IOLink,
   IOPlay,
   IOPricetag,
   IOSparkles,
@@ -245,8 +246,9 @@ const MovieComp = forwardRef<
         )}
 
         <Grid flex flexR flexSpaceB className="glx-p-8 glx-flex-wrap" hCenter>
-          <Grid flex vCenter gap={12} grow={1} className="glx-mr-12">
-            <div>{moment(mov.created).format('DD.MM.YY - HH:mm')}</div>
+          <Grid flex vCenter gap={8} grow={1} className="glx-mr-12">
+            <div>{moment(mov.created).format('DD.MM.YY - HH:mm')} </div>
+            {mov.movie_url && <IOLink />}
             {playerStatus ? (
               <Grid grow={1}>
                 <Progress
@@ -267,6 +269,7 @@ const MovieComp = forwardRef<
                 <b>{meta.res}p</b>
                 <DurationComp dur={meta.duration} />
                 <Tooltip
+                  className="hide-on-mobile"
                   position="bottom"
                   text={`Container: ${meta.container}\nSize: ${
                     meta.size
@@ -298,13 +301,7 @@ const MovieComp = forwardRef<
             </IconButton>
 
             {!editMode && (
-              <IconButton
-                /* toolTip={{
-                                      text: 'Bewerten',
-                                      position: 'left',
-                                    }} */
-                onClick={() => setEditStar(!editStar)}
-              >
+              <IconButton onClick={() => setEditStar(!editStar)}>
                 {editStar ? (
                   <span className="icon-active">
                     <IOSparkles />
@@ -353,7 +350,7 @@ const MovieComp = forwardRef<
 
             {multi && (
               <Tooltip
-                className="hide-on-mobile h-fix"
+                className="h-fix"
                 position="left"
                 text="Select for bulk action."
               >

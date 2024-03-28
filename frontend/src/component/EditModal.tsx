@@ -7,6 +7,7 @@ import React, {
 } from 'react';
 import {
   CheckBox,
+  DropDownIconMenu,
   Grid,
   IconButton,
   IOChevronBack,
@@ -304,30 +305,47 @@ export default function EditModal() {
           >
             <IOSettings />
           </IconButton>
-          <CheckBox
-            className="h-fix"
-            checked={forcePlay}
-            onChange={() => setForcePlay(!forcePlay)}
-          />{' '}
-          <Tooltip text="Autoplay video">Autoplay</Tooltip>{' '}
-          <CheckBox
-            className="h-fix"
-            checked={forceSuggest}
-            onChange={() => setForceSuggest(!forceSuggest)}
-          />{' '}
-          <Tooltip text="Auto suggest labels from title">Auto-suggest</Tooltip>{' '}
-          <CheckBox
-            className="h-fix"
-            checked={findMatch}
-            onChange={() => setFindMatch(!findMatch)}
-          />{' '}
-          <Tooltip text="Find labels by Search Query">Find-Match</Tooltip>{' '}
-          <CheckBox
-            className="h-fix"
-            checked={doubleTime}
-            onChange={() => setDoubleTime(!doubleTime)}
-          />{' '}
-          Speed 2x - ({pos + 1}/{data.length})
+          <DropDownIconMenu
+            left
+            menu={[
+              {
+                key: 'forcePlay',
+                label: 'Autoplay video',
+                checkBox: true,
+                value: forcePlay,
+              },
+              {
+                key: 'forceSuggest',
+                label: 'Auto Suggest Labels',
+                checkBox: true,
+                value: forceSuggest,
+              },
+              {
+                key: 'findMatch',
+                label: 'Media Suggestions',
+                checkBox: true,
+                value: findMatch,
+              },
+              {
+                key: 'doubleTime',
+                label: 'Speed 2x',
+                checkBox: true,
+                value: doubleTime,
+              },
+            ]}
+            onChange={(key, value) => {
+              if (key === 'forcePlay') {
+                setForcePlay(!!value);
+              } else if (key === 'forceSuggest') {
+                setForceSuggest(!!value);
+              } else if (key === 'findMatch') {
+                setFindMatch(!!value);
+              } else if (key === 'doubleTime') {
+                setDoubleTime(!!value);
+              }
+            }}
+          />
+          ({pos + 1}/{data.length})
           <input
             min={1}
             max={data.length}

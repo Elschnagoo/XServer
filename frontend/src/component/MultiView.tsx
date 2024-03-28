@@ -4,8 +4,11 @@ import {
   Grid,
   IconButton,
   IOClose,
+  IOInformationCircle,
+  IOInformationCircleOutline,
   KeyBind,
   MediaPlayerParentFunction,
+  Tooltip,
   useKeyListener,
   uuid,
 } from '@grandlinex/react-components';
@@ -153,6 +156,18 @@ export default function MultiView() {
     ],
     [pList],
   );
+  const tText = useMemo(
+    () =>
+      [
+        'Shortcuts:',
+        ...keyListerner
+          .filter((e) => !!e.description)
+          .map(
+            (k) => `${k.key.primary} + ${k.key.secondary}: ${k.description}`,
+          ),
+      ].join('\n'),
+    [keyListerner],
+  );
   useKeyListener(keyListerner);
 
   return (
@@ -181,6 +196,9 @@ export default function MultiView() {
         ))}
       </Grid>
       <div className="multi-close">
+        <Tooltip className="h-fix" text={tText} position="left">
+          <IOInformationCircleOutline size={16} />
+        </Tooltip>
         <IconButton
           onClick={() => {
             try {

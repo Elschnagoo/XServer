@@ -75,6 +75,17 @@ export default function usePreload() {
               break;
           }
 
+          switch (search?.link) {
+            case 'has':
+              data = data?.filter((c) => !!c.movie_url);
+              break;
+            case 'hasnot':
+              data = data?.filter((c) => !c.movie_url);
+              break;
+            case 'default':
+            default:
+          }
+
           if (search?.titel) {
             data = data?.filter((c) => {
               return c.movie_name
