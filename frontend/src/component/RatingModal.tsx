@@ -29,8 +29,7 @@ const formOptions: FormConf = [
       type: InputOptionType.NUMBER,
       label: 'Rating order',
     },
-  ],
-  [
+
     {
       key: 'rating_value',
       type: InputOptionType.NUMBER,
@@ -166,7 +165,7 @@ export default function RatingModal({
           },
         ]}
         extendRowRenderer={(params) => (
-          <Form
+          <Form<any>
             key={formId}
             className="glx-w-full-4"
             defaultState={{

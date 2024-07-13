@@ -36,6 +36,7 @@ import LabelAliasAction from './action/alias/LabelAliasAction';
 import LabelLookupAction from './action/label/LabelLookupAction';
 import DownloadLabelSuggestionsAction from './action/admin/DownloadLabelSuggestionsAction';
 import FindVideoSuggestionsAction from './action/admin/FindVideoSuggestionsAction';
+import GetMovieRelatedAction from './action/movie/GetMovieRelatedAction';
 
 export default class WatchModule extends BaseKernelModule<
   IKernel,
@@ -57,6 +58,7 @@ export default class WatchModule extends BaseKernelModule<
       new DeleteMovieAction(this),
       new SetMovieRatingAction(this),
       new GetMovieRatingAction(this),
+      new GetMovieRelatedAction(this),
       // label
       new LabelAction(this),
       new NewLabelAction(this),

@@ -110,7 +110,7 @@ export default function LabelComp(props: {
                     key: l.e_id,
                     name: l.label_name,
                     icon: l.icon as any,
-                    other: l.color,
+                    meta: l.color,
                   })),
                   autoFocus: focus,
                   onChange: async (e, change) => {

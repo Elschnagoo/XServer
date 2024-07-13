@@ -155,7 +155,7 @@ export default function FindMatchComp() {
   return (
     <Grid flex flexC gap={8}>
       <h2>Video Suggestion</h2>
-      <Form
+      <Form<any>
         className="find-match-form"
         options={[
           [

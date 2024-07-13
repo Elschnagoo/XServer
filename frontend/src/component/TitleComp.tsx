@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import {
-  copyToClipboard,
   Form,
   Grid,
   IconButton,
   InputOptionType,
-  IOClipboard,
   IOClose,
   IOPencil,
   IOSave,
@@ -14,7 +12,7 @@ import { toast } from 'react-toastify';
 import { useGlobalContext } from '@/context/GlobalContext';
 import { useMovieContext } from '@/context/MovieContext';
 
-export default function TitleComp() {
+export default function TitleComp({ noEdit = false }: { noEdit?: boolean }) {
   const { mov, update } = useMovieContext();
   const [edit, setEdit] = useState(false);
   const [name, setName] = useState(mov.movie_name);
@@ -24,33 +22,22 @@ export default function TitleComp() {
     return (
       <Grid flex flexR vCenter className="glx-w-full" flexSpaceB>
         <h4>{mov.movie_name}</h4>
-        <Grid flex flexR style={{ width: '78px' }}>
-          <IconButton
-            toolTip={{
-              text: mov.e_id,
-              position: 'bottom',
-            }}
-            className="glx-ml-8"
-            onClick={() => {
-              copyToClipboard(mov.e_id);
-              toast.success(`ID copied to clipboard`);
-            }}
-          >
-            <IOClipboard />
-          </IconButton>
-          <IconButton
-            toolTip={{
-              text: 'Edit title',
-              position: 'left',
-            }}
-            onClick={() => {
-              setName(mov.movie_name);
-              setEdit(true);
-            }}
-          >
-            <IOPencil />
-          </IconButton>
-        </Grid>
+        {!noEdit && (
+          <Grid flex flexR>
+            <IconButton
+              toolTip={{
+                text: 'Edit title',
+                position: 'left',
+              }}
+              onClick={() => {
+                setName(mov.movie_name);
+                setEdit(true);
+              }}
+            >
+              <IOPencil />
+            </IconButton>
+          </Grid>
+        )}
       </Grid>
     );
   }

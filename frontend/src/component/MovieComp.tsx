@@ -33,12 +33,12 @@ import {
   useQData,
   useUIContext,
   uuid,
-} from '@grandlinex/react-components';
-import moment from 'moment';
-import {
   MediaPlayer,
   MediaPlayerRefType,
-} from '@grandlinex/react-components/dist/components/mediaPlayer/MediaPlayer';
+  copyToClipboard,
+} from '@grandlinex/react-components';
+import moment from 'moment';
+
 import { toast } from 'react-toastify';
 import useAuthHelper from '@/utils/AuthUtil';
 import { useGlobalContext } from '@/context/GlobalContext';
@@ -49,6 +49,7 @@ import TitleComp from '@/component/TitleComp';
 import { useAppDispatch, useAppSelector, usePlayMode } from '@/store';
 import {
   selectForcePreview,
+  setCinema,
   setEditMode,
   updateMovie,
 } from '@/store/MovieStore';
@@ -216,6 +217,7 @@ const MovieComp = forwardRef<
             <MediaPlayer
               ref={playerRef}
               autoplay={editMode}
+              controls
               src={stream}
               onProgress={(e) => {
                 if (showProgress) {
@@ -380,6 +382,16 @@ const MovieComp = forwardRef<
                     ]
                   : []),
                 {
+                  key: 'copy-id',
+                  icon: 'IOClipboard',
+                  label: 'Copy Element ID',
+                },
+                {
+                  key: 'cinema-mode',
+                  icon: 'IOCamera',
+                  label: 'Cinema Mode',
+                },
+                {
                   key: 'suggest--video',
                   icon: 'IOPricetags' as INames,
                   label: 'Video Suggestion',
@@ -411,6 +423,13 @@ const MovieComp = forwardRef<
               left
               onChange={(key) => {
                 switch (key) {
+                  case 'copy-id':
+                    copyToClipboard(mov.e_id);
+                    toast.success(`ID copied to clipboard`);
+                    break;
+                  case 'cinema-mode':
+                    dispatch(setCinema(mov));
+                    break;
                   case 'suggest--label':
                     setSuggest(!suggest);
                     break;
@@ -522,17 +541,5 @@ const MovieComp = forwardRef<
     </MovieContext.Provider>
   );
 });
-
-MovieComp.defaultProps = {
-  editMode: undefined,
-  suggest: undefined,
-  trace: undefined,
-  forcePlay: undefined,
-  doubleTime: undefined,
-  showProgress: undefined,
-  index: undefined,
-  multi: undefined,
-  autoFindMatch: undefined,
-};
 
 export default MovieComp;

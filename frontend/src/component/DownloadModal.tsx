@@ -122,7 +122,7 @@ export default function DownloadModal() {
                   key: l.e_id,
                   name: l.label_name,
                   icon: l.icon as any,
-                  other: l.color,
+                  meta: l.color,
                 })),
               },
             ],

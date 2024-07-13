@@ -41,6 +41,7 @@
     "no-await-in-loop": "warn",
     "react/no-unused-prop-types": "warn",
     "linebreak-style": "off",
+    "react/require-default-props": "off",
     "no-restricted-properties": "warn",
     "import/extensions": [
       "off","ignorePackages",

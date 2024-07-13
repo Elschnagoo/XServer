@@ -16,7 +16,8 @@ const initialAppEnv: MovieEnv = {
   modal: null,
   editMode: -1,
   revision: 0,
-  mode: PlayMode.DEFAULT,
+  cinema: null,
+  mode: LocalStorage.load('mode', PlayMode.DEFAULT) as PlayMode,
   forcePreview: LocalStorage.flagLoad('forcePreview'),
   forceSuggest: LocalStorage.flagLoad('suggestion'),
 };
@@ -70,6 +71,9 @@ export const movState = createSlice({
     setMulti: (state, action: PayloadAction<string[]>) => {
       state.multi = action.payload;
     },
+    setCinema: (state, action: PayloadAction<MovieLib | null>) => {
+      state.cinema = action.payload;
+    },
     setEditMode: (state, action: PayloadAction<number>) => {
       state.editMode = action.payload;
     },
@@ -105,6 +109,7 @@ export const {
   setForcePreview,
   setRating,
   setForceSuggest,
+  setCinema,
 } = movState.actions;
 
 export const selectSearch = (state: RootState) => state.movie.search;
@@ -121,3 +126,4 @@ export const selectMulti = (state: RootState) => state.movie.multi;
 export const selectModal = (state: RootState) => state.movie.modal;
 export const selectEditMode = (state: RootState) => state.movie.editMode;
 export const selectRevision = (state: RootState) => state.movie.revision;
+export const selectCinema = (state: RootState) => state.movie.cinema;

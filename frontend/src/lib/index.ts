@@ -43,6 +43,7 @@ export type MovieEnv = {
   rating: RatingElement[] | null;
   exclude: Label[] | null;
   movie: MovieLib[] | null;
+  cinema: MovieLib | null;
   max: number;
   multi: string[];
   modal: MODAL | null;

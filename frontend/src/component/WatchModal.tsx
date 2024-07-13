@@ -46,6 +46,7 @@ export default function WatchModal() {
           PersistentStorage.flagSave('forcePreview', form.preview);
           dispatch(setForceSuggest(form.suggest));
           PersistentStorage.flagSave('suggestion', form.suggest);
+          PersistentStorage.save('mode', form.mode);
           PersistentStorage.setDefaultQuery(form.query);
           PersistentStorage.setMultiOptions({
             maxR: form.maxR,
@@ -68,8 +69,6 @@ export default function WatchModal() {
             type: InputOptionType.CHECKBOX,
             label: 'Force play preview',
           },
-        ],
-        [
           {
             key: 'suggest',
             type: InputOptionType.CHECKBOX,

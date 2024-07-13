@@ -1,6 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
-  cnx,
   getDocumentMeta,
   Grid,
   IconButton,
@@ -19,27 +18,27 @@ import {
   IOSparkles,
   IOSync,
   IOTrash,
-  LDots,
 } from '@grandlinex/react-components';
-import { MovieLib } from '@elschnagoo/xserver-con/dist/ApiTypes';
+import { MovieLib } from '@elschnagoo/xserver-con';
 import { useGlobalContext } from '@/context/GlobalContext';
 import downloadFullPlaylist from '@/utils/PlaylistGen';
 import useAuthHelper from '@/utils/AuthUtil';
 import usePreload from '@/store/preload';
-import { useAppDispatch, useAppSelector, usePlayMode } from '@/store';
 import {
-  addMulti,
-  removeMulti,
+  selectViewG,
+  useAppDispatch,
+  useAppSelector,
+  usePlayMode,
+} from '@/store';
+import {
   resetMulti,
+  selectCinema,
   selectEditMode,
-  selectForceSuggest,
-  selectLabel,
   selectMax,
-  selectModal,
   selectMovie,
   selectMulti,
-  selectRevision,
   selectSearch,
+  setCinema,
   setEditMode,
   setMax,
   setModal,
@@ -49,7 +48,8 @@ import {
 import EditModal from '@/component/EditModal';
 import { MODAL } from '@/lib';
 import ModalSwitch from '@/component/ModalSwitch';
-import MovieComp from '@/component/MovieComp';
+import HomeGrid from '@/page/HomeGrid';
+import Cinema from '@/page/Cinema';
 
 export default function Main() {
   const dispatch = useAppDispatch();
@@ -58,15 +58,13 @@ export default function Main() {
   const max = useAppSelector(selectMax);
   const search = useAppSelector(selectSearch);
   const data = useAppSelector(selectMovie);
-  const label = useAppSelector(selectLabel);
-  const forceSuggestions = useAppSelector(selectForceSuggest);
-  const revision = useAppSelector(selectRevision);
-  const modal = useAppSelector(selectModal);
+
   const mode = usePlayMode();
   const [double, setDouble] = useState<boolean>(false);
   const [full, setFull] = useState<boolean>(false);
   const context = useGlobalContext();
   const auth = useAuthHelper();
+  const cinema = useAppSelector(selectCinema);
   const { loadLabel, loadMovie, loadRating } = usePreload();
   const cur = useMemo<MovieLib[]>(() => {
     if (!data) {
@@ -74,20 +72,6 @@ export default function Main() {
     }
     return data.slice(0, max);
   }, [max, data]);
-  useEffect(() => {
-    // DATA LENGTH IS SMALLER THAN MAX
-    if (data && max > data.length) {
-      dispatch(setMax(data.length));
-    }
-    // MAX IS SMALLER THAN 14 AND MAX IS SMALLER THAN DATA LENGTH
-    if (data && max < data.length && max < 14) {
-      if (data.length >= 14) {
-        dispatch(setMax(14));
-      } else {
-        dispatch(setMax(data.length));
-      }
-    }
-  }, [search, data, max, dispatch]);
   return (
     <>
       {editMode !== -1 ? <EditModal /> : null}
@@ -178,6 +162,22 @@ export default function Main() {
                 |
               </>
             ) : null}
+            {cinema && (
+              <>
+                <IconButton
+                  toolTip={{
+                    text: 'Close cinema mode',
+                    position: 'left',
+                  }}
+                  onClick={() => {
+                    dispatch(setCinema(null));
+                  }}
+                >
+                  <IOCloseCircle />
+                </IconButton>
+                |
+              </>
+            )}
             <span>
               ({max}/{data?.length || 0})
             </span>
@@ -236,6 +236,14 @@ export default function Main() {
                 position: 'left',
               }}
               onClick={() => {
+                if (cinema) {
+                  const ax = data?.findIndex((e) => e.e_id === cinema.e_id);
+                  if (ax !== undefined && ax >= 0) {
+                    dispatch(setEditMode(ax));
+                    dispatch(setCinema(null));
+                    return;
+                  }
+                }
                 dispatch(setEditMode(0));
               }}
               disabled={cur.length === 0}
@@ -328,64 +336,8 @@ export default function Main() {
             </IconButton>
           </Grid>
         </Grid>
-        <Grid
-          flex
-          flexC
-          className={cnx('body', [double, 'body-large'])}
-          gap={24}
-          vCenter
-        >
-          {!data || !label || editMode >= 0 ? (
-            <Grid className="item" flex flexC hCenter vCenter>
-              <div style={{ width: '62px' }}>
-                <LDots />
-              </div>
-            </Grid>
-          ) : (
-            <Grid
-              className="scroll-container"
-              flex
-              gap={12}
-              onScroll={(event: React.UIEvent<HTMLDivElement>) => {
-                const { target } = event;
-                const div = target as HTMLDivElement;
-
-                if (
-                  div.offsetHeight + div.scrollTop >= div.scrollHeight - 350 &&
-                  data &&
-                  data.length > max
-                ) {
-                  dispatch(setMax(max + 14));
-                }
-              }}
-            >
-              {modal !== MODAL.MULTI_VIEW
-                ? cur.map((e, index) => (
-                    <MovieComp
-                      key={`${e.e_id}_${revision}`}
-                      mov={e}
-                      reload={() => {
-                        loadMovie(search);
-                      }}
-                      suggest={forceSuggestions}
-                      index={index}
-                      multi={{
-                        list: multi,
-                        updateMulti: (id) => {
-                          if (multi.includes(id)) {
-                            dispatch(removeMulti(id));
-                          } else {
-                            dispatch(addMulti(id));
-                          }
-                        },
-                      }}
-                    />
-                  ))
-                : null}
-              {cur.length === 0 ? <Grid> No Elements</Grid> : null}
-            </Grid>
-          )}
-        </Grid>
+        {!cinema && <HomeGrid double={double} />}
+        {cinema && <Cinema />}
       </Grid>
     </>
   );

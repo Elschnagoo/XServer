@@ -6,7 +6,6 @@ import React, {
   useState,
 } from 'react';
 import {
-  CheckBox,
   DropDownIconMenu,
   Grid,
   IconButton,
