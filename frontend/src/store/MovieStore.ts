@@ -20,6 +20,7 @@ const initialAppEnv: MovieEnv = {
   mode: LocalStorage.load('mode', PlayMode.DEFAULT) as PlayMode,
   forcePreview: LocalStorage.flagLoad('forcePreview'),
   forceSuggest: LocalStorage.flagLoad('suggestion'),
+  videoQuery: 'https://www.youtube.com/results?search_query=',
 };
 
 export const movState = createSlice({
@@ -89,6 +90,9 @@ export const movState = createSlice({
     setMode: (state, action: PayloadAction<PlayMode>) => {
       state.mode = action.payload;
     },
+    setVideoQuery: (state, action: PayloadAction<string>) => {
+      state.videoQuery = action.payload;
+    },
   },
 });
 
@@ -110,6 +114,7 @@ export const {
   setRating,
   setForceSuggest,
   setCinema,
+  setVideoQuery,
 } = movState.actions;
 
 export const selectSearch = (state: RootState) => state.movie.search;
@@ -127,3 +132,4 @@ export const selectModal = (state: RootState) => state.movie.modal;
 export const selectEditMode = (state: RootState) => state.movie.editMode;
 export const selectRevision = (state: RootState) => state.movie.revision;
 export const selectCinema = (state: RootState) => state.movie.cinema;
+export const selectVideoQuery = (state: RootState) => state.movie.videoQuery;

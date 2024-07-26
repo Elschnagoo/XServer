@@ -44,7 +44,7 @@ export default function EditModal() {
   const { loadMovie } = usePreload();
   const ref = useRef(createRef<MovieComRefType>());
   const data = useAppSelector(selectMovie);
-  const [forcePlay, setForcePlay] = useState<boolean>(false);
+  const [forcePlay, setForcePlay] = useState<boolean>(true);
   const [forceSuggest, setForceSuggest] = useState<boolean>(false);
   const [doubleTime, setDoubleTime] = useState<boolean>(false);
   const [pos, setPos] = useState<number>(parentPos ?? 0);

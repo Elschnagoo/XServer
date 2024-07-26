@@ -4,7 +4,7 @@ import useAuthHelper from '@/utils/AuthUtil';
 
 export default function VideoPreview({
   eid,
-  force,
+  force = false,
 }: {
   eid: string;
   force?: boolean;
@@ -51,6 +51,3 @@ export default function VideoPreview({
     </div>
   );
 }
-VideoPreview.defaultProps = {
-  force: false,
-};

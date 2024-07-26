@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import {
   Form,
@@ -13,6 +13,7 @@ import { useGlobalContext } from '@/context/GlobalContext';
 import { parseJwtLegacy } from '@/lib/ParseJWT';
 import { Views } from '@/lib';
 import LocalStorage from '@/utils/LocalStorage';
+import { setVideoQuery } from '@/store/MovieStore';
 
 const LoginWeb: React.FC<any> = function () {
   const dispatch = useAppDispatch();
@@ -32,6 +33,14 @@ const LoginWeb: React.FC<any> = function () {
     context.env.userId = jwt?.userid || 'error';
   }
 
+  const preload = useCallback(async () => {
+    context.getGlobalConfig('default-query').then((r) => {
+      if (r.success && r.data) {
+        dispatch(setVideoQuery(r.data.c_value));
+      }
+    });
+  }, [context, dispatch]);
+
   useEffect(() => {
     (async () => {
       const tok = LocalStorage.load('token');
@@ -42,6 +51,7 @@ const LoginWeb: React.FC<any> = function () {
           await setupAppEnv();
           dispatch(setAppStore(context.env));
           dispatch(setInit(true));
+          preload();
         } else {
           LocalStorage.delete('token');
         }
@@ -79,7 +89,7 @@ const LoginWeb: React.FC<any> = function () {
           ]}
           submit={{
             loading: true,
-            onSubmit: async ({ form, setError, clear }) => {
+            onSubmit: async ({ form, setError }) => {
               setError(null);
               if (!(await context.connect('admin', form.password))) {
                 setError({ global: ['ERROR-CON'] });
@@ -88,6 +98,7 @@ const LoginWeb: React.FC<any> = function () {
                 LocalStorage.save('token', context.authorization || '');
                 dispatch(setAppStore(context.env));
                 dispatch(setInit(true));
+                preload();
               }
               if (!skipLS) {
                 setSkipLS(true);

@@ -11,6 +11,7 @@ import * as fs from 'fs';
 import { WatchDB } from '../../database';
 import Converter from '../../utils/Converter';
 import CoreTimeCache from '../../class/CoreTimeCache';
+import BrowserSupport from '../../lib/BrowserSupport';
 
 @SPath({
   '/movie/stream/{id}': {
@@ -73,56 +74,51 @@ export default class MovieStreamAction extends BaseApiAction<IKernel, WatchDB> {
     );
   }
 
-  async handler({ res, req, data }: XActionEvent): Promise<void> {
-    this.log(req.headers);
+  async handler({ res, req }: XActionEvent): Promise<void> {
+    const { id } = req.params;
+    const { profile, trace } = req.query;
+    if (!id || (profile && typeof profile !== 'string')) {
+      res.sendStatus(400);
+      return;
+    }
 
-    if (data) {
-      const { id } = req.params;
-      const { profile, trace } = req.query;
-      if (!id || (profile && typeof profile !== 'string')) {
-        res.sendStatus(400);
-        return;
-      }
+    const support = new BrowserSupport(req);
 
-      const db = this.getModule().getDb();
-      // Fined Video
-      const dat = await db.movieLib.getObjById(req.params.id);
+    const db = this.getModule().getDb();
+    // Fined Video
+    const dat = await db.movieLib.getObjById(req.params.id);
 
-      if (dat) {
-        const file = await db.file.getObjById(dat.lib_file);
+    if (dat) {
+      const file = await db.file.getObjById(dat.lib_file);
 
-        if (file && fs.existsSync(file.file_path)) {
-          // HAS TRACE IN PATH
-          if (trace && typeof trace === 'string') {
-            const tr = this.traceCache.get(dat.e_id);
-            // TRACE NOT MATCH
-            if (tr !== trace) {
-              this.traceCache.set(dat.e_id, trace, 1000 * 60 * 30);
+      if (file && fs.existsSync(file.file_path)) {
+        // HAS TRACE IN PATH
+        if (trace && typeof trace === 'string') {
+          const tr = this.traceCache.get(dat.e_id);
+          // TRACE NOT MATCH
+          if (tr !== trace) {
+            this.traceCache.set(dat.e_id, trace, 1000 * 60 * 30);
 
-              await db.movieLib.updateObject(dat.e_id, {
-                played_count: (dat.played_count ?? 0) + 1,
-                last_played: new Date(),
-              });
-            } else {
-              // TRACE MATCH
-              this.traceCache.extend(dat.e_id, 1000 * 60 * 5);
-            }
-          } else {
-            // HAS NO TRACE IN PATH
             await db.movieLib.updateObject(dat.e_id, {
               played_count: (dat.played_count ?? 0) + 1,
               last_played: new Date(),
             });
+          } else {
+            // TRACE MATCH
+            this.traceCache.extend(dat.e_id, 1000 * 60 * 5);
           }
-
-          this.converter.stream(file, res, profile);
-          return;
+        } else {
+          // HAS NO TRACE IN PATH
+          await db.movieLib.updateObject(dat.e_id, {
+            played_count: (dat.played_count ?? 0) + 1,
+            last_played: new Date(),
+          });
         }
-      }
-      res.sendStatus(404);
-      return;
-    }
 
-    res.sendStatus(403);
+        this.converter.stream(file, res, profile, support);
+        return;
+      }
+    }
+    res.sendStatus(500);
   }
 }

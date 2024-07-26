@@ -5,22 +5,25 @@ import {
   selectForcePreview,
   selectForceSuggest,
   selectMode,
+  selectVideoQuery,
   setForcePreview,
   setForceSuggest,
   setModal,
   setMode,
+  setVideoQuery,
 } from '@/store/MovieStore';
 import { PlayMode } from '@/lib';
 import PersistentStorage from '@/utils/PersistentStorage';
+import { useGlobalContext } from '@/context/GlobalContext';
 
-export default function WatchModal() {
+export default function DefaultModal() {
+  const context = useGlobalContext();
   const mode = useAppSelector(selectMode);
   const forcePreview = useAppSelector(selectForcePreview);
   const forceSuggestions = useAppSelector(selectForceSuggest);
+  const videoQuery = useAppSelector(selectVideoQuery);
 
   const dispatch = useAppDispatch();
-  const option = PersistentStorage.getMultiOptions();
-  const query = PersistentStorage.getDefaultQuery();
 
   const opts = useMemo(
     () => Object.values(PlayMode).map((v) => ({ key: v, name: v })),
@@ -33,9 +36,7 @@ export default function WatchModal() {
         mode,
         preview: forcePreview,
         suggest: forceSuggestions,
-        maxR: option.maxR,
-        maxC: option.maxC,
-        query,
+        query: videoQuery,
       }}
       submit={{
         buttonText: 'Save',
@@ -47,11 +48,14 @@ export default function WatchModal() {
           dispatch(setForceSuggest(form.suggest));
           PersistentStorage.flagSave('suggestion', form.suggest);
           PersistentStorage.save('mode', form.mode);
-          PersistentStorage.setDefaultQuery(form.query);
-          PersistentStorage.setMultiOptions({
-            maxR: form.maxR,
-            maxC: form.maxC,
+
+          const ax = await context.saveGlobalConfig({
+            key: 'default-query',
+            value: form.query,
           });
+          if (ax.success) {
+            dispatch(setVideoQuery(form.query));
+          }
         },
       }}
       options={[
@@ -80,26 +84,6 @@ export default function WatchModal() {
             key: 'query',
             type: InputOptionType.TEXT,
             label: 'Set default query for label video match',
-          },
-        ],
-        [
-          {
-            key: 'maxR',
-            type: InputOptionType.NUMBER,
-            label: 'Set max rows shown in multi view',
-            restriction: {
-              min: 1,
-            },
-          },
-        ],
-        [
-          {
-            key: 'maxC',
-            type: InputOptionType.NUMBER,
-            label: 'Set max columns shown in multi view',
-            restriction: {
-              min: 1,
-            },
           },
         ],
       ]}

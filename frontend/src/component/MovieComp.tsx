@@ -58,10 +58,6 @@ import RatingComp from '@/component/RatingComp';
 import FindMatchComp from '@/component/FindMatchComp';
 import MovieContext, { MovieDataContext } from '@/context/MovieContext';
 
-const SupportedWebVideoCodec = ['h264', 'vp8', 'vp9'];
-
-const SupportedWebVideoContainer = ['mov,mp4,m4a,3gp,3g2,mj2', 'matroska,webm'];
-
 export type MovieComRefType = ElementRef<typeof MovieComp>;
 
 const MovieComp = forwardRef<
@@ -126,8 +122,8 @@ const MovieComp = forwardRef<
   }, [autoFindMatch]);
 
   const has = useMemo(
-    () => !!multi?.list.includes(mov.e_id),
-    [mov.e_id, multi],
+    () => !!multi?.list.includes(localLib.e_id),
+    [localLib.e_id, multi],
   );
 
   useImperativeHandle(ref, () => ({
@@ -167,19 +163,18 @@ const MovieComp = forwardRef<
     const inspection: ProbeInfo | undefined = (
       await context.getMovieVersion(mov.e_id)
     ).data?.file_meta;
+    const test = await context.getMovieSupport(mov.e_id);
     if (!inspection) {
       return null;
     }
     const vid = inspection.streams.find((dx) => dx.codec_type === 'video')!;
-    const web =
-      SupportedWebVideoCodec.includes(vid.codec_name) &&
-      SupportedWebVideoContainer.includes(inspection.format.format_name);
+    const web = !!test.data?.video?.supported && !!test.data.audio?.supported;
     return {
       duration: mov.duration || 0,
       size: `${(Number(inspection.format.size) / 1024 / 1024).toFixed(2)} MB`,
       res: vid.height || 0,
       web,
-      container: inspection.format.format_name,
+      container: `${test.data?.video?.code} + ${test.data?.audio?.code}`,
       raw: inspection,
     };
   });
@@ -195,7 +190,7 @@ const MovieComp = forwardRef<
       `/movie/stream/${mov.e_id}?trace=${trace || uuid()}${mode()}`,
       true,
     );
-  }, [authHelper, mov.e_id]);
+  }, [authHelper, mode, mov.e_id, trace]);
   const mc = useMemo(
     () =>
       new MovieDataContext({
@@ -249,8 +244,18 @@ const MovieComp = forwardRef<
 
         <Grid flex flexR flexSpaceB className="glx-p-8 glx-flex-wrap" hCenter>
           <Grid flex vCenter gap={8} grow={1} className="glx-mr-12">
-            <div>{moment(mov.created).format('DD.MM.YY - HH:mm')} </div>
-            {mov.movie_url && <IOLink />}
+            <div>{moment(localLib.created).format('DD.MM.YY - HH:mm')} </div>
+            {localLib.movie_url && (
+              <Tooltip text={localLib.movie_url}>
+                <div
+                  style={{
+                    paddingTop: '4px',
+                  }}
+                >
+                  <IOLink />
+                </div>
+              </Tooltip>
+            )}
             {playerStatus ? (
               <Grid grow={1}>
                 <Progress
@@ -275,9 +280,9 @@ const MovieComp = forwardRef<
                   position="bottom"
                   text={`Container: ${meta.container}\nSize: ${
                     meta.size
-                  }\nPlays: ${mov.played_count ?? 0}\nLast Played: ${
-                    mov.last_played
-                      ? new Date(mov.last_played).toLocaleString()
+                  }\nPlays: ${localLib.played_count ?? 0}\nLast Played: ${
+                    localLib.last_played
+                      ? new Date(localLib.last_played).toLocaleString()
                       : 'never'
                   }`}
                 >
@@ -286,13 +291,7 @@ const MovieComp = forwardRef<
               </>
             ) : null}
 
-            <IconButton
-              /* toolTip={{
-                              text: 'Label bearbeiten',
-                              position: 'left',
-                            }} */
-              onClick={() => setEditLabel(!editLabel)}
-            >
+            <IconButton onClick={() => setEditLabel(!editLabel)}>
               {editLabel ? (
                 <span className="icon-active">
                   <IOPricetag />
@@ -315,37 +314,19 @@ const MovieComp = forwardRef<
             )}
 
             {play ? (
-              <IconButton
-                /* toolTip={{
-                                      text: 'Abspielen beenden',
-                                      position: 'left',
-                                    }} */
-                onClick={() => setPlay(!play)}
-              >
+              <IconButton onClick={() => setPlay(!play)}>
                 <span className="icon-active">
                   <IOEyeOffOutline />
                 </span>
               </IconButton>
             ) : null}
             {meta?.web && !play ? (
-              <IconButton
-                /* toolTip={{
-                                      text: 'Abspielen',
-                                      position: 'left',
-                                    }} */
-                onClick={() => setPlay(!play)}
-              >
+              <IconButton onClick={() => setPlay(!play)}>
                 <IOPlay />
               </IconButton>
             ) : null}
             {!meta?.web && !play ? (
-              <IconButton
-                /* toolTip={{
-                                      text: 'Abspielen (Konvertieren)',
-                                      position: 'left',
-                                    }} */
-                onClick={() => setPlay(!play)}
-              >
+              <IconButton onClick={() => setPlay(!play)}>
                 <IOTvOutline />
               </IconButton>
             ) : null}
@@ -360,7 +341,7 @@ const MovieComp = forwardRef<
                   className="h-fix"
                   checked={has}
                   value={has}
-                  onChange={() => multi.updateMulti(mov.e_id)}
+                  onChange={() => multi.updateMulti(localLib.e_id)}
                 />
               </Tooltip>
             )}
@@ -372,7 +353,7 @@ const MovieComp = forwardRef<
                   icon: 'IOOpenOutline',
                   label: 'Open Video in new tab',
                 },
-                ...(mov.movie_url
+                ...(localLib.movie_url
                   ? [
                       {
                         key: 'open-original',
@@ -405,6 +386,15 @@ const MovieComp = forwardRef<
                   checkBox: true,
                   value: suggest,
                 },
+                ...(localLib.movie_url !== null
+                  ? [
+                      {
+                        key: 'unlink',
+                        icon: 'IOBagRemove' as INames,
+                        label: 'Remove Link',
+                      },
+                    ]
+                  : []),
                 ...(index !== undefined
                   ? [
                       {
@@ -424,7 +414,7 @@ const MovieComp = forwardRef<
               onChange={(key) => {
                 switch (key) {
                   case 'copy-id':
-                    copyToClipboard(mov.e_id);
+                    copyToClipboard(localLib.e_id);
                     toast.success(`ID copied to clipboard`);
                     break;
                   case 'cinema-mode':
@@ -438,14 +428,25 @@ const MovieComp = forwardRef<
                     break;
                   case 'open-original':
                     context.openExternalConfig({
-                      url: mov.movie_url!,
+                      url: localLib.movie_url!,
                       external: true,
                     });
+                    break;
+                  case 'unlink':
+                    context
+                      .updateMovie(localLib.e_id, {
+                        movie_url: null as any,
+                      })
+                      .then((r) => {
+                        if (r.data) {
+                          setLocalLib(r.data);
+                        }
+                      });
                     break;
                   case 'open':
                     context.openExternalConfig({
                       url: authHelper(
-                        `/movie/stream/${mov.e_id}?${mode(true)}`,
+                        `/movie/stream/${localLib.e_id}?${mode(true)}`,
                         true,
                         true,
                       ),
@@ -457,12 +458,12 @@ const MovieComp = forwardRef<
                     toast.dark(
                       <Grid flex flexC gap={12}>
                         <span>
-                          Delete Medium [{mov.movie_name}] from File system
+                          Delete Medium [{localLib.movie_name}] from File system
                         </span>
                         <Grid flex flexR gap={12} hCenter>
                           <IconButton
                             onClick={() => {
-                              context.deleteMovie(mov.e_id).then((r) => {
+                              context.deleteMovie(localLib.e_id).then((r) => {
                                 if (r.success) {
                                   toast.success('Element deleted');
                                 } else {
@@ -510,11 +511,11 @@ const MovieComp = forwardRef<
         >
           <LabelComp
             key={`label_${updateKey}`}
-            id={mov.e_id}
+            id={localLib.e_id}
             focus={!!editMode}
             edit={editLabel}
             suggest={suggest}
-            title={mov.movie_name}
+            title={localLib.movie_name}
           />
           <Grid
             flex

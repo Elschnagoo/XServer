@@ -2,14 +2,21 @@ import { CoreLogChannel, IHaveLogger, XResponse } from '@grandlinex/kernel';
 import ffmpeg from 'fluent-ffmpeg';
 import * as fs from 'fs';
 import LibFile from '../database/entities/LibFile';
-import MediaUtil from './MediaUtil';
+import BrowserSupport from '../lib/BrowserSupport';
 
 export default class Converter extends CoreLogChannel {
   constructor(log: IHaveLogger) {
     super('converter', log);
   }
 
-  stream(file: LibFile, res: XResponse, profile: string | null | undefined) {
+  stream(
+    file: LibFile,
+    res: XResponse,
+    profile: string | null | undefined,
+    support: BrowserSupport,
+  ) {
+    const v = file.file_meta?.streams.find((e) => e.codec_type === 'video');
+    const a = file.file_meta?.streams.find((e) => e.codec_type === 'audio');
     switch (profile) {
       case 'best':
         this.liveConvertVideo(file.file_path, res);
@@ -26,8 +33,14 @@ export default class Converter extends CoreLogChannel {
       case undefined:
       case null:
       default:
-        if (MediaUtil.fileHasWebVideoCodec(file)) {
+        if (
+          !v ||
+          !a ||
+          (support.canPlayVideoCodec(v.codec_name) &&
+            support.canPlayVideoCodec(a.codec_name))
+        ) {
           res.status(200).sendFile(file.file_path);
+          break;
         } else {
           this.liveConvertVideoMEDIUM(file.file_path, res);
         }

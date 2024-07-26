@@ -37,6 +37,10 @@ import LabelLookupAction from './action/label/LabelLookupAction';
 import DownloadLabelSuggestionsAction from './action/admin/DownloadLabelSuggestionsAction';
 import FindVideoSuggestionsAction from './action/admin/FindVideoSuggestionsAction';
 import GetMovieRelatedAction from './action/movie/GetMovieRelatedAction';
+import MovieSupportAction from './action/movie/MovieSupportAction';
+import LoadGlobalConfigAction from './action/config/LoadGlobalConfigAction';
+import SaveGlobalConfigAction from './action/config/SaveGlobalConfigAction';
+import GetLabelSuggestionAction from './action/label/GetLabelSuggestionAction';
 
 export default class WatchModule extends BaseKernelModule<
   IKernel,
@@ -66,6 +70,7 @@ export default class WatchModule extends BaseKernelModule<
       new BindLabelAction(this),
       new UnbindLabelAction(this),
       new LabelLookupAction(this),
+      new GetLabelSuggestionAction(this),
       // label alias
       new LabelAliasAction(this),
       new NewLabelAliasAction(this),
@@ -84,6 +89,10 @@ export default class WatchModule extends BaseKernelModule<
       new RatingAction(this),
       new NewRatingAction(this),
       new UpdateRatingAction(this),
+      new MovieSupportAction(this),
+      // config
+      new LoadGlobalConfigAction(this),
+      new SaveGlobalConfigAction(this),
     );
     this.addService(
       new QService(this),

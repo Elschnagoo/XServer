@@ -68,7 +68,7 @@ export default class DownloadLabelSuggestionsAction extends BaseApiAction<
   constructor(
     module: IBaseKernelModule<IKernel, WatchDB, WatchClient, any, any>,
   ) {
-    super('POST', '/download/label', module, module.getKernel().getModule());
+    super('GET', '/suggest/label/:id', module, module.getKernel().getModule());
     this.handler = this.handler.bind(this);
   }
 

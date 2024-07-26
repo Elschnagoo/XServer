@@ -71,7 +71,11 @@ export default class UpdateMovieAction extends BaseApiAction<IKernel, WatchDB> {
     const movieDescriptionValid =
       !movie_description ||
       (typeof movie_description === 'string' && movie_description.length > 0);
-    const noBody = rating === undefined && !movie_name && !movie_description;
+    const noBody =
+      rating === undefined &&
+      !movie_name &&
+      !movie_description &&
+      movie_url === undefined;
     if (noBody || !(ratingValid && movieNameValid && movieDescriptionValid)) {
       res.sendStatus(400);
       return;

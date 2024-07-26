@@ -88,9 +88,12 @@ export default function usePreload() {
 
           if (search?.titel) {
             data = data?.filter((c) => {
-              return c.movie_name
-                .toLowerCase()
-                .includes(search.titel.toLowerCase());
+              return (
+                c.movie_name
+                  .toLowerCase()
+                  .includes(search.titel.toLowerCase()) ||
+                search.titel === c.e_id
+              );
             });
           }
           switch (search?.order) {

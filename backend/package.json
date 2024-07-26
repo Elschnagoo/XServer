@@ -1,6 +1,6 @@
 {
   "name": "@elschnagoo/xserver",
-  "version": "1.10.0",
+  "version": "1.11.0",
   "description": "GrandLineX Full Stack Demo Project",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -14,7 +14,7 @@
     "test": "jest --runInBand --ci --collectCoverage   --coverageDirectory=\"./coverage\"  --reporters=default --reporters=jest-junit",
     "test-coverage": "npm run buildTestApi && npm run test",
     "makeDocs": "typedoc",
-    "buildApi": "npm run buildSpecMain && npm --prefix ./gen run build",
+    "buildApi": "npm run buildprep && npm run buildSpecMain && npm --prefix ./gen run build",
     "buildTestApi": "npm run buildSpecDev && npm --prefix ./gen run build",
     "makeSpec": "swagger-mate",
     "serveSpec": "swagger-mate --serve",

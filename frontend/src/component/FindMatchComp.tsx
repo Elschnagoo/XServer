@@ -14,9 +14,10 @@ import { FindVideoSuggestionsResponseElement } from '@elschnagoo/xserver-con';
 import moment from 'moment';
 import { toast } from 'react-toastify';
 import { useGlobalContext } from '@/context/GlobalContext';
-import PersistentStorage from '@/utils/PersistentStorage';
 import LoadingComp from '@/component/LoadingComp';
 import { useMovieContext } from '@/context/MovieContext';
+import { useAppSelector } from '@/store';
+import { selectVideoQuery } from '@/store/MovieStore';
 
 export function FindMatchElement({
   item,
@@ -144,6 +145,7 @@ export function FindMatchElement({
 
 export default function FindMatchComp() {
   const context = useGlobalContext();
+  const videoQuery = useAppSelector(selectVideoQuery);
   const { mov } = useMovieContext();
   const [data, setData] = useState<
     FindVideoSuggestionsResponseElement[] | null
@@ -196,7 +198,7 @@ export default function FindMatchComp() {
         ]}
         defaultState={{
           element: mov.e_id,
-          url: PersistentStorage.getDefaultQuery(),
+          url: videoQuery,
         }}
         submit={{
           onSubmit: async ({ form, setError }) => {

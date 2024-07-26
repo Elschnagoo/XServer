@@ -55,7 +55,7 @@ html, body {
 
 .scroll-container{
   @extend .flex-grid,.main-frame;
-  background-color: $main-background;
+  background: linear-gradient(to bottom right, #0f0f0f, #1a1a1a);
   justify-content: center !important;
 
 

@@ -5,7 +5,7 @@ import SettingsSwitch, { SETTINGS } from '@/component/SettingsSwitch';
 
 export default function Settings() {
   const ref = useRef(createRef<HTMLDivElement>());
-  const [mode, setMode] = useState(SETTINGS.PLAY);
+  const [mode, setMode] = useState(SETTINGS.DEFAULT);
 
   return (
     <BaseModal divRef={ref.current} title="Settings">
@@ -13,7 +13,7 @@ export default function Settings() {
         onChange={(c) => setMode(c.key as SETTINGS)}
         items={[
           {
-            key: SETTINGS.PLAY,
+            key: SETTINGS.DEFAULT,
             name: 'General',
           },
           {

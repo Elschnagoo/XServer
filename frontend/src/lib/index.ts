@@ -52,4 +52,5 @@ export type MovieEnv = {
   mode: PlayMode;
   forcePreview: boolean;
   forceSuggest: boolean;
+  videoQuery: string;
 };

@@ -1,10 +1,10 @@
 import React, { createRef, useMemo } from 'react';
 import {
   cnx,
+  def,
   Grid,
   IconButton,
   IOClose,
-  IOInformationCircle,
   IOInformationCircleOutline,
   KeyBind,
   MediaPlayerParentFunction,
@@ -19,7 +19,6 @@ import {
 import useAuthHelper from '@/utils/AuthUtil';
 import { selectMulti, setModal } from '@/store/MovieStore';
 import { useAppDispatch, useAppSelector, usePlayMode } from '@/store';
-import PersistentStorage from '@/utils/PersistentStorage';
 
 function changeVol(
   ref: React.RefObject<MediaPlayerParentFunction>,
@@ -48,18 +47,70 @@ export default function MultiView() {
   const authHelper = useAuthHelper();
   const dispatch = useAppDispatch();
   const mode = usePlayMode();
-  const option = PersistentStorage.getMultiOptions();
+
   const list = useAppSelector(selectMulti);
+  const option = useMemo(() => {
+    switch (list.length) {
+      case 1:
+        return {
+          maxR: 1,
+          maxC: 1,
+        };
+      case 2:
+        return {
+          maxR: 1,
+          maxC: 2,
+        };
+      case 3:
+      case 4:
+        return {
+          maxR: 2,
+          maxC: 2,
+        };
+      case 5:
+      case 6:
+        return {
+          maxR: 2,
+          maxC: 3,
+        };
+      case 7:
+      case 8:
+      case 9:
+        return {
+          maxR: 3,
+          maxC: 3,
+        };
+      case 10:
+      case 11:
+      case 12:
+        return {
+          maxR: 3,
+          maxC: 4,
+        };
+      case 13:
+      case 14:
+      case 15:
+      case 16:
+        return {
+          maxR: 4,
+          maxC: 4,
+        };
+      case 17:
+      case 18:
+      case 19:
+      case 20:
+      default:
+        return {
+          maxR: 4,
+          maxC: 5,
+        };
+    }
+  }, [list.length]);
   const pList = useMemo(() => {
     return list
       .map<
         [string, string, string, React.RefObject<MediaPlayerParentFunction>]
-      >((v) => [
-        v,
-        authHelper(`/movie/stream/${v}?trace=${uuid()}${mode()}`, true),
-        authHelper(`/movie/img/${v}?type=tn_1`, true),
-        createRef<MediaPlayerRefType>(),
-      ])
+      >((v) => [v, authHelper(`/movie/stream/${v}?trace=${uuid()}${mode()}`, true), authHelper(`/movie/img/${v}?type=tn_1`, true), createRef<MediaPlayerRefType>()])
       .slice(0, option.maxR * option.maxC);
   }, [authHelper, list, mode, option.maxC, option.maxR]);
 
@@ -191,7 +242,7 @@ export default function MultiView() {
                 : undefined
             }
           >
-            <MediaPlayer src={steam} poster={poster} ref={ref} loop />
+            <MediaPlayer src={steam} poster={poster} ref={ref} loop controls />
           </div>
         ))}
       </Grid>

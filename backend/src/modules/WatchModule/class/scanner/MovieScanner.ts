@@ -5,8 +5,8 @@ import BaseScanner from './BaseScanner';
 import LibPath from '../../database/entities/LibPath';
 import LibFile from '../../database/entities/LibFile';
 import MovieLib from '../../database/entities/MovieLib';
-import MediaUtil from '../../utils/MediaUtil';
 import LabelMap from '../../database/map/LabelMap';
+import BrowserSupport from '../../lib/BrowserSupport';
 
 export function niceName(name: string) {
   let tName = Path.parse(name).name;
@@ -27,7 +27,7 @@ export default class MovieScanner extends BaseScanner {
   ): Promise<void> {
     try {
       if (!(await this.db.file.findObj({ file_path: fPath }))) {
-        if (MediaUtil.isSupportedVideoContainer(fPath)) {
+        if (BrowserSupport.isSupportedVideoContainer(fPath)) {
           const fId = (
             await this.db.file.createObject(
               new LibFile({
