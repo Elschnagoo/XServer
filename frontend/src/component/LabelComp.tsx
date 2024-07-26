@@ -28,7 +28,7 @@ function LabelComplete({
 }) {
   const context = useGlobalContext();
   const [data, , fetch] = useQData(async () => {
-    toast.info('Lade Vorschläge');
+    console.log('getLabelSuggestions');
     return (await context.getLabelSuggestions(id)).data || null;
   });
   const filtered = useMemo(
