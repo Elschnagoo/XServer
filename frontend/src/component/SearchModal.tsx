@@ -4,7 +4,6 @@ import { useAppDispatch, useAppSelector } from '@/store';
 import {
   selectLabel,
   selectSearch,
-  setMax,
   setModal,
   setSearch,
 } from '@/store/MovieStore';
@@ -24,6 +23,9 @@ export enum SearchOrder {
   LAST_PLAYED_DSC = 'last_played_dsc',
   PLAYS_ASC = 'plays_asc',
   PLAYS_DSC = 'plays_dsc',
+  PLAYS_NO = 'plays_no',
+  QUALITY_ASC = 'quality_asc',
+  QUALITY_DSC = 'quality_dsc',
   SHUFFLE = 'shuffle',
 }
 export enum Sync {
@@ -31,17 +33,26 @@ export enum Sync {
   PENDING = 'pending',
   DONE = 'done',
 }
+export enum Duration {
+  ALL = 'all',
+  SHORT = 'short',
+  MEDIUM = 'medium',
+  LONG = 'long',
+}
 const defaultSearch = {
   titel: '',
-  rating: '',
-  label: [],
-  exclude: [],
-  order: SearchOrder.DATE_DSC,
+  ratingMin: '',
+  ratingMax: '',
+  needLabel: [],
+  optLabel: [],
+  notLabel: [],
+  sortOrder: SearchOrder.DATE_DSC,
   sync: Sync.ALL,
-  link: false,
+  link: 'default',
+  duration: Duration.ALL,
 };
 export default function SearchModal() {
-  const { loadMovie } = usePreload();
+  const { clearLoadMovie } = usePreload();
   const search = useAppSelector(selectSearch);
   const dispatch = useAppDispatch();
   const label = useAppSelector(selectLabel);
@@ -56,16 +67,15 @@ export default function SearchModal() {
         submit={{
           buttonText: 'Search',
           onSubmit: async ({ form }) => {
-            dispatch(setMax(14));
             dispatch(setSearch(form));
-            loadMovie(form);
+            clearLoadMovie();
             dispatch(setModal(null));
           },
         }}
         options={[
           [
             {
-              key: 'titel',
+              key: 'title',
               type: InputOptionType.TEXT,
               label: 'Titel',
               autoFocus: true,
@@ -73,7 +83,7 @@ export default function SearchModal() {
           ],
           [
             {
-              key: 'min',
+              key: 'ratingMin',
               type: InputOptionType.NUMBER,
               label: 'Rating Min',
               restriction: {
@@ -82,7 +92,7 @@ export default function SearchModal() {
               },
             },
             {
-              key: 'max',
+              key: 'ratingMax',
               type: InputOptionType.NUMBER,
               label: 'Rating Max',
               restriction: {
@@ -112,9 +122,9 @@ export default function SearchModal() {
           ],
           [
             {
-              key: 'label',
+              key: 'needLabel',
               type: InputOptionType.TAG_SELECTOR,
-              label: 'Have Label',
+              label: 'Have all Label',
               items: label.map((l) => ({
                 key: l.e_id,
                 name: l.label_name,
@@ -125,9 +135,22 @@ export default function SearchModal() {
           ],
           [
             {
-              key: 'exclude',
+              key: 'optLabel',
               type: InputOptionType.TAG_SELECTOR,
-              label: 'Exclude Label',
+              label: 'Have at least one Label',
+              items: label.map((l) => ({
+                key: l.e_id,
+                name: l.label_name,
+                icon: l.icon as any,
+                meta: l.color,
+              })),
+            },
+          ],
+          [
+            {
+              key: 'notLabel',
+              type: InputOptionType.TAG_SELECTOR,
+              label: 'Exclude all Label',
               items: label.map((l) => ({
                 key: l.e_id,
                 name: l.label_name,
@@ -156,12 +179,35 @@ export default function SearchModal() {
                 },
               ],
             },
+            {
+              key: 'duration',
+              type: InputOptionType.DROPDOWN,
+              label: 'Duration',
+              items: [
+                {
+                  key: Duration.ALL,
+                  name: 'All (default)',
+                },
+                {
+                  key: Duration.SHORT,
+                  name: 'Short (0-10 min)',
+                },
+                {
+                  key: Duration.MEDIUM,
+                  name: 'Medium (10-30 min)',
+                },
+                {
+                  key: Duration.LONG,
+                  name: 'Long (30+ min)',
+                },
+              ],
+            },
           ],
           [
             {
-              key: 'order',
+              key: 'sortOrder',
               type: InputOptionType.DROPDOWN,
-              label: 'Order',
+              label: 'Sort/Order',
               items: [
                 {
                   key: SearchOrder.DATE_DSC,
@@ -188,6 +234,14 @@ export default function SearchModal() {
                   name: 'Duration (Ascending)',
                 },
                 {
+                  key: SearchOrder.QUALITY_DSC,
+                  name: 'Quality (Descending)',
+                },
+                {
+                  key: SearchOrder.QUALITY_ASC,
+                  name: 'Quality (Ascending)',
+                },
+                {
                   key: SearchOrder.NAME_ASC,
                   name: 'Name (A-Z)',
                 },
@@ -202,6 +256,10 @@ export default function SearchModal() {
                 {
                   key: SearchOrder.PLAYS_DSC,
                   name: 'Plays (Descending)',
+                },
+                {
+                  key: SearchOrder.PLAYS_NO,
+                  name: 'Unplayed',
                 },
                 {
                   key: SearchOrder.LAST_PLAYED_ASC,

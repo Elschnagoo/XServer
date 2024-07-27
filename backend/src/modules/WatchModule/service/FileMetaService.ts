@@ -29,11 +29,13 @@ export default class FileMetaService extends BaseLoopService<
           if (!meta) {
             this.error(`Could not get meta for ${el.file_path}`);
           }
+          const v = meta?.streams.find((e) => e.codec_type === 'video');
 
           await db.file.updateObject(el.e_id, {
             synced: true,
             file_meta: meta,
             duration: parseInt(meta?.format.duration.split('.')[0] || '0', 10),
+            quality: v?.height || null,
           });
         } catch (e) {
           this.error(`Could not get meta [Exception] for ${el.file_path}`);

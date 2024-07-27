@@ -10,12 +10,20 @@ import {
 import { WatchDB } from '../../database';
 
 @SPath({
-  '/movie/label/{id}': {
+  '/movie/label/{mov}/{id}': {
     delete: {
       tags: ['Watch'],
       operationId: 'unbindLabel',
       summary: 'Unbind label from movie',
       parameters: [
+        {
+          in: 'path',
+          name: 'mov',
+          required: true,
+          schema: {
+            type: 'string',
+          },
+        },
         {
           in: 'path',
           name: 'id',
@@ -31,26 +39,30 @@ import { WatchDB } from '../../database';
 })
 export default class UnbindLabelAction extends BaseApiAction<IKernel, WatchDB> {
   constructor(module: IBaseKernelModule<IKernel, WatchDB, any, any, any>) {
-    super('DELETE', '/movie/label/:id', module, module.getKernel().getModule());
+    super(
+      'DELETE',
+      '/movie/label/:mov/:id',
+      module,
+      module.getKernel().getModule(),
+    );
     this.handler = this.handler.bind(this);
   }
 
-  async handler({ res, req, data }: XActionEvent): Promise<void> {
-    if (data) {
-      const db = this.getModule().getDb();
-      const label = await db.labelMap.getObjById(req.params.id);
+  async handler({ res, req }: XActionEvent): Promise<void> {
+    const db = this.getModule().getDb();
+    const { mov, id } = req.params;
+    const label = await db.labelMap.findObj({
+      mov_lib: mov,
+      label: id,
+    });
 
-      if (!label) {
-        res.sendStatus(404);
-        return;
-      }
-
-      await db.labelMap.delete(label.e_id);
-
-      res.sendStatus(200);
+    if (!label) {
+      res.sendStatus(404);
       return;
     }
 
-    res.sendStatus(403);
+    await db.labelMap.delete(label.e_id);
+
+    res.sendStatus(200);
   }
 }

@@ -10,12 +10,15 @@ import {
   useAsync,
   uuid,
 } from '@grandlinex/react-components';
-import React, { createRef, useMemo, useState } from 'react';
-import { MLabel } from '@elschnagoo/xserver-con';
+import React, { createRef, useEffect, useMemo, useState } from 'react';
 import { selectCinema, setCinema } from '@/store/MovieStore';
-import { useAppDispatch, useAppSelector, usePlayMode } from '@/store';
+import {
+  useAppDispatch,
+  useAppSelector,
+  useLabelHook,
+  usePlayMode,
+} from '@/store';
 import TitleComp from '@/component/TitleComp';
-import MovieContext, { MovieDataContext } from '@/context/MovieContext';
 import useAuthHelper from '@/utils/AuthUtil';
 import CinemaPreviewComp from '@/component/CinemaPreviewComp';
 import { useGlobalContext } from '@/context/GlobalContext';
@@ -30,22 +33,17 @@ export default function Cinema() {
 
   const [page, setPage] = useState(0);
   const authHelper = useAuthHelper();
-  const [movLabel, setMovieLabel] = useState<MLabel[]>();
-  const curEl = useMemo(() => {
+  const [movLabel, setMovieLabel] = useState<string[]>();
+
+  useEffect(() => {
     if (cinema) {
-      context.getMoviesLabel(cinema.e_id).then((d) => {
-        setMovieLabel(
-          d.data?.sort((a, b) => a.label.label_order - b.label.label_order) ||
-            [],
-        );
-      });
-      return new MovieDataContext({
-        mov: cinema,
-        update: () => {},
-      });
+      context
+        .getMoviesLabel(cinema.e_id)
+        .then((d) => setMovieLabel(d.data?.map((e) => e.map)));
     }
-    return null;
   }, [cinema, context]);
+
+  const label = useLabelHook(movLabel || []);
 
   const [nextEl, loading] = useAsync(async () => {
     if (!cinema) {
@@ -56,10 +54,10 @@ export default function Cinema() {
 
   const stream = useMemo(() => {
     return authHelper(
-      `/movie/stream/${curEl?.mov.e_id}?trace=${trace}${mode()}`,
+      `/movie/stream/${cinema?.e_id}?trace=${trace}${mode()}`,
       true,
     );
-  }, [authHelper, curEl?.mov.e_id, mode, trace]);
+  }, [authHelper, cinema?.e_id, mode, trace]);
   const hasNextPage = useMemo(() => {
     return nextEl?.slice((page + 1) * 5, (page + 1) * 5 + 5).length !== 0;
   }, [nextEl, page]);
@@ -67,24 +65,29 @@ export default function Cinema() {
     <Grid flex flexC className={cnx('cinema-body')} gap={24} vCenter>
       <Grid flex flexC className="cinema-element">
         <Grid flex flexC className="player-comp">
-          {curEl && (
-            <MovieContext.Provider value={curEl}>
+          {cinema && (
+            <>
               <Grid flex flexC className="player-comp--title">
-                <TitleComp noEdit />
+                <TitleComp
+                  noEdit
+                  mc={{
+                    mov: cinema,
+                    update: () => {},
+                  }}
+                />
                 <Grid
                   className="glx-w-full-4 glx-p-4 glx-flex-wrap"
                   flex
                   flexR
                   gap={8}
                 >
-                  {movLabel?.map((l) => (
+                  {label?.map((l) => (
                     <Badge
                       icon={
-                        (l.label.icon as INames | undefined) ||
-                        'IOPricetagOutline'
+                        (l.icon as INames | undefined) || 'IOPricetagOutline'
                       }
-                      text={l.label.label_name}
-                      color={l.label.color as BadgeColor | undefined}
+                      text={l.label_name}
+                      color={l.color as BadgeColor | undefined}
                     />
                   ))}
                 </Grid>
@@ -100,7 +103,7 @@ export default function Cinema() {
                   setPage(0);
                 }}
               />
-            </MovieContext.Provider>
+            </>
           )}
         </Grid>
         <Grid flex flexR className="play-candidates" flexSpaceA>

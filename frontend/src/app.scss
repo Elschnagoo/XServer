@@ -1,6 +1,13 @@
+$content-w: 520px;
+$content-h: 288px;
+
 @import "@grandlinex/react-components/style/style";
 @import "styles/font";
 @import "styles/ReactToastify";
+@import "styles/cinema";
+@import "styles/multi-view";
+@import "styles/label-suggestion";
+@import "styles/edit-mode";
 
 
 .root {
@@ -66,19 +73,7 @@ html, body {
   width: 100%;
 }
 
-$content-w: 520px;
-$content-h: 288px;
 
-.edit-modal{
-  .movie-com {
-    .video-preview {
-      video.glx-media-player {
-        width: $content-w;
-        height: $content-h;
-      }
-    }
-  }
-}
 
 .movie-com{
   min-height: 320px;
@@ -158,53 +153,7 @@ $content-h: 288px;
   flex-grow: 1;
 }
 
-.edit-modal{
-  position: absolute;
-  z-index: 899;
-  background-color: $main-background-alt;
-  top:0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  .chang-inp{
-    width: 60px;
-  }
-  .edit-wrapper{
-    overflow-x: auto;
-    width: 100%;
-    height: 100%;
-    position: relative;
-    .edit-close{
-      position: absolute;
-      top: 4px;
-      right: 4px;
 
-    }
-    .edit-desktop{
-      width: calc(100% - 600px);
-    }
-    .edit-main{
-      padding-top: 20px;
-      height: calc(100% - 20px);
-      .movie-com{
-        width: calc(100% - 4px);
-      }
-       .carosell{
-         @extend .glx-flex-h-center;
-         min-height: calc(288px * 2);
-         .glx-flex{
-           @extend .glx-flex-h-center;
-           flex-wrap: wrap;
-         }
-       }
-      .glx-media-player{
-        height: calc(288px * 2);
-        width: 100%;
-      }
-
-    }
-  }
-}
 .carosell-container:hover{
   .play{
     display: block;
@@ -232,31 +181,7 @@ $content-h: 288px;
   }
 }
 
-@media only screen and (min-height: 1200px) {
-  .edit-modal {
-    .edit-main{
-      .glx-media-player{
-        height: calc($content-h * 3) !important;
-      }
-      .carosell {
-        height: calc($content-h * 3) !important;
-        img{
-          height: calc($content-h * 1.5) !important;
-          width: calc($content-w * 1.5) !important;
-        }
-      }
-      .movie-com {
-        .video-preview {
-          video.glx-media-player {
-            height: calc($content-h * 1.5) !important;
-            width: calc($content-w * 1.5) !important;
-          }
-        }
-      }
-    }
-  }
 
-}
 .s-modal{
   position: absolute;
   z-index: 900;
@@ -298,35 +223,7 @@ $content-h: 288px;
   }
 }
 
-.multi-view{
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background: $main-background;
-  z-index: 400;
-  .multi-el{
-//    height: calc(50% - 2px);
-    video{
-      width: 100%;
-      height: calc(100% - 2px);
-    }
-  }
-  .multi-el-dual{
-    @extend .multi-el;
-    width: 50%;
-    height: calc(100% - 2px);
-  }
-  .multi-el-single{
-    @extend .multi-el;
-    height: calc(100% - 2px);
-  }
-}
-.multi-close{
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  z-index: 401;
-}
+
 .h-fix{
   height:24px;
 }
@@ -376,112 +273,9 @@ $content-h: 288px;
   }
 
 }
-.cinema-body{
-  width: 100%;
-  height: calc(100% - 48px);
-  .cinema-element{
-    height: 100%;
-    width: 100%;
-    /*outline: 1px solid green;*/
-  }
-  h4{
-    margin: 8px;
-  }
-  video.cinema-vid{
-    width: 100%;
-    height: 100%;
+.carosell{
+  img{
     object-fit: contain;
   }
-  .player-comp{
-    background-color: black;
-    /*outline: 1px solid red;*/
-    position: relative;
-    height: calc(100% - 250px);
-    flex-grow: 1;
-    .player-comp--title{
-      @extend .glx-no-select;
-      width: 100%;
-      position: absolute;
-      display: none;
-      backdrop-filter: blur(10px);
-      background-color: rgba(0,0,0,0.8);
-      padding-top: 16px;
-      padding-bottom: 16px;
-      h4{
-        font-size: 20pt;
-      }
-    }
-  }
-  .player-comp:hover{
-    .player-comp--title{
-      @extend .glx-animation-fade-in-fast;
-      position: absolute;
-      display: block;
-    }
-  }
-  .play-candidates{
-    /*outline: 1px solid blue;*/
-    width: 100%;
-
-    position: relative;
-
-    .aps-left{
-      position: absolute;
-      left: 0;
-      top: calc(50% - 12px);
-    }
-    .aps-right{
-      position: absolute;
-      right: 0;
-      top: calc(50% - 12px);
-    }
-
-    .cinema-preview:hover{
-      .cinema-preview-name{
-        @extend .glx-animation-fade-in-fast;
-        display: block;
-      }
-      .cinema-preview-play{
-        @extend .glx-animation-fade-in-fast;
-        display: block;
-      }
-    }
-    .cinema-preview-empty{
-      @extend .animated-background;
-      height: 200px;
-      flex-basis: 18%;
-    }
-    .cinema-preview{
-      cursor: pointer;
-      position: relative;
-      flex-basis: 18%;
-      height: 100%;
-      .cinema-preview-play{
-        @extend .glx-no-select;
-        padding: 4px;
-        display: none;
-        position: absolute;
-        bottom: 0;
-        right: 0;
-
-      }
-      .cinema-preview-name{
-        @extend .glx-no-select;
-        padding: 4px;
-        display: none;
-        position: absolute;
-        width: 100%;
-        backdrop-filter: blur(10px);
-        background-color: rgba(0,0,0,0.5);
-      }
-      .video-preview{
-        video{
-          max-height: 200px;
-          width: 100%;
-          height: 100%;
-          object-fit: contain;
-        }
-      }
-    }
-  }
 }
+

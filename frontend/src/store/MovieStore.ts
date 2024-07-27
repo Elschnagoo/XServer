@@ -11,7 +11,10 @@ const initialAppEnv: MovieEnv = {
   exclude: null,
   movie: null,
   rating: null,
-  max: 14,
+  max: 0,
+  page: 0,
+  loading: false,
+  lastPage: false,
   multi: [],
   modal: null,
   editMode: -1,
@@ -56,6 +59,15 @@ export const movState = createSlice({
     },
     setMax: (state, action: PayloadAction<number>) => {
       state.max = action.payload;
+    },
+    setPage: (state, action: PayloadAction<number>) => {
+      state.page = action.payload;
+    },
+    setLoading: (state, action: PayloadAction<boolean>) => {
+      state.loading = action.payload;
+    },
+    setLastPage: (state, action: PayloadAction<boolean>) => {
+      state.lastPage = action.payload;
     },
     setModal: (state, action: PayloadAction<MODAL | null>) => {
       state.modal = action.payload;
@@ -115,10 +127,16 @@ export const {
   setForceSuggest,
   setCinema,
   setVideoQuery,
+  setLoading,
+  setLastPage,
+  setPage,
 } = movState.actions;
 
 export const selectSearch = (state: RootState) => state.movie.search;
 export const selectMax = (state: RootState) => state.movie.max;
+export const selectPage = (state: RootState) => state.movie.page;
+export const selectLoading = (state: RootState) => state.movie.loading;
+export const selectLastPage = (state: RootState) => state.movie.lastPage;
 export const selectForcePreview = (state: RootState) =>
   state.movie.forcePreview;
 export const selectForceSuggest = (state: RootState) =>

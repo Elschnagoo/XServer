@@ -1,16 +1,16 @@
 import { CoreDBUpdate } from '@grandlinex/kernel';
 import PGCon from '@grandlinex/bundle-postgresql';
 
-export default class Patch003 extends CoreDBUpdate<PGCon> {
+export default class Patch010 extends CoreDBUpdate<PGCon> {
   constructor(con: PGCon) {
-    super('2', '3', con);
+    super('9', '10', con);
   }
 
   async performe(): Promise<boolean> {
     const db = this.getDb();
     const [atx1, atx2] = await db.execScripts([
       {
-        exec: `ALTER TABLE ${db.schemaName}.lib_file ADD duration INTEGER;`,
+        exec: `ALTER TABLE ${db.schemaName}.lib_file ADD quality INTEGER;`,
         param: [],
       },
       {

@@ -1,7 +1,7 @@
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { AppDispatch, RootState } from './store';
-import { selectMode } from '@/store/MovieStore';
+import { selectLabel, selectMode } from '@/store/MovieStore';
 import { PlayMode } from '@/lib';
 
 // Use throughout your app instead of plain `useDispatch` and `useSelector`
@@ -26,4 +26,22 @@ export function usePlayMode() {
     },
     [mode],
   );
+}
+
+export function useLabelHook(labelList: string[]) {
+  const label = useAppSelector(selectLabel);
+
+  return useMemo(() => {
+    return labelList
+      .map((e) => {
+        return (
+          label?.find((x) => x.e_id === e) || {
+            e_id: e,
+            label_name: 'Missing',
+            label_order: 0,
+          }
+        );
+      })
+      .sort((a, b) => a.label_order - b.label_order);
+  }, [label, labelList]);
 }

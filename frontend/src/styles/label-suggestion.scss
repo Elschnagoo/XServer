@@ -1,0 +1,17 @@
+.label-suggestion-button{
+
+  flex-grow: 1;
+  button{
+    width: 100%;
+    @extend .glx-pointer;
+    background-color: $main-accent-01;
+    border: none;
+    padding: 4px;
+    border-radius: 12px;
+  }
+}
+.label-suggestion-button:hover{
+  button{
+    background-color: $main-accent-03;
+  }
+}

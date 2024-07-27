@@ -14,7 +14,12 @@ export default class Converter extends CoreLogChannel {
     res: XResponse,
     profile: string | null | undefined,
     support: BrowserSupport,
+    disableConv: boolean,
   ) {
+    if (disableConv) {
+      res.status(200).sendFile(file.file_path);
+      return;
+    }
     const v = file.file_meta?.streams.find((e) => e.codec_type === 'video');
     const a = file.file_meta?.streams.find((e) => e.codec_type === 'audio');
     switch (profile) {
@@ -37,7 +42,7 @@ export default class Converter extends CoreLogChannel {
           !v ||
           !a ||
           (support.canPlayVideoCodec(v.codec_name) &&
-            support.canPlayVideoCodec(a.codec_name))
+            support.canPlayAudioCodec(a.codec_name))
         ) {
           res.status(200).sendFile(file.file_path);
           break;

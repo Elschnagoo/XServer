@@ -15,18 +15,18 @@ import moment from 'moment';
 import { toast } from 'react-toastify';
 import { useGlobalContext } from '@/context/GlobalContext';
 import LoadingComp from '@/component/LoadingComp';
-import { useMovieContext } from '@/context/MovieContext';
 import { useAppSelector } from '@/store';
 import { selectVideoQuery } from '@/store/MovieStore';
+import { MovieProperties } from '@/lib';
 
 export function FindMatchElement({
   item,
   canUpdate,
+  mc,
 }: {
   canUpdate: boolean;
   item: FindVideoSuggestionsResponseElement;
-}) {
-  const mc = useMovieContext();
+} & MovieProperties) {
   const context = useGlobalContext();
   const [open, setOpen] = useState(false);
   const [update, setUpdate] = useState(false);
@@ -143,10 +143,10 @@ export function FindMatchElement({
   );
 }
 
-export default function FindMatchComp() {
+export default function FindMatchComp({ mc }: MovieProperties) {
   const context = useGlobalContext();
   const videoQuery = useAppSelector(selectVideoQuery);
-  const { mov } = useMovieContext();
+  const { mov } = mc;
   const [data, setData] = useState<
     FindVideoSuggestionsResponseElement[] | null
   >(null);
@@ -235,6 +235,7 @@ export default function FindMatchComp() {
       <Grid flex flexC gap={4} vCenter>
         {data?.map((d) => (
           <FindMatchElement
+            mc={mc}
             canUpdate={!mov.movie_url}
             key={d.meta.url}
             item={d}

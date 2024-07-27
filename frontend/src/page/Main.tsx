@@ -23,13 +23,8 @@ import { MovieLib } from '@elschnagoo/xserver-con';
 import { useGlobalContext } from '@/context/GlobalContext';
 import downloadFullPlaylist from '@/utils/PlaylistGen';
 import useAuthHelper from '@/utils/AuthUtil';
-import usePreload from '@/store/preload';
-import {
-  selectViewG,
-  useAppDispatch,
-  useAppSelector,
-  usePlayMode,
-} from '@/store';
+import usePreload, { useLoader } from '@/store/preload';
+import { useAppDispatch, useAppSelector, usePlayMode } from '@/store';
 import {
   resetMulti,
   selectCinema,
@@ -40,19 +35,19 @@ import {
   selectSearch,
   setCinema,
   setEditMode,
-  setMax,
   setModal,
   setMulti,
   setSearch,
 } from '@/store/MovieStore';
-import EditModal from '@/component/EditModal';
 import { MODAL } from '@/lib';
 import ModalSwitch from '@/component/ModalSwitch';
 import HomeGrid from '@/page/HomeGrid';
 import Cinema from '@/page/Cinema';
+import EditModalV2 from '@/component/EditModal';
 
 export default function Main() {
   const dispatch = useAppDispatch();
+  useLoader();
   const editMode = useAppSelector(selectEditMode);
   const multi = useAppSelector(selectMulti);
   const max = useAppSelector(selectMax);
@@ -65,7 +60,7 @@ export default function Main() {
   const context = useGlobalContext();
   const auth = useAuthHelper();
   const cinema = useAppSelector(selectCinema);
-  const { loadLabel, loadMovie, loadRating } = usePreload();
+  const { loadLabel, clearLoadMovie, loadRating } = usePreload();
   const cur = useMemo<MovieLib[]>(() => {
     if (!data) {
       return [];
@@ -74,7 +69,7 @@ export default function Main() {
   }, [max, data]);
   return (
     <>
-      {editMode !== -1 ? <EditModal /> : null}
+      {editMode !== -1 ? <EditModalV2 /> : null}
       <ModalSwitch />
       <Grid flex className="main" flexC vCenter>
         <Grid className="header" flex flexR vCenter flexSpaceB>
@@ -179,7 +174,7 @@ export default function Main() {
               </>
             )}
             <span>
-              ({max}/{data?.length || 0})
+              ({data?.length || 0}/{max})
             </span>
             {search ? (
               <IconButton
@@ -189,8 +184,7 @@ export default function Main() {
                 }}
                 onClick={() => {
                   dispatch(setSearch(null));
-                  dispatch(setMax(14));
-                  loadMovie();
+                  clearLoadMovie();
                 }}
               >
                 <IOCloseCircleOutline />
@@ -258,8 +252,7 @@ export default function Main() {
               onClick={() => {
                 loadRating();
                 loadLabel();
-                loadMovie(search);
-                dispatch(setMax(14));
+                clearLoadMovie();
               }}
             >
               <IOSync />

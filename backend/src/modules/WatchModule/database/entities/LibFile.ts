@@ -36,6 +36,12 @@ export default class LibFile extends CoreEntity {
   duration: number | null;
 
   @Column({
+    dataType: 'int',
+    canBeNull: true,
+  })
+  quality: number | null;
+
+  @Column({
     dataType: 'boolean',
   })
   synced: boolean;
@@ -48,5 +54,6 @@ export default class LibFile extends CoreEntity {
     this.file_path = props?.file_path || '';
     this.synced = props?.synced ?? false;
     this.duration = props?.duration ?? null;
+    this.quality = props?.quality ?? null;
   }
 }

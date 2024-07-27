@@ -8,6 +8,3 @@ export default function DurationComp(props: { dur?: number }) {
   const durF = Math.trunc(dur / 60);
   return <i>{durF} min</i>;
 }
-DurationComp.defaultProps = {
-  dur: undefined,
-};

@@ -86,18 +86,6 @@ const SwaggerConf: SwaggerConfig = {
         new MovieRating(),
         new LabelAlias(),
       ),
-      MLabel: {
-        type: 'object',
-        properties: {
-          label: {
-            $ref: SPathUtil.schemaPath('Label'),
-          },
-          map: {
-            type: 'string',
-          },
-        },
-        required: ['label', 'map'],
-      },
     },
   },
 };

@@ -7,67 +7,131 @@ import {
   SPathUtil,
   XActionEvent,
 } from '@grandlinex/kernel';
-
 import { WatchDB } from '../../database';
 import MovieLib from '../../database/entities/MovieLib';
-import { isUUID } from '../../utils/Validation';
+import { inputValidation } from '../../utils/Validation';
+import EntitySchemaExtender from '../../../../utils/EntitySchemaExtender';
+import BrowserSupport from '../../lib/BrowserSupport';
+import { SearchProps } from '../../database/WatchDB';
 
-const extendedSchema: any = SPathUtil.schemaEntryGen(new MovieLib()).MovieLib;
-extendedSchema.properties = {
-  ...extendedSchema.properties,
-  duration: {
-    type: 'number',
+const extendedSchema = EntitySchemaExtender.extendEntitySchema(
+  new MovieLib(),
+  {
+    key: 'duration',
+    schema: {
+      type: 'number',
+    },
   },
-};
+  {
+    key: 'size',
+    schema: {
+      type: 'number',
+    },
+  },
+  {
+    key: 'synced',
+    schema: {
+      type: 'boolean',
+    },
+    required: true,
+  },
+  {
+    key: 'video',
+    schema: {
+      type: 'object',
+      properties: {
+        code: {
+          type: 'string',
+        },
+        supported: {
+          type: 'boolean',
+        },
+        quality: {
+          type: 'number',
+        },
+      },
+      required: ['code', 'supported', 'quality'],
+    },
+  },
+  {
+    key: 'audio',
+    schema: {
+      type: 'object',
+      properties: {
+        code: {
+          type: 'string',
+        },
+        supported: {
+          type: 'boolean',
+        },
+      },
+      required: ['code', 'supported'],
+    },
+  },
+);
 
 @SPath({
   '/movie': {
-    get: {
+    post: {
       tags: ['Watch'],
       operationId: 'getMovies',
       summary: 'Get Movies',
-      parameters: [
-        {
-          name: 'label',
-          in: 'query',
-          description: 'Label',
-          required: false,
-          schema: {
+      requestBody: SPathUtil.jsonBody({
+        type: 'object',
+        properties: {
+          title: {
+            type: 'string',
+          },
+          needLabel: {
+            type: 'string',
+          },
+          notLabel: {
+            type: 'string',
+          },
+          duration: {
+            type: 'string',
+          },
+          optLabel: {
+            type: 'string',
+          },
+          ratingMin: {
+            type: 'number',
+          },
+          ratingMax: {
+            type: 'number',
+          },
+          page: {
+            type: 'number',
+          },
+          hasLink: {
+            type: 'boolean',
+          },
+          isSynced: {
+            type: 'boolean',
+          },
+          sortOrder: {
             type: 'string',
           },
         },
-        {
-          name: 'exclude',
-          in: 'query',
-          description: 'Label',
-          required: false,
-          schema: {
-            type: 'string',
-          },
-        },
-        {
-          name: 'min',
-          in: 'query',
-          description: 'Rating Min',
-          required: false,
-          schema: {
-            type: 'string',
-          },
-        },
-        {
-          name: 'max',
-          in: 'query',
-          description: 'Rating Max',
-          required: false,
-          schema: {
-            type: 'string',
-          },
-        },
-      ],
-      responses: SPathUtil.refResponse(
+      }),
+      responses: SPathUtil.jsonResponse(
         '200',
-        new MovieLib(),
-        true,
+        {
+          type: 'object',
+          properties: {
+            data: {
+              type: 'array',
+              items: {
+                $ref: SPathUtil.schemaPath('MovieLib'),
+              },
+            },
+            count: {
+              type: 'integer',
+            },
+          },
+          required: ['data', 'count'],
+        },
+        false,
         '400',
         '500',
       ),
@@ -76,75 +140,105 @@ extendedSchema.properties = {
 })
 @SComponent({
   schemas: {
-    MovieLib: extendedSchema,
+    ...extendedSchema,
   },
 })
 export default class MovieAction extends BaseApiAction<IKernel, WatchDB> {
   constructor(module: IBaseKernelModule<IKernel, WatchDB, any, any, any>) {
-    super('GET', '/movie', module, module.getKernel().getModule());
+    super('POST', '/movie', module, module.getKernel().getModule());
     this.handler = this.handler.bind(this);
   }
 
-  async handler({ res, req, data }: XActionEvent): Promise<void> {
-    if (data) {
-      const { min, max, label, exclude } = req.query;
+  async handler({ res, req }: XActionEvent): Promise<void> {
+    const ops = inputValidation<{
+      ratingMin?: number;
+      ratingMax?: number;
+      page?: number;
+      hasLink?: boolean;
+      isSynced?: boolean;
+      title?: string;
+      duration?: string;
+      sortOrder?: string;
+      needLabel?: string[];
+      notLabel?: string[];
+      optLabel?: string[];
+    }>(req.body, [
+      {
+        key: 'ratingMin',
+        type: 'number',
+      },
+      {
+        key: 'ratingMax',
+        type: 'number',
+      },
+      {
+        key: 'page',
+        type: 'number',
+      },
+      {
+        key: 'hasLink',
+        type: 'boolean',
+      },
+      {
+        key: 'isSynced',
+        type: 'boolean',
+      },
+      {
+        key: 'title',
+        type: 'string',
+      },
+      {
+        key: 'duration',
+        type: 'string',
+      },
+      {
+        key: 'sortOrder',
+        type: 'string',
+      },
+      {
+        key: 'needLabel',
+        type: 'label',
+      },
+      {
+        key: 'notLabel',
+        type: 'label',
+      },
+      {
+        key: 'optLabel',
+        type: 'label',
+      },
+    ]);
 
-      let mi: number | undefined;
-      let ma: number | undefined;
-      try {
-        mi = typeof min === 'string' ? parseInt(min as string, 10) : undefined;
-      } catch (e) {
-        this.error(e);
-        res.sendStatus(400);
-        return;
-      }
-      try {
-        ma = typeof max === 'string' ? parseInt(max as string, 10) : undefined;
-      } catch (e) {
-        this.error(e);
-        res.sendStatus(400);
-        return;
-      }
-      const lab = this.convertLabel(label);
-      const exc = this.convertLabel(exclude);
-      if (lab === null || exc === null) {
-        res.sendStatus(400);
-        return;
-      }
+    this.debug('Search', ops);
 
-      const db = this.getModule().getDb();
-      const dat = await db.searchQuery(mi, ma, lab, exc);
+    const db = this.getModule().getDb();
 
-      res.status(200).send(dat);
+    const dat = await db.searchQuery(ops);
+    const support = new BrowserSupport(req);
 
-      return;
-    }
+    const out = dat.data.map((cur) => {
+      const v = cur.file_meta?.streams.find((e) => e.codec_type === 'video');
+      const a = cur.file_meta?.streams.find((e) => e.codec_type === 'audio');
+      return {
+        ...cur,
+        size: cur.file_meta?.format.size,
+        video: {
+          code: v?.codec_name || 'none',
+          supported: support.canPlayVideoCodec(v?.codec_name),
+          quality: cur.quality,
+        },
+        audio: {
+          code: a?.codec_name || 'none',
+          supported: support.canPlayAudioCodec(a?.codec_name),
+        },
+        file_meta: undefined,
+        quality: undefined,
+      };
+    });
 
-    res.sendStatus(403);
-  }
-
-  convertLabel(label?: unknown): string[] | undefined | null {
-    let lab: string[] | undefined;
-    try {
-      if (label) {
-        if (typeof label !== 'string') {
-          return null;
-        }
-        lab = label.split(';');
-        let valid = true;
-        lab.forEach((cur) => {
-          if (!isUUID(cur)) {
-            valid = false;
-          }
-        });
-        if (!valid) {
-          return null;
-        }
-      }
-    } catch (e) {
-      this.error(e);
-      return null;
-    }
-    return lab;
+    res.status(200).send({
+      data: out,
+      count: parseInt(dat.count, 10),
+    });
   }
 }

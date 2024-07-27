@@ -10,10 +10,13 @@ import {
 } from '@grandlinex/react-components';
 import { toast } from 'react-toastify';
 import { useGlobalContext } from '@/context/GlobalContext';
-import { useMovieContext } from '@/context/MovieContext';
+import { MovieProperties } from '@/lib';
 
-export default function TitleComp({ noEdit = false }: { noEdit?: boolean }) {
-  const { mov, update } = useMovieContext();
+export default function TitleComp({
+  noEdit = false,
+  mc,
+}: { noEdit?: boolean } & MovieProperties) {
+  const { mov, update } = mc;
   const [edit, setEdit] = useState(false);
   const [name, setName] = useState(mov.movie_name);
   const context = useGlobalContext();
@@ -97,5 +100,4 @@ export default function TitleComp({ noEdit = false }: { noEdit?: boolean }) {
       </IconButton>
     </Grid>
   );
-  return null;
 }

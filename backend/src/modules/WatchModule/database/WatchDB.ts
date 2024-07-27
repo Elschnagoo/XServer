@@ -19,7 +19,47 @@ import RatingElement from './entities/RatingElement';
 import * as Patch from './patch';
 import MovieRating from './entities/MovieRating';
 import LabelAlias from './entities/LabelAlias';
-import Patch009 from './patch/Patch009';
+import { ProbeInfo } from '../lib/MediaHandlerTypes';
+
+export enum SearchOrder {
+  DATE_ASC = 'date_asc',
+  DATE_DSC = 'date_dsc',
+  RATING_ASC = 'rating_asc',
+  RATING_DSC = 'rating_dsc',
+  DURATION_ASC = 'duration_asc',
+  DURATION_DSC = 'duration_dsc',
+  NAME_ASC = 'name_asc',
+  NAME_DSC = 'name_dsc',
+  LAST_PLAYED_ASC = 'last_played_asc',
+  LAST_PLAYED_DSC = 'last_played_dsc',
+  PLAYS_ASC = 'plays_asc',
+  PLAYS_DSC = 'plays_dsc',
+  PLAYS_NO = 'plays_no',
+  QUALITY_ASC = 'quality_asc',
+  QUALITY_DSC = 'quality_dsc',
+  SHUFFLE = 'shuffle',
+}
+
+export type ExtMovLib = MovieLib & {
+  duration?: number;
+  quality?: number;
+  synced: boolean;
+  file_meta: ProbeInfo | null;
+};
+
+export type SearchProps = {
+  ratingMin?: number;
+  ratingMax?: number;
+  needLabel?: string[];
+  notLabel?: string[];
+  optLabel?: string[];
+  page?: number;
+  sortOrder?: string;
+  hasLink?: boolean;
+  isSynced?: boolean;
+  title?: string;
+  duration?: string;
+};
 
 export default class WatchDB extends PGCon {
   types: CoreEntityWrapper<LibType>;
@@ -49,7 +89,7 @@ export default class WatchDB extends PGCon {
   movRating: CoreEntityWrapper<MovieRating>;
 
   constructor(mod: IBaseKernelModule<any, any, any, any, any>) {
-    super(mod, '9');
+    super(mod, '10');
     this.types = this.registerEntity(new LibType());
     this.states = this.registerEntity(new StateTypeQ());
     this.lib = this.registerEntity(new Library());
@@ -76,45 +116,153 @@ export default class WatchDB extends PGCon {
       new Patch.Patch007(this),
       new Patch.Patch008(this),
       new Patch.Patch009(this),
+      new Patch.Patch010(this),
     );
   }
 
-  async searchQuery(
-    min?: number,
-    max?: number,
-    label?: string[],
-    exc?: string[],
-  ): Promise<MovieLib[]> {
-    const param: any[] = [];
+  async searchQuery(ops: SearchProps): Promise<{
+    data: ExtMovLib[];
+    count: string;
+  }> {
+    const {
+      ratingMin,
+      ratingMax,
+      needLabel,
+      notLabel,
+      optLabel,
+      page,
+      title,
+      isSynced,
+      hasLink,
+      duration,
+      sortOrder,
+    } = ops;
+    const filter: string[] = [];
+    const param: (string | number | boolean)[] = [];
     let paramCounter = 1;
-    const filter = [];
-    if (min !== undefined) {
-      filter.push(`AND rating >= $${paramCounter}`);
-      param.push(min);
-      paramCounter += 1;
+
+    let orderBy = 'ORDER BY lib.created DESC';
+
+    switch (sortOrder as SearchOrder | undefined) {
+      case SearchOrder.DATE_DSC:
+        orderBy = `ORDER BY lib.created DESC`;
+        break;
+      case SearchOrder.DATE_ASC:
+        orderBy = `ORDER BY lib.created ASC`;
+        break;
+      case SearchOrder.RATING_DSC:
+        orderBy = `ORDER BY lib.rating DESC`;
+        break;
+      case SearchOrder.RATING_ASC:
+        orderBy = `ORDER BY lib.rating ASC`;
+        break;
+      case SearchOrder.DURATION_DSC:
+        orderBy = `ORDER BY file.duration DESC`;
+        filter.push(`AND file.duration IS NOT NULL`);
+        break;
+      case SearchOrder.DURATION_ASC:
+        orderBy = `ORDER BY file.duration ASC`;
+        filter.push(`AND file.duration IS NOT NULL`);
+        break;
+      case SearchOrder.NAME_DSC:
+        orderBy = `ORDER BY lib.movie_name DESC`;
+        break;
+      case SearchOrder.NAME_ASC:
+        orderBy = `ORDER BY lib.movie_name ASC`;
+        break;
+      case SearchOrder.PLAYS_DSC:
+        orderBy = `ORDER BY lib.played_count DESC`;
+        filter.push(`AND lib.played_count IS NOT NULL`);
+        break;
+      case SearchOrder.PLAYS_ASC:
+        orderBy = `ORDER BY lib.played_count ASC`;
+        filter.push(`AND lib.played_count IS NOT NULL`);
+        break;
+      case SearchOrder.PLAYS_NO:
+        filter.push(`AND lib.played_count IS NULL OR lib.played_count = 0`);
+        break;
+      case SearchOrder.LAST_PLAYED_DSC:
+        orderBy = `ORDER BY lib.last_played DESC`;
+        filter.push(`AND lib.last_played IS NOT NULL`);
+        break;
+      case SearchOrder.LAST_PLAYED_ASC:
+        orderBy = `ORDER BY lib.last_played ASC`;
+        filter.push(`AND lib.last_played IS NOT NULL`);
+        break;
+      case SearchOrder.QUALITY_DSC:
+        orderBy = `ORDER BY file.quality DESC, lib.created DESC`;
+        filter.push(`AND file.quality IS NOT NULL`);
+        break;
+      case SearchOrder.QUALITY_ASC:
+        orderBy = `ORDER BY file.quality ASC, lib.created DESC`;
+        filter.push(`AND file.quality IS NOT NULL`);
+        break;
+      case SearchOrder.SHUFFLE:
+        orderBy = `ORDER BY random()`;
+        break;
+      default:
     }
-    if (max !== undefined) {
-      if (max === 0) {
+
+    switch (duration) {
+      case 'short':
+        filter.push(`AND file.duration IS NOT null AND file.duration < 600`);
+        break;
+      case 'medium':
+        filter.push(
+          `AND file.duration IS NOT null AND file.duration > 600 AND file.duration < 1800 `,
+        );
+        break;
+      case 'long':
+        filter.push(`AND file.duration IS NOT null AND file.duration > 1800 `);
+        break;
+      default:
+    }
+    if (title !== undefined) {
+      filter.push(
+        `AND (LOWER(movie_name) like '%' || $${paramCounter++} || '%' OR lib.e_id = $${paramCounter++} ) `,
+      );
+      param.push(title.toLowerCase(), title);
+    }
+    if (isSynced !== undefined) {
+      filter.push(`AND lib.synced = $${paramCounter++}`);
+      param.push(isSynced);
+    }
+    if (hasLink !== undefined) {
+      filter.push(`AND lib.movie_url IS${hasLink ? ' NOT' : ''} NULL`);
+    }
+    if (ratingMin !== undefined) {
+      filter.push(`AND rating >= $${paramCounter++}`);
+      param.push(ratingMin);
+    }
+    if (ratingMax !== undefined) {
+      if (ratingMax === 0) {
         filter.push(`AND rating is null`);
       } else {
-        filter.push(`AND rating <= $${paramCounter}`);
-        param.push(max);
-        paramCounter += 1;
+        filter.push(`AND rating <= $${paramCounter++}`);
+        param.push(ratingMax);
       }
     }
-    if (label) {
-      const idd = label.map((cur) => `'${cur}'`).join(',');
+    if (needLabel) {
+      const idd = needLabel.map((cur) => `'${cur}'`).join(',');
       filter.push(`AND lib.e_id in (SELECT mov_lib
                                     FROM (SELECT count(1) as count, mov_lib
                                           FROM watch.label_map
                                           WHERE label in (${idd})
                                           GROUP BY mov_lib) as cml
-                                    WHERE count = $${paramCounter})`);
-      param.push(label.length);
-      paramCounter += 1;
+                                    WHERE count = $${paramCounter++})`);
+      param.push(needLabel.length);
     }
-    if (exc) {
-      const idd = exc.map((cur) => `'${cur}'`).join(',');
+    if (optLabel) {
+      const idd = optLabel.map((cur) => `'${cur}'`).join(',');
+      filter.push(`AND lib.e_id in (SELECT mov_lib
+                                    FROM (SELECT count(1) as count, mov_lib
+                                          FROM watch.label_map
+                                          WHERE label in (${idd})
+                                          GROUP BY mov_lib) as cml
+                                    WHERE count > 0)`);
+    }
+    if (notLabel) {
+      const idd = notLabel.map((cur) => `'${cur}'`).join(',');
       filter.push(`AND lib.e_id not in (SELECT mov_lib
                                         FROM (SELECT count(1) as count, mov_lib
                                               FROM watch.label_map
@@ -123,22 +271,50 @@ export default class WatchDB extends PGCon {
                                         WHERE count >0)`);
     }
 
+    const qPram = [...param];
+    if (page) {
+      qPram.push(25, page * 25);
+    } else {
+      qPram.push(25, 0);
+    }
     const query: RawQuery = {
       exec: `
-          SELECT lib.*,file.duration
+          SELECT lib.*,file.duration,file.synced,file.file_meta,file.quality
           FROM ${this.schemaName}.movie_lib as lib,
                ${this.schemaName}.lib_file as file
           WHERE disabled = false
-          AND   lib.lib_file = file.e_id
+          AND lib.lib_file = file.e_id
           ${filter.join('\n')}
-          ORDER BY created DESC;
+          ${orderBy}
+          LIMIT $${paramCounter++} OFFSET $${paramCounter++};
+        `,
+      param: qPram,
+    };
+
+    const queryC: RawQuery = {
+      exec: `
+          SELECT count(1) as count
+          FROM ${this.schemaName}.movie_lib as lib,
+               ${this.schemaName}.lib_file as file
+          WHERE disabled = false
+          AND lib.lib_file = file.e_id
+          ${filter.join('\n')};
         `,
       param,
     };
 
-    this.debug(query);
-    const [res] = await this.execScripts([query]);
-    return res?.rows || [];
+    this.debug(query.exec);
+    this.debug('param', query.param);
+
+    this.debug(queryC.exec);
+    this.debug('param', queryC.param);
+
+    const [res, resC] = await this.execScripts([query, queryC]);
+
+    return {
+      data: res?.rows || [],
+      count: resC?.rows?.[0]?.count || '0',
+    };
   }
 
   async initNewDB(): Promise<void> {

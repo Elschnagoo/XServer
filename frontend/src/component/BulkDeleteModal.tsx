@@ -8,7 +8,6 @@ import {
   selectLabel,
   selectMovie,
   selectMulti,
-  selectSearch,
   setModal,
 } from '@/store/MovieStore';
 import usePreload from '@/store/preload';
@@ -17,8 +16,7 @@ import BaseModal from '@/component/BaseModal';
 export default function BulkDeleteModal() {
   const dispatch = useAppDispatch();
   const multi = useAppSelector(selectMulti);
-  const search = useAppSelector(selectSearch);
-  const { loadMovie } = usePreload();
+  const { clearLoadMovie } = usePreload();
 
   const mov = useAppSelector(selectMovie);
   const context = useGlobalContext();
@@ -60,7 +58,7 @@ export default function BulkDeleteModal() {
               toast.success('Action completed');
             }
 
-            loadMovie(search, true);
+            clearLoadMovie(true);
             dispatch(setModal(null));
           }}
         >

@@ -45,6 +45,9 @@ export type MovieEnv = {
   movie: MovieLib[] | null;
   cinema: MovieLib | null;
   max: number;
+  page: number;
+  loading: boolean;
+  lastPage: boolean;
   multi: string[];
   modal: MODAL | null;
   editMode: number;
@@ -53,4 +56,11 @@ export type MovieEnv = {
   forcePreview: boolean;
   forceSuggest: boolean;
   videoQuery: string;
+};
+
+export type MovieProperties = {
+  mc: {
+    mov: MovieLib;
+    update: (m: MovieLib) => void;
+  };
 };

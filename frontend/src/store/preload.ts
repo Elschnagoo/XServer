@@ -1,199 +1,185 @@
 import { useDispatch } from 'react-redux';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { GetMoviesRequestBody } from '@elschnagoo/xserver-con';
+import { Simulate } from 'react-dom/test-utils';
 import { useAppSelector } from '@/store/hooks';
 import {
   selectLabel,
+  selectLastPage,
+  selectLoading,
   selectMovie,
+  selectPage,
   selectRating,
   selectRevision,
+  selectSearch,
   setLabel,
+  setLastPage,
+  setLoading,
+  setMax,
   setMovie,
+  setPage,
   setRating,
   setRevision,
 } from '@/store/MovieStore';
 import { useGlobalContext } from '@/context/GlobalContext';
-import { SearchOrder, Sync } from '@/component/SearchModal';
+import { Sync } from '@/component/SearchModal';
 
-export default function usePreload() {
+export function useLoader() {
   const context = useGlobalContext();
   const dispatch = useDispatch();
   const label = useAppSelector(selectLabel);
+  const search = useAppSelector(selectSearch);
   const movie = useAppSelector(selectMovie);
   const rating = useAppSelector(selectRating);
-  const revision = useAppSelector(selectRevision);
-  const loadLabel = useCallback(() => {
-    context
-      .getLabels()
-      .then((res) => {
-        dispatch(setLabel(res.data || []));
-      })
-      .catch(() => {
-        dispatch(setLabel([]));
-      });
-  }, [context, dispatch]);
-  const loadRating = useCallback(() => {
-    context
-      .getRating()
-      .then((res) => {
-        dispatch(setRating(res.data || []));
-      })
-      .catch(() => {
-        dispatch(setRating([]));
-      });
-  }, [context, dispatch]);
-  const loadMovie = useCallback(
-    (search?: any, rev = false) => {
-      const min: string | undefined = Number.isInteger(search?.min)
-        ? `${search?.min}`
-        : undefined;
-      const max: string | undefined = Number.isInteger(search?.max)
-        ? `${search?.max}`
-        : undefined;
-      const l: string | undefined =
-        search?.label && search.label.length > 0
-          ? search.label.join(';')
-          : undefined;
-      const e: string | undefined =
-        search?.exclude && search.exclude.length > 0
-          ? search.exclude.join(';')
-          : undefined;
+  const page = useAppSelector(selectPage);
+  const lastpage = useAppSelector(selectLastPage);
+  const loading = useAppSelector(selectLoading);
+  const [running, setRunning] = useState(false);
 
+  useEffect(() => {
+    if (rating === null) {
       context
-        .getMovies(l, e, min, max)
+        .getRating()
         .then((res) => {
-          let data = res.data || [];
+          dispatch(setRating(res.data || []));
+        })
+        .catch(() => {
+          dispatch(setRating([]));
+        });
+    }
+  }, [context, dispatch, rating]);
 
+  useEffect(() => {
+    if (label === null) {
+      context
+        .getLabels()
+        .then((res) => {
+          dispatch(setLabel(res.data || []));
+        })
+        .catch(() => {
+          dispatch(setLabel([]));
+        });
+    }
+  }, [context, dispatch, label]);
+
+  useEffect(() => {
+    (async () => {
+      if ((movie === null || loading) && !running) {
+        if (lastpage) {
+          return;
+        }
+        if (!loading) {
+          setLoading(true);
+        }
+        setRunning(true);
+
+        const lConv = (i: string[] | undefined) => {
+          if (!i || i.length === 0) {
+            return undefined;
+          }
+          return i.join(';');
+        };
+
+        try {
+          const body: GetMoviesRequestBody = {
+            needLabel: lConv(search?.needLabel),
+            optLabel: lConv(search?.optLabel),
+            notLabel: lConv(search?.notLabel),
+            ratingMin: search?.ratingMin,
+            ratingMax: search?.ratingMax,
+            duration: search?.duration,
+            page,
+            title: search?.title || undefined,
+            sortOrder: search?.sortOrder || undefined,
+          };
           switch (search?.syc) {
             case Sync.DONE:
-              data = data?.filter((c) => c.synced);
+              body.isSynced = true;
               break;
             case Sync.PENDING:
-              data = data?.filter((c) => !c.synced);
+              body.isSynced = false;
               break;
             case Sync.ALL:
             default:
               break;
           }
-
           switch (search?.link) {
             case 'has':
-              data = data?.filter((c) => !!c.movie_url);
+              body.hasLink = true;
               break;
             case 'hasnot':
-              data = data?.filter((c) => !c.movie_url);
+              body.hasLink = false;
               break;
             case 'default':
             default:
           }
+          const res = await context.getMovies(body);
 
-          if (search?.titel) {
-            data = data?.filter((c) => {
-              return (
-                c.movie_name
-                  .toLowerCase()
-                  .includes(search.titel.toLowerCase()) ||
-                search.titel === c.e_id
-              );
-            });
-          }
-          switch (search?.order) {
-            case SearchOrder.RATING_DSC:
-              data = data.sort((a, b) => {
-                const ar = a.rating || 0;
-                const br = b.rating || 0;
-                return br - ar;
-              });
-              break;
-            case SearchOrder.RATING_ASC:
-              data = data.sort((a, b) => {
-                const ar = a.rating || 6;
-                const br = b.rating || 6;
-                return ar - br;
-              });
-              break;
-            case SearchOrder.NAME_ASC:
-              data = data.sort((a, b) =>
-                a.movie_name.localeCompare(b.movie_name),
-              );
-              break;
-            case SearchOrder.NAME_DSC:
-              data = data.sort((a, b) =>
-                b.movie_name.localeCompare(a.movie_name),
-              );
-              break;
-            case SearchOrder.DURATION_ASC:
-              data = data.sort((a, b) => (a.duration || 0) - (b.duration || 0));
-              break;
-            case SearchOrder.DURATION_DSC:
-              data = data.sort((a, b) => (b.duration || 0) - (a.duration || 0));
-              break;
-            case SearchOrder.SHUFFLE:
-              data = data.sort(() => 0.5 - Math.random());
-              break;
-            case SearchOrder.DATE_ASC:
-              data = data.sort(
-                (a, b) =>
-                  new Date(a.created).getTime() - new Date(b.created).getTime(),
-              );
-              break;
+          const data = res.data?.data || [];
+          const maxData = res.data?.count || 0;
 
-            case SearchOrder.PLAYS_ASC:
-              data = data.sort(
-                (a, b) => (a.played_count || 0) - (b.played_count || 0),
-              );
-              break;
-            case SearchOrder.PLAYS_DSC:
-              data = data.sort(
-                (a, b) => (b.played_count || 0) - (a.played_count || 0),
-              );
-              break;
-            case SearchOrder.LAST_PLAYED_ASC:
-              data = data.sort(
-                (a, b) =>
-                  new Date(a.last_played || 0).getTime() -
-                  new Date(b.last_played || 0).getTime(),
-              );
-              break;
-            case SearchOrder.LAST_PLAYED_DSC:
-              data = data.sort(
-                (a, b) =>
-                  new Date(b.last_played || 0).getTime() -
-                  new Date(a.last_played || 0).getTime(),
-              );
-              break;
-            case SearchOrder.DATE_DSC:
-            default:
-              break;
+          if (page > 0) {
+            const ndat = [...(movie || []), ...data];
+            if (ndat.length >= maxData) {
+              dispatch(setLastPage(true));
+            }
+            dispatch(setMovie(ndat));
+          } else {
+            if (data.length >= maxData) {
+              dispatch(setLastPage(true));
+            }
+            dispatch(setMovie(data));
           }
-          dispatch(setMovie(data));
-          if (rev) {
-            dispatch(setRevision(revision + 1));
-          }
-        })
-        .catch(() => {
+
+          dispatch(setMax(res.data?.count || data.length));
+        } catch (err) {
+          console.error(err);
           dispatch(setMovie([]));
-        });
+        }
+        setRunning(false);
+        dispatch(setLoading(false));
+      }
+    })();
+  }, [context, dispatch, lastpage, loading, movie, page, running, search]);
+}
+export default function usePreload() {
+  const dispatch = useDispatch();
+  const revision = useAppSelector(selectRevision);
+  const loading = useAppSelector(selectLoading);
+
+  const page = useAppSelector(selectPage);
+
+  const loadMoviePage = useCallback(async () => {
+    if (!loading) {
+      dispatch(setPage(page + 1));
+      dispatch(setLoading(true));
+    }
+  }, [dispatch, loading, page]);
+
+  const loadLabel = useCallback(async () => {
+    dispatch(setLabel(null));
+  }, [dispatch]);
+  const loadRating = useCallback(async () => {
+    dispatch(setRating(null));
+  }, [dispatch]);
+
+  const clearLoadMovie = useCallback(
+    async (rev?: boolean) => {
+      dispatch(setMax(0));
+      dispatch(setPage(0));
+      dispatch(setLastPage(false));
+      if (rev) {
+        dispatch(setRevision(revision + 1));
+      }
+      dispatch(setMovie(null));
     },
-    [context, dispatch, revision],
+    [dispatch, revision],
   );
-  useEffect(() => {
-    if (label === null) {
-      loadLabel();
-    }
-  }, [label]);
-  useEffect(() => {
-    if (rating === null) {
-      loadRating();
-    }
-  }, [rating]);
-  useEffect(() => {
-    if (movie === null) {
-      loadMovie();
-    }
-  }, [movie]);
+
   return {
-    loadMovie,
+    loadMoviePage,
     loadLabel,
     loadRating,
+    clearLoadMovie,
   };
 }

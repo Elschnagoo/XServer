@@ -12,7 +12,8 @@ import StarCompV2 from '@/component/StarCompV2';
 import { useGlobalContext } from '@/context/GlobalContext';
 import { useAppSelector } from '@/store';
 import { selectRating } from '@/store/MovieStore';
-import { useMovieContext } from '@/context/MovieContext';
+import LoadingComp from '@/component/LoadingComp';
+import { MovieProperties } from '@/lib';
 
 function cr(rating: number | undefined) {
   let rat = rating ?? 0;
@@ -24,16 +25,17 @@ function cr(rating: number | undefined) {
 export default function RatingComp({
   option,
   className,
-}: Readonly<{
-  className?: string;
-  option: {
-    edit: boolean;
-    close: () => void;
-  };
-}>) {
-  const mc = useMovieContext();
+  mc,
+}: Readonly<
+  {
+    className?: string;
+    option: {
+      close: () => void;
+    };
+  } & MovieProperties
+>) {
   const { mov, update } = mc;
-  const { edit, close } = option;
+  const { close } = option;
   const ratings = useAppSelector(selectRating);
   const context = useGlobalContext();
   const max = useMemo(
@@ -60,9 +62,11 @@ export default function RatingComp({
   );
   const perc = useMemo(() => maxCur / max, [maxCur, max]);
   const calcR = useMemo(() => 5 * perc, [perc]);
-  if (!edit) {
-    return null;
+
+  if (rData === undefined) {
+    return <LoadingComp loading />;
   }
+
   return (
     <Grid flex flexC className={className}>
       <StarCompV2
@@ -172,6 +176,3 @@ export default function RatingComp({
     </Grid>
   );
 }
-RatingComp.defaultProps = {
-  className: undefined,
-};

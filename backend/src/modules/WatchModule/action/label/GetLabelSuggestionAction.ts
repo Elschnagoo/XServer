@@ -78,7 +78,7 @@ export default class GetLabelSuggestionAction extends BaseApiAction<
                                           WHERE mov_lib = $1)
                       GROUP BY label
                       ORDER BY sum DESC
-                      LIMIT 10) AS q JOIN watch.label AS l ON q.label=l.e_id
+                      LIMIT 30) AS q JOIN watch.label AS l ON q.label=l.e_id
                 ORDER BY q.sum DESC ,l.label_order;`,
         param: [cur.e_id],
       },

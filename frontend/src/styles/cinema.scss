@@ -1,0 +1,109 @@
+.cinema-body{
+  width: 100%;
+  height: calc(100% - 48px);
+  .cinema-element{
+    height: 100%;
+    width: 100%;
+    /*outline: 1px solid green;*/
+  }
+  h4{
+    margin: 8px;
+  }
+  video.cinema-vid{
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .player-comp{
+    background-color: black;
+    /*outline: 1px solid red;*/
+    position: relative;
+    height: calc(100% - 250px);
+    flex-grow: 1;
+    .player-comp--title{
+      @extend .glx-no-select;
+      width: 100%;
+      position: absolute;
+      display: none;
+      backdrop-filter: blur(10px);
+      background-color: rgba(0,0,0,0.8);
+      padding-top: 16px;
+      padding-bottom: 16px;
+      h4{
+        font-size: 20pt;
+      }
+    }
+  }
+  .player-comp:hover{
+    .player-comp--title{
+      @extend .glx-animation-fade-in-fast;
+      position: absolute;
+      display: block;
+    }
+  }
+  .play-candidates{
+    /*outline: 1px solid blue;*/
+    width: 100%;
+
+    position: relative;
+
+    .aps-left{
+      position: absolute;
+      left: 0;
+      top: calc(50% - 12px);
+    }
+    .aps-right{
+      position: absolute;
+      right: 0;
+      top: calc(50% - 12px);
+    }
+
+    .cinema-preview:hover{
+      .cinema-preview-name{
+        @extend .glx-animation-fade-in-fast;
+        display: flex;
+      }
+      .cinema-preview-play{
+        @extend .glx-animation-fade-in-fast;
+        display: block;
+      }
+    }
+    .cinema-preview-empty{
+      @extend .animated-background;
+      height: 200px;
+      flex-basis: 18%;
+    }
+    .cinema-preview{
+      cursor: pointer;
+      position: relative;
+      flex-basis: 18%;
+      height: 100%;
+      .cinema-preview-play{
+        @extend .glx-no-select;
+        padding: 4px;
+        display: none;
+        position: absolute;
+        bottom: 0;
+        right: 0;
+
+      }
+      .cinema-preview-name{
+        @extend .glx-no-select;
+        padding: 4px;
+        display: none;
+        position: absolute;
+        width: 100%;
+        backdrop-filter: blur(10px);
+        background-color: rgba(0,0,0,0.5);
+      }
+      .video-preview{
+        video{
+          max-height: 200px;
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+        }
+      }
+    }
+  }
+}

@@ -23,8 +23,7 @@ import BaseModal from '@/component/BaseModal';
 export default function BulkLabelModal() {
   const dispatch = useAppDispatch();
   const multi = useAppSelector(selectMulti);
-  const search = useAppSelector(selectSearch);
-  const { loadMovie } = usePreload();
+  const { clearLoadMovie } = usePreload();
 
   const mov = useAppSelector(selectMovie);
   const context = useGlobalContext();
@@ -86,7 +85,7 @@ export default function BulkLabelModal() {
               toast.success('Action completed');
             }
 
-            loadMovie(search, true);
+            clearLoadMovie(true);
             dispatch(setModal(null));
           },
         }}

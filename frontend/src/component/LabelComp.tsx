@@ -1,10 +1,9 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Badge,
   BadgeColor,
   Form,
   Grid,
-  IconButton,
   INames,
   InputOptionType,
   useQData,
@@ -13,58 +12,69 @@ import {
 import { toast } from 'react-toastify';
 import { Label } from '@elschnagoo/xserver-con';
 import { useGlobalContext } from '@/context/GlobalContext';
-import { useAppSelector } from '@/store';
+import { useAppSelector, useLabelHook } from '@/store';
 import { selectLabel } from '@/store/MovieStore';
 import LoadingComp from '@/component/LoadingComp';
+import { MovieProperties } from '@/lib';
 
 function LabelComplete({
-  id,
   reload,
   label,
+  mc,
 }: {
-  id: string;
   reload: () => void;
   label: Label[];
-}) {
+} & MovieProperties) {
+  const { mov } = mc;
   const context = useGlobalContext();
-  const [data, , fetch] = useQData(async () => {
-    console.log('getLabelSuggestions');
-    return (await context.getLabelSuggestions(id)).data || null;
+  const [data, , fetchData] = useQData(async () => {
+    console.log('LabelComplete - fetchData');
+    return (await context.getLabelSuggestions(mov.e_id)).data || null;
   });
   const filtered = useMemo(
     () => data?.filter((e) => !label.find((y) => y.e_id === e.e_id)) || [],
     [data, label],
   );
-
+  useEffect(() => {
+    console.log('LabelComplete - IN');
+    return () => console.log('LabelComplete - out');
+  }, []);
   return (
     <LoadingComp loading={!data}>
       {filtered.length > 0 && <hr style={{ width: '100%' }} />}
-      <Grid flex flexR gap={12} flexWrap>
+      <Grid flex flexR gap={8} flexWrap>
         {filtered.map((l) => (
-          <Grid flex flexR flexEnd>
-            <Badge
-              icon={(l.icon as INames | undefined) || 'IOPricetagOutline'}
-              text={l.label_name}
-              color={l.color as BadgeColor | undefined}
-            />
-            <IconButton
+          <Grid
+            key={`${mov.e_id}_lcomp_${l.e_id}`}
+            flex
+            flexR
+            flexEnd
+            className="label-suggestion-button"
+          >
+            <button
+              type="button"
               onClick={() => {
                 context
                   .bindLabel({
                     label: l.e_id,
-                    mov_lib: id,
+                    mov_lib: mov.e_id,
                   })
                   .then((x) => {
                     if (!x.success) {
                       toast.error(`Fehler`);
                     } else {
-                      fetch();
+                      fetchData();
                     }
                     reload();
                   });
               }}
-              icon="IOCheckmark"
-            />
+            >
+              <Badge
+                icon={(l.icon as INames | undefined) || 'IOPricetagOutline'}
+                text={l.label_name}
+                color={l.color as BadgeColor | undefined}
+              />
+            </button>
           </Grid>
         ))}
       </Grid>
@@ -72,22 +82,29 @@ function LabelComplete({
   );
 }
 
-export default function LabelComp(props: {
-  id: string;
-  title: string;
-  edit: boolean;
-  suggest: boolean;
-  focus: boolean;
-}) {
+export default function LabelComp(
+  props: {
+    edit: boolean;
+    suggest: boolean;
+    focus: boolean;
+  } & MovieProperties,
+) {
+  const { edit, focus, suggest, mc } = props;
+  const { mov } = mc;
   const [formId, setFormId] = useState(uuid());
-  const { id, edit, focus, title, suggest } = props;
   const contex = useGlobalContext();
   const label = useAppSelector(selectLabel)!;
-  const [movLabel, , reload] = useQData(async () => {
-    return (await contex.getMoviesLabel(id)).data?.sort(
-      (a, b) => a.label.label_order - b.label.label_order,
-    );
+  const [labelKeys, , reload] = useQData(async () => {
+    return (await contex.getMoviesLabel(mov.e_id)).data?.map((e) => e.map);
   });
+
+  const movLabel = useLabelHook(labelKeys || []);
+
+  useEffect(() => {
+    console.log('LabelComp - IN');
+    return () => console.log('LabelComp - out');
+  }, []);
+
   if (movLabel) {
     return (
       <Grid flex flexC vCenter className="label-comp" gap={12}>
@@ -97,7 +114,7 @@ export default function LabelComp(props: {
               key={`${formId}label`}
               className="glx-w-full"
               defaultState={{
-                label: movLabel.map((l) => l.label.e_id),
+                label: movLabel.map((l) => l.e_id),
               }}
               options={[
                 [
@@ -112,28 +129,21 @@ export default function LabelComp(props: {
                     })),
                     autoFocus: focus,
                     onChange: async (e, change) => {
-                      let sel: string | null = null;
                       switch (change.mode) {
                         case 'DEL':
-                          sel =
-                            movLabel.find((x) => x.label.e_id === change.id)
-                              ?.map || null;
-                          if (sel) {
-                            contex.unbindLabel(sel).then((x) => {
-                              if (!x.success) {
-                                toast.error(`Fehler`);
-                              }
-                              reload();
-                            });
-                          } else {
-                            toast.error(`Fehler`);
-                          }
+                          contex.unbindLabel(mov.e_id, change.id).then((x) => {
+                            if (!x.success) {
+                              toast.error(`Fehler`);
+                            }
+                            reload();
+                          });
+
                           break;
                         case 'NEW':
                           contex
                             .bindLabel({
                               label: change.id,
-                              mov_lib: id,
+                              mov_lib: mov.e_id,
                             })
                             .then((x) => {
                               if (!x.success) {
@@ -159,11 +169,10 @@ export default function LabelComp(props: {
             >
               {movLabel.map((l) => (
                 <Badge
-                  icon={
-                    (l.label.icon as INames | undefined) || 'IOPricetagOutline'
-                  }
-                  text={l.label.label_name}
-                  color={l.label.color as BadgeColor | undefined}
+                  key={mov.e_id + l.e_id}
+                  icon={(l.icon as INames | undefined) || 'IOPricetagOutline'}
+                  text={l.label_name}
+                  color={l.color as BadgeColor | undefined}
                 />
               ))}
             </Grid>
@@ -171,13 +180,13 @@ export default function LabelComp(props: {
 
           {suggest && (
             <LabelComplete
-              key={`label-complete_${id}`}
-              id={id}
+              mc={mc}
+              key={`label-complete_${mov.e_id}`}
               reload={() => {
                 reload();
                 setFormId(uuid());
               }}
-              label={movLabel.map((l) => l.label)}
+              label={movLabel}
             />
           )}
         </>

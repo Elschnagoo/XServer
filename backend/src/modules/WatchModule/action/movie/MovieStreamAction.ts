@@ -59,6 +59,8 @@ import BrowserSupport from '../../lib/BrowserSupport';
 export default class MovieStreamAction extends BaseApiAction<IKernel, WatchDB> {
   mediaPath: string;
 
+  disableConv: boolean;
+
   converter: Converter;
 
   traceCache: CoreTimeCache<string>;
@@ -67,6 +69,8 @@ export default class MovieStreamAction extends BaseApiAction<IKernel, WatchDB> {
     super('GET', '/movie/stream/:id', module, module.getKernel().getModule());
     this.handler = this.handler.bind(this);
     this.mediaPath = module.getKernel().getConfigStore().get('MEDIA_PATH')!;
+    this.disableConv =
+      module.getKernel().getConfigStore().get('DISABLE_CONVERT') === 'TRUE';
     this.converter = new Converter(this.getKernel());
     this.traceCache = new CoreTimeCache<string>(
       'stream-trace',
@@ -115,7 +119,7 @@ export default class MovieStreamAction extends BaseApiAction<IKernel, WatchDB> {
           });
         }
 
-        this.converter.stream(file, res, profile, support);
+        this.converter.stream(file, res, profile, support, this.disableConv);
         return;
       }
     }

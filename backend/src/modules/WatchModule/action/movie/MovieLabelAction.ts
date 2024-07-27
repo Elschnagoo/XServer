@@ -25,9 +25,17 @@ import { WatchDB } from '../../database';
           },
         },
       ],
-      responses: SPathUtil.refResponse(
+      responses: SPathUtil.jsonResponse(
         '200',
-        SPathUtil.schemaPath('MLabel'),
+        {
+          type: 'object',
+          properties: {
+            map: {
+              type: 'string',
+            },
+          },
+          required: ['map'],
+        },
         true,
         '400',
         '404',
@@ -60,14 +68,11 @@ export default class MovieLabelAction extends BaseApiAction<IKernel, WatchDB> {
         },
       });
 
-      const labels = await Promise.all(
-        map.map(async (m) => ({
-          label: await db.label.getObjById(m.label),
-          map: m.e_id,
+      res.status(200).send(
+        map.map((x) => ({
+          map: x.label,
         })),
       );
-
-      res.status(200).send(labels);
       return;
     }
 

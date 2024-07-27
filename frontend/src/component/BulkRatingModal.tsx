@@ -17,9 +17,8 @@ import StarCompV2 from '@/component/StarCompV2';
 export default function BulkRatingModal() {
   const dispatch = useAppDispatch();
   const multi = useAppSelector(selectMulti);
-  const search = useAppSelector(selectSearch);
   const [loading, setLoading] = useState(false);
-  const { loadMovie } = usePreload();
+  const { clearLoadMovie } = usePreload();
   const [rating, setRating] = useState(-1);
   const mov = useAppSelector(selectMovie);
   const context = useGlobalContext();
@@ -66,7 +65,7 @@ export default function BulkRatingModal() {
                   }
                 }
                 toast.success('Action completed');
-                loadMovie(search, true);
+                clearLoadMovie(true);
                 dispatch(setModal(null));
               }}
             >

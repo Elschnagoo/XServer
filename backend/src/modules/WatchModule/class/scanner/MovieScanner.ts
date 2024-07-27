@@ -37,6 +37,7 @@ export default class MovieScanner extends BaseScanner {
                 lib: lib.e_id,
                 synced: false,
                 duration: null,
+                quality: null,
               }),
             )
           ).e_id;

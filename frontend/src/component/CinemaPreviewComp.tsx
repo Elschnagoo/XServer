@@ -1,7 +1,12 @@
 import React, { useMemo, useState } from 'react';
 import { MovieLib } from '@elschnagoo/xserver-con';
 import { MediaPlayer } from '@grandlinex/react-components/dist/components/mediaPlayer/MediaPlayer';
-import { IconButton } from '@grandlinex/react-components';
+import {
+  Grid,
+  IconButton,
+  IOFlash,
+  IOFlashOff,
+} from '@grandlinex/react-components';
 import VideoPreview from '@/component/VideoPreview';
 import useAuthHelper from '@/utils/AuthUtil';
 import { usePlayMode } from '@/store';
@@ -25,11 +30,17 @@ export default function CinemaPreviewComp({
     );
   }, [authHelper, mov.e_id, mode, trace]);
   const [play, setPlay] = useState(false);
+  const isSupported = useMemo(() => {
+    return !!mov.video?.supported && !!mov.audio?.supported;
+  }, [mov]);
   return (
     <div className="cinema-preview" onClick={onClick}>
-      <div className="cinema-preview-name">
-        <b>{mov.movie_name}</b>
-      </div>
+      <Grid flex flexR className="cinema-preview-name" gap={8} vCenter>
+        <div>{isSupported ? <IOFlash /> : <IOFlashOff />}</div>
+        <div>
+          <b>{mov.movie_name}</b>
+        </div>
+      </Grid>
       <div className="cinema-preview-play">
         <IconButton
           icon={play ? 'IOPause' : 'IOPlay'}
