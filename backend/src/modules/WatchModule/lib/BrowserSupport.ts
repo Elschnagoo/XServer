@@ -1,6 +1,5 @@
-import { XRequest } from '@grandlinex/kernel';
+import { BaseUserAgent } from '@grandlinex/kernel';
 import Path from 'path';
-import UserAgent from './UserAgent';
 
 type CodecMinReq = {
   name: string[];
@@ -90,10 +89,10 @@ export default class BrowserSupport {
     );
   }
 
-  agent: UserAgent;
+  agent: BaseUserAgent;
 
-  constructor(req: XRequest) {
-    this.agent = new UserAgent(req);
+  constructor(agent: BaseUserAgent) {
+    this.agent = agent;
   }
 
   canPlayVideoCodec(codec?: string): boolean {
@@ -120,7 +119,7 @@ export default class BrowserSupport {
     if (!c) {
       return false;
     }
-    if (this.agent.getVLCVersion() > 0) {
+    if (this.agent.getXVersion('vlc') > 0) {
       return true;
     }
     if (c.oculus !== undefined && c.oculus <= this.agent.getOculusVersion()) {

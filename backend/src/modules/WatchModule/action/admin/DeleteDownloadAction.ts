@@ -29,14 +29,12 @@ export default class DeleteDownloadAction extends BaseApiAction<
     this.handler = this.handler.bind(this);
   }
 
-  async handler({ res, req }: XActionEvent): Promise<void> {
+  async handler({ res }: XActionEvent): Promise<void> {
     const db = this.getModule().getDb();
     const done = await db.download.getObjList({
       search: { state: StateTypeQEnum.DONE },
     });
-    for (const d of done) {
-      await db.download.delete(d.e_id);
-    }
+    await db.download.deleteBulk(done.map((d) => d.e_id));
 
     res.sendStatus(200);
   }

@@ -1,5 +1,6 @@
 import {
   BaseApiAction,
+  EntitySchemaExtender,
   IBaseKernelModule,
   IKernel,
   SComponent,
@@ -10,9 +11,7 @@ import {
 import { WatchDB } from '../../database';
 import MovieLib from '../../database/entities/MovieLib';
 import { inputValidation } from '../../utils/Validation';
-import EntitySchemaExtender from '../../../../utils/EntitySchemaExtender';
 import BrowserSupport from '../../lib/BrowserSupport';
-import { SearchProps } from '../../database/WatchDB';
 
 const extendedSchema = EntitySchemaExtender.extendEntitySchema(
   new MovieLib(),
@@ -149,7 +148,7 @@ export default class MovieAction extends BaseApiAction<IKernel, WatchDB> {
     this.handler = this.handler.bind(this);
   }
 
-  async handler({ res, req }: XActionEvent): Promise<void> {
+  async handler({ res, req, agent }: XActionEvent): Promise<void> {
     const ops = inputValidation<{
       ratingMin?: number;
       ratingMax?: number;
@@ -214,7 +213,7 @@ export default class MovieAction extends BaseApiAction<IKernel, WatchDB> {
     const db = this.getModule().getDb();
 
     const dat = await db.searchQuery(ops);
-    const support = new BrowserSupport(req);
+    const support = new BrowserSupport(agent);
 
     const out = dat.data.map((cur) => {
       const v = cur.file_meta?.streams.find((e) => e.codec_type === 'video');

@@ -1,5 +1,4 @@
 import {
-  ActionMode,
   BaseApiAction,
   IBaseKernelModule,
   IKernel,
@@ -79,9 +78,9 @@ export default class MovieSupportAction extends BaseApiAction<
     this.handler = this.handler.bind(this);
   }
 
-  async handler({ req, res }: XActionEvent): Promise<void> {
-    const support = new BrowserSupport(req);
-    const { agent } = support;
+  async handler({ req, res, agent }: XActionEvent): Promise<void> {
+    const support = new BrowserSupport(agent);
+
     const { id } = req.params;
     const db = this.getModule().getDb();
     const lib = await db.movieLib.getObjById(id);
@@ -119,7 +118,7 @@ export default class MovieSupportAction extends BaseApiAction<
         edge: agent.getEdgeVersion(),
         opera: agent.getOperaVersion(),
       },
-      raw: agent.raw,
+      raw: agent.getRaw(),
     });
   }
 }

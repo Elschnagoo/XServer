@@ -508,7 +508,7 @@ const MovieComp = forwardRef<
           key={`label_${updateKey}`}
           edit={editLabel}
           suggest={suggest}
-          focus
+          focus={false}
           mc={{
             update,
             mov,

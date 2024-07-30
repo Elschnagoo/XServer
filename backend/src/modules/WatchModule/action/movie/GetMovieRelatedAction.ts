@@ -52,13 +52,13 @@ export default class GetMovieRelatedAction extends BaseApiAction<
     this.handler = this.handler.bind(this);
   }
 
-  async handler({ res, req, data }: XActionEvent): Promise<void> {
+  async handler({ res, req, data, agent }: XActionEvent): Promise<void> {
     if (data) {
       if (!req.params.id || !isUUID(req.params.id)) {
         res.sendStatus(400);
         return;
       }
-      const support = new BrowserSupport(req);
+      const support = new BrowserSupport(agent);
 
       const db = this.getModule().getDb();
       const [mov] = await db.execScripts([

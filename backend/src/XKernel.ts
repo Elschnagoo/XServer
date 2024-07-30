@@ -60,7 +60,7 @@ export default class XKernel extends Kernel {
     this.addModule(new YTDLMod(this), new WatchModule(this));
 
     let loadOnce = false;
-    this.setTriggerFunction('load', async (ik) => {
+    this.on('load', async (ik) => {
       if (!loadOnce) {
         loadOnce = true;
         const ep = ik.getModule().getPresenter() as KernelEndpoint;
@@ -70,7 +70,7 @@ export default class XKernel extends Kernel {
       }
     });
 
-    this.setTriggerFunction('pre', async (ik) => {
+    this.on('pre', async () => {
       XUtil.createFolderIfNotExist(media);
       XUtil.createFolderIfNotExist(download);
     });

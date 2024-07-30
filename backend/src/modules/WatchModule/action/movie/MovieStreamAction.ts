@@ -78,7 +78,7 @@ export default class MovieStreamAction extends BaseApiAction<IKernel, WatchDB> {
     );
   }
 
-  async handler({ res, req }: XActionEvent): Promise<void> {
+  async handler({ res, req, agent }: XActionEvent): Promise<void> {
     const { id } = req.params;
     const { profile, trace } = req.query;
     if (!id || (profile && typeof profile !== 'string')) {
@@ -86,7 +86,7 @@ export default class MovieStreamAction extends BaseApiAction<IKernel, WatchDB> {
       return;
     }
 
-    const support = new BrowserSupport(req);
+    const support = new BrowserSupport(agent);
 
     const db = this.getModule().getDb();
     // Fined Video

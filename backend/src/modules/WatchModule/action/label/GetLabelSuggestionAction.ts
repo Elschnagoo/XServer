@@ -63,7 +63,7 @@ export default class GetLabelSuggestionAction extends BaseApiAction<
     const outLabel: Label[] = [
       ...(await client.labelFromString(cur.movie_name || '')),
     ];
-    const [nearLabel] = await db.execScripts([
+    let [nearLabel] = await db.execScripts([
       {
         exec: `SELECT l.*
                 FROM (SELECT label, SUM(1) AS sum
@@ -84,6 +84,19 @@ export default class GetLabelSuggestionAction extends BaseApiAction<
       },
     ]);
 
+    if (nearLabel?.rows.length === 0) {
+      [nearLabel] = await db.execScripts([
+        {
+          exec: `SELECT l.*
+                  FROM (SELECT label as e_id, COUNT(1) as count
+                        FROM watch.label_map
+                        GROUP BY label ORDER BY count DESC
+                        LIMIT 30) AS top JOIN watch.label as l on l.e_id = top.e_id
+                  ORDER BY count DESC;`,
+          param: [],
+        },
+      ]);
+    }
     nearLabel?.rows.forEach((l: Label) => {
       if (!outLabel.find((e) => e.e_id === l.e_id)) {
         outLabel.push(l);

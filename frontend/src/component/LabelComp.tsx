@@ -100,11 +100,6 @@ export default function LabelComp(
 
   const movLabel = useLabelHook(labelKeys || []);
 
-  useEffect(() => {
-    console.log('LabelComp - IN');
-    return () => console.log('LabelComp - out');
-  }, []);
-
   if (movLabel) {
     return (
       <Grid flex flexC vCenter className="label-comp" gap={12}>
@@ -114,7 +109,7 @@ export default function LabelComp(
               key={`${formId}label`}
               className="glx-w-full"
               defaultState={{
-                label: movLabel.map((l) => l.e_id),
+                label: movLabel.map((l) => l.e_id) ?? [],
               }}
               options={[
                 [
